@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, use } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import {
   CheckCircle2,
@@ -68,7 +69,7 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
     e.preventDefault();
     setClaimError('');
     if (!deviceIdInput.trim()) {
-      setClaimError('Mohon masukkan Device ID yang tertera di aplikasi kasir Anda.');
+      setClaimError('Mohon masukkan Device ID dari aplikasi Anda.');
       return;
     }
 
@@ -86,7 +87,7 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || 'Gagal menerbitkan lisensi.');
+        throw new Error(data.error || 'Gagal memproses klaim lisensi.');
       }
 
       setGeneratedKey(data.serialKey);
@@ -111,10 +112,14 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
       <div className="max-w-2xl mx-auto">
         {/* Top Header */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 font-black text-xl text-slate-900 mb-4">
-            <span className="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center text-xs font-black">
-              P
-            </span>
+          <Link href="/" className="inline-flex items-center gap-2.5 font-black text-xl text-slate-900 mb-4">
+            <Image
+              src="/icon.png"
+              alt="POS OFFLINE Logo"
+              width={32}
+              height={32}
+              className="rounded-lg shadow-sm"
+            />
             <span>POS OFFLINE</span>
           </Link>
           <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto mb-3">

@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { UrgencyBar } from '@/components/UrgencyBar';
 import { HeroSection } from '@/components/HeroSection';
 import { PainPoints } from '@/components/PainPoints';
@@ -7,7 +8,6 @@ import { CheckoutForm } from '@/components/CheckoutForm';
 import { FaqSection } from '@/components/FaqSection';
 import { StickyMobileCta } from '@/components/StickyMobileCta';
 import { FloatingWhatsApp } from '@/components/FloatingWhatsApp';
-import { ShieldCheck, Heart } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -34,12 +34,16 @@ export default function Home() {
       <FaqSection />
 
       {/* 8. Footer */}
-      <footer className="bg-slate-950 text-slate-400 py-12 px-4 sm:px-6 border-t border-slate-800 text-center text-xs sm:text-sm">
+      <footer className="bg-[#0b1714] text-slate-400 py-12 px-4 sm:px-6 border-t border-[#183630] text-center text-xs sm:text-sm">
         <div className="max-w-4xl mx-auto flex flex-col items-center gap-4">
-          <div className="flex items-center gap-2 text-white font-black text-lg">
-            <span className="w-6 h-6 rounded-lg bg-emerald-500 text-slate-950 flex items-center justify-center text-xs font-black">
-              P
-            </span>
+          <div className="flex items-center gap-3 text-white font-extrabold text-lg">
+            <Image
+              src="/icon.png"
+              alt="POS OFFLINE Logo"
+              width={32}
+              height={32}
+              className="rounded-lg shadow-sm border border-emerald-500/30"
+            />
             <span>POS OFFLINE</span>
           </div>
 

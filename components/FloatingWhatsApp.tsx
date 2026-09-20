@@ -5,7 +5,7 @@ import { MessageCircle } from 'lucide-react';
 export function FloatingWhatsApp() {
   const waNumber = '6281234567890'; // User can customize in env or settings
   const message = encodeURIComponent(
-    'Halo Admin POS OFFLINE, saya ingin tanya-tanya mengenai aplikasi kasir beli putus dan paket printer thermalnya. Boleh dibantu?'
+    'Halo Admin POS OFFLINE, saya ingin tanya-tanya mengenai lisensi permanen aplikasi kasir dan paket printer thermalnya. Boleh dibantu?'
   );
 
   return (

@@ -12,10 +12,10 @@ export function UrgencyBar() {
             100% Offline
           </span>
           <span className="text-slate-300 text-xs hidden sm:inline">
-            Aplikasi kasir Android beli putus tanpa biaya bulanan. Promo rilis mulai <strong>Rp 149.000</strong>.
+            Aplikasi kasir Android lisensi permanen tanpa biaya bulanan. Promo rilis mulai <strong>Rp 149.000</strong>.
           </span>
           <span className="text-slate-300 text-xs sm:hidden">
-            Promo rilis beli putus mulai <strong>Rp 149.000</strong>
+            Promo rilis lisensi permanen mulai <strong>Rp 149.000</strong>
           </span>
         </div>
 

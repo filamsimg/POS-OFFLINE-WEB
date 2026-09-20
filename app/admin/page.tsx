@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import {
   ShieldCheck,
@@ -157,9 +158,13 @@ export default function AdminPage() {
       {/* Navbar */}
       <header className="bg-slate-900 text-white py-4 px-6 border-b border-slate-800 flex justify-between items-center sticky top-0 z-30">
         <div className="flex items-center gap-3">
-          <span className="w-8 h-8 rounded-lg bg-emerald-600 text-white font-black flex items-center justify-center text-sm">
-            P
-          </span>
+          <Image
+            src="/icon.png"
+            alt="POS OFFLINE Logo"
+            width={32}
+            height={32}
+            className="rounded-lg shadow-sm border border-emerald-500/30"
+          />
           <div>
             <h1 className="font-extrabold text-sm sm:text-base leading-tight">Admin POS OFFLINE</h1>
             <p className="text-[11px] text-slate-400">Database Neon PostgreSQL & Generator Lisensi</p>

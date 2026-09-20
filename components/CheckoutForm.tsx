@@ -267,7 +267,7 @@ export function CheckoutForm() {
                 </p>
               </div>
               <span className="text-[11px] font-mono text-emerald-300 bg-emerald-950 px-2 py-0.5 rounded border border-emerald-500/30">
-                PROMO BELI PUTUS
+                LISENSI PERMANEN
               </span>
             </div>
 
@@ -283,7 +283,7 @@ export function CheckoutForm() {
                 </>
               ) : (
                 <>
-                  <span>AMBIL PROMO BELI PUTUS</span>
+                  <span>KONFIRMASI PESANAN LISENSI</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}

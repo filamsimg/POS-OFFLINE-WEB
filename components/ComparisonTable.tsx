@@ -37,7 +37,7 @@ export function ComparisonTable() {
             Perbandingan POS OFFLINE vs Kasir Sewa
           </h2>
           <p className="text-slate-600 text-xs sm:text-sm mt-1.5">
-            Perbedaan mendasar antara aplikasi kasir sewa bulanan dengan lisensi beli putus.
+            Perbedaan mendasar antara aplikasi kasir sewa bulanan dengan lisensi permanen sekali bayar.
           </p>
         </div>
 

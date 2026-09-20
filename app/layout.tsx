@@ -14,19 +14,28 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://pos-offline.vercel.app'),
-  title: "POS OFFLINE - Aplikasi Kasir Android Beli Putus Seumur Hidup",
+  title: "POS OFFLINE - Aplikasi Kasir Android Lisensi Permanen Tanpa Langganan",
   description:
     "Aplikasi kasir pintar untuk HP & Tablet Android 100% offline tanpa internet dan tanpa biaya bulanan. Cetak struk Bluetooth thermal, scan barcode, dan laporan laba bersih otomatis.",
   keywords: [
     "aplikasi kasir offline",
     "pos offline",
-    "kasir android beli putus",
+    "kasir android tanpa langganan",
+    "kasir lisensi permanen",
     "aplikasi kasir tanpa internet",
     "cetak struk bluetooth",
     "kasir umkm",
   ],
+  icons: {
+    icon: [
+      { url: '/favicon.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icon.png', sizes: '192x192', type: 'image/png' },
+    ],
+    shortcut: '/favicon.png',
+    apple: '/icon.png',
+  },
   openGraph: {
-    title: "POS OFFLINE - Aplikasi Kasir Android Sekali Beli Seumur Hidup",
+    title: "POS OFFLINE - Aplikasi Kasir Android Lisensi Sekali Bayar Seumur Hidup",
     description: "100% Offline Tanpa Biaya Bulanan. Cetak struk Bluetooth thermal instan dan kelola pembukuan toko Anda.",
     url: "https://pos-offline.vercel.app",
     siteName: "POS OFFLINE",

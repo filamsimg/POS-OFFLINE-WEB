@@ -12,7 +12,7 @@ export function HeroSection() {
             {/* 1. Eyebrow */}
             <div className="inline-flex items-center gap-2 text-emerald-400 text-xs font-mono font-semibold tracking-wider uppercase mb-4 bg-emerald-950/60 border border-emerald-500/30 px-3 py-1 rounded-full">
               <span className="w-2 h-2 rounded-full bg-emerald-400" />
-              <span>Beli Putus • Sekali Bayar Seumur Hidup</span>
+              <span>Lisensi Permanen • Sekali Bayar Seumur Hidup</span>
             </div>
 
             {/* 2. Headline: max 2 lines desktop */}
@@ -33,7 +33,7 @@ export function HeroSection() {
                 className="inline-flex items-center justify-center gap-2 bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-black text-sm sm:text-base px-7 py-3.5 rounded-xl transition-transform active:scale-[0.98] shadow-md shadow-emerald-950/40"
               >
                 <Zap className="w-4 h-4 fill-slate-950" />
-                <span>AMBIL PROMO BELI PUTUS</span>
+                <span>DAPATKAN LISENSI PERMANEN</span>
               </a>
               <a
                 href="#fitur"

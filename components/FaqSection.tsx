@@ -34,43 +34,40 @@ export function FaqSection() {
   const [openIdx, setOpenIdx] = useState<number | null>(0);
 
   return (
-    <section className="py-20 px-4 sm:px-6 bg-white text-slate-900 border-t border-slate-200">
-      <div className="max-w-3xl mx-auto">
-        <div className="text-center mb-12">
-          <span className="text-xs sm:text-sm font-bold tracking-wider text-emerald-800 uppercase bg-emerald-100/60 border border-emerald-200 px-3 py-1 rounded-full">
-            Tanya Jawab
-          </span>
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 mt-4 mb-2 tracking-tight">
+    <section className="py-16 px-4 sm:px-6 bg-white text-slate-900 border-b border-slate-200">
+      <div className="max-w-2xl mx-auto">
+        <div className="max-w-xl mb-10 text-left sm:text-center sm:mx-auto">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
             Pertanyaan yang Sering Diajukan
           </h2>
-          <p className="text-slate-600 text-xs sm:text-sm">
-            Semua yang perlu Anda ketahui sebelum membeli aplikasi POS OFFLINE
+          <p className="text-slate-600 text-xs sm:text-sm mt-1.5">
+            Hal penting yang perlu Anda ketahui sebelum membeli aplikasi POS OFFLINE.
           </p>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           {FAQS.map((faq, idx) => {
             const isOpen = openIdx === idx;
             return (
               <div
                 key={idx}
-                className="border border-slate-200 rounded-2xl overflow-hidden transition-colors"
+                className="border border-slate-200 rounded-xl overflow-hidden"
               >
                 <button
                   type="button"
                   onClick={() => setOpenIdx(isOpen ? null : idx)}
-                  className="w-full text-left p-5 font-bold text-sm sm:text-base text-slate-900 flex justify-between items-center gap-4 bg-slate-50/50 hover:bg-slate-100/60 transition-colors"
+                  className="w-full text-left p-4 font-bold text-xs sm:text-sm text-slate-900 flex justify-between items-center gap-3 bg-slate-50/50 hover:bg-slate-100/60 transition-colors"
                 >
                   <span>{faq.q}</span>
                   <ChevronDown
-                    className={`w-5 h-5 text-slate-500 shrink-0 transition-transform duration-200 ${
+                    className={`w-4 h-4 text-slate-500 shrink-0 transition-transform duration-200 ${
                       isOpen ? 'rotate-180 text-emerald-600' : ''
                     }`}
                   />
                 </button>
                 {isOpen && (
-                  <div className="p-5 pt-0 text-xs sm:text-sm text-slate-600 leading-relaxed bg-slate-50/50">
-                    <p className="border-t border-slate-200/60 pt-3">{faq.a}</p>
+                  <div className="p-4 pt-0 text-xs text-slate-600 leading-relaxed bg-slate-50/50">
+                    <p className="border-t border-slate-200 pt-3">{faq.a}</p>
                   </div>
                 )}
               </div>

@@ -1,93 +1,77 @@
-import { ShieldCheck, Zap, Printer, ArrowDown, CheckCircle2 } from 'lucide-react';
+import Image from 'next/image';
+import { ArrowDown, Check, Zap } from 'lucide-react';
 
 export function HeroSection() {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-[#183630] via-[#1b3d36] to-[#0f2420] text-white pt-10 pb-16 px-4 sm:px-6">
-      {/* Decorative Glow */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-emerald-500/15 blur-[120px] pointer-events-none rounded-full" />
-
-      <div className="max-w-4xl mx-auto text-center relative z-10">
-        {/* Trust Badge */}
-        <div className="inline-flex items-center gap-2 bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold mb-6 backdrop-blur-md shadow-sm">
-          <ShieldCheck className="w-4 h-4 text-emerald-400" />
-          <span>Aplikasi Kasir Android Non-Play Store • Beli Putus 1x Bayar</span>
-        </div>
-
-        {/* Main Headline */}
-        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.15] text-white mb-5">
-          Capek Bayar Kasir Ratusan Ribu Tiap Bulan? <br className="hidden sm:inline" />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-green-400">
-            Beralih ke POS OFFLINE
-          </span>
-        </h1>
-
-        {/* Subheadline */}
-        <p className="text-base sm:text-lg text-emerald-100/80 max-w-2xl mx-auto mb-8 font-normal leading-relaxed">
-          Aplikasi kasir pintar untuk HP & Tablet Android. <strong className="text-white font-semibold">100% jalan tanpa internet</strong>, cetak struk Bluetooth otomatis, scan barcode, dan kelola laporan laba bersih tanpa biaya bulanan selamanya!
-        </p>
-
-        {/* CTA Buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
-          <a
-            href="#checkout"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-base sm:text-lg px-8 py-4 rounded-xl shadow-lg shadow-emerald-950/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
-          >
-            <Zap className="w-5 h-5 fill-slate-950" />
-            <span>AMBIL PROMO BELI PUTUS (RP 149.000)</span>
-          </a>
-          <a
-            href="#fitur"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/15 border border-white/20 text-white font-semibold text-sm sm:text-base px-6 py-4 rounded-xl backdrop-blur transition-all"
-          >
-            <span>Pelajari Fitur Lengkap</span>
-            <ArrowDown className="w-4 h-4" />
-          </a>
-        </div>
-
-        {/* Quick Highlights Pill */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 max-w-3xl mx-auto text-xs sm:text-sm text-emerald-200/90 mb-12">
-          <div className="flex items-center justify-center gap-1.5 bg-white/5 border border-white/10 py-2.5 px-3 rounded-lg">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span>100% Tanpa Kuota</span>
-          </div>
-          <div className="flex items-center justify-center gap-1.5 bg-white/5 border border-white/10 py-2.5 px-3 rounded-lg">
-            <Printer className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span>Struk 58mm & 80mm</span>
-          </div>
-          <div className="flex items-center justify-center gap-1.5 bg-white/5 border border-white/10 py-2.5 px-3 rounded-lg">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span>Sekali Beli Aktif 1x</span>
-          </div>
-          <div className="flex items-center justify-center gap-1.5 bg-white/5 border border-white/10 py-2.5 px-3 rounded-lg">
-            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-            <span>Ganti HP Data Aman</span>
-          </div>
-        </div>
-
-        {/* Video / Visual Mockup Container */}
-        <div className="relative rounded-2xl overflow-hidden border-2 border-emerald-500/30 bg-slate-900/90 shadow-2xl p-2 sm:p-4 max-w-3xl mx-auto backdrop-blur-xl">
-          <div className="rounded-xl overflow-hidden bg-slate-950 aspect-video relative flex flex-col items-center justify-center text-center p-6 border border-white/10">
-            {/* Header simulated bar */}
-            <div className="absolute top-0 inset-x-0 h-9 bg-slate-900/90 border-b border-white/10 flex items-center px-4 gap-2">
-              <span className="w-3 h-3 rounded-full bg-red-500/80" />
-              <span className="w-3 h-3 rounded-full bg-yellow-500/80" />
-              <span className="w-3 h-3 rounded-full bg-green-500/80" />
-              <span className="text-[11px] text-slate-400 font-mono ml-2">POS OFFLINE - Mode Kasir Cepat</span>
+    <section className="relative bg-[#112420] text-white pt-12 sm:pt-16 pb-16 px-4 sm:px-6 border-b border-[#1f423b]">
+      <div className="max-w-6xl mx-auto">
+        {/* Split Layout: Left Content, Right Asset */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+          {/* Left Column: Copy & Actions */}
+          <div className="lg:col-span-6 text-left">
+            {/* 1. Eyebrow */}
+            <div className="inline-flex items-center gap-2 text-emerald-400 text-xs font-mono font-semibold tracking-wider uppercase mb-4 bg-emerald-950/60 border border-emerald-500/30 px-3 py-1 rounded-full">
+              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              <span>Beli Putus • Sekali Bayar Seumur Hidup</span>
             </div>
 
-            <div className="mt-6 flex flex-col items-center">
-              <div className="w-16 h-16 rounded-2xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center mb-3">
-                <Printer className="w-8 h-8 text-emerald-400" />
-              </div>
-              <h3 className="text-lg sm:text-xl font-bold text-white mb-2">
-                Simulasi Kasir & Cetak Struk Instan
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-400 max-w-md mb-4">
-                HP masuk mode pesawat (tanpa WiFi & tanpa kuota) ➔ Input pesanan ➔ Klik Bayar ➔ Struk thermal keluar otomatis dalam 1 detik!
-              </p>
-              <div className="inline-flex items-center gap-2 bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 text-xs px-3 py-1.5 rounded-full font-medium">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                <span>Teruji di 50+ Merk Printer Bluetooth Mini Thermal</span>
+            {/* 2. Headline: max 2 lines desktop */}
+            <h1 className="text-3xl sm:text-5xl lg:text-5xl font-black tracking-tight leading-[1.1] text-white mb-4">
+              Mesin Kasir Android. <br />
+              <span className="text-emerald-400">100% Offline Tanpa Biaya Bulanan.</span>
+            </h1>
+
+            {/* 3. Subtext: exactly 18 words (disciplined under 20 words) */}
+            <p className="text-sm sm:text-base text-slate-300 mb-8 leading-relaxed max-w-[50ch]">
+              Cetak struk Bluetooth instan, scan barcode, dan kelola keuntungan toko dari smartphone Anda tanpa biaya bulanan seumur hidup.
+            </p>
+
+            {/* 4. CTAs: 1 primary + 1 secondary */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-8">
+              <a
+                href="#checkout"
+                className="inline-flex items-center justify-center gap-2 bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-black text-sm sm:text-base px-7 py-3.5 rounded-xl transition-transform active:scale-[0.98] shadow-md shadow-emerald-950/40"
+              >
+                <Zap className="w-4 h-4 fill-slate-950" />
+                <span>AMBIL PROMO BELI PUTUS</span>
+              </a>
+              <a
+                href="#fitur"
+                className="inline-flex items-center justify-center gap-1.5 text-slate-300 hover:text-white text-xs sm:text-sm font-semibold px-4 py-3 rounded-xl border border-slate-700 hover:border-slate-500 transition-colors"
+              >
+                <span>Lihat Fitur Lengkap</span>
+                <ArrowDown className="w-3.5 h-3.5" />
+              </a>
+            </div>
+
+            {/* Micro proof row under hero */}
+            <div className="flex items-center gap-4 text-xs text-slate-400 border-t border-slate-800/80 pt-4">
+              <span className="flex items-center gap-1">
+                <Check className="w-3.5 h-3.5 text-emerald-400" /> Tanpa Kuota
+              </span>
+              <span className="flex items-center gap-1">
+                <Check className="w-3.5 h-3.5 text-emerald-400" /> Printer 58 & 80mm
+              </span>
+              <span className="flex items-center gap-1">
+                <Check className="w-3.5 h-3.5 text-emerald-400" /> Garansi Seumur Hidup
+              </span>
+            </div>
+          </div>
+
+          {/* Right Column: Authentic Product Photography */}
+          <div className="lg:col-span-6">
+            <div className="relative rounded-2xl overflow-hidden border border-emerald-500/20 bg-slate-950 shadow-2xl group">
+              <Image
+                src="/hero-mockup.jpg"
+                alt="Aplikasi Kasir POS OFFLINE di smartphone Android dengan printer thermal Bluetooth mini"
+                width={1280}
+                height={720}
+                priority
+                className="w-full h-auto object-cover transform group-hover:scale-[1.01] transition-transform duration-500"
+              />
+              <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-transparent p-4 sm:p-5 flex items-center justify-between text-xs text-slate-300">
+                <span className="font-mono text-emerald-400 text-[11px]">POS OFFLINE v1.0 • Android Native</span>
+                <span className="text-[11px] text-slate-400">Kompatibel 50+ Merk Printer Thermal</span>
               </div>
             </div>
           </div>

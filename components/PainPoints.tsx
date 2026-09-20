@@ -1,91 +1,70 @@
-import { XCircle, CheckCircle, AlertTriangle, BatteryCharging, DollarSign, WifiOff } from 'lucide-react';
+import { AlertTriangle, DollarSign, WifiOff, CheckCircle } from 'lucide-react';
 
 export function PainPoints() {
   return (
-    <section className="py-16 px-4 sm:px-6 bg-slate-50 border-y border-slate-200 text-slate-800">
+    <section className="py-16 px-4 sm:px-6 bg-[#f8faf9] border-b border-slate-200">
       <div className="max-w-5xl mx-auto">
-        {/* Title */}
-        <div className="text-center max-w-2xl mx-auto mb-12">
-          <span className="text-xs sm:text-sm font-bold tracking-wider text-rose-600 uppercase bg-rose-100 border border-rose-200 px-3 py-1 rounded-full">
-            Apakah Toko Anda Sering Mengalami Ini?
-          </span>
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 mt-4 mb-3 tracking-tight">
-            Jangan Biarkan Keuntungan Toko Habis Terbakar Hal Sepele
+        <div className="max-w-2xl mb-10 text-left sm:text-center sm:mx-auto">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            Masalah Nyata yang Sering Menghambat Toko Anda
           </h2>
-          <p className="text-slate-600 text-sm sm:text-base">
-            Banyak pengusaha UMKM lelah bukan karena capek melayani pembeli, tapi karena sistem kasir dan pembukuan yang bikin frustrasi.
+          <p className="text-slate-600 text-xs sm:text-sm mt-2">
+            Mengapa ribuan pedagang mulai meninggalkan sistem kasir konvensional dan aplikasi langganan online.
           </p>
         </div>
 
-        {/* 3 Pain Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          <div className="bg-white p-6 rounded-2xl border border-rose-100 shadow-sm relative overflow-hidden">
-            <div className="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center mb-4">
-              <DollarSign className="w-6 h-6" />
+        {/* 3 Grounded Pain Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
+          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
+            <div className="w-10 h-10 rounded-lg bg-red-50 text-red-600 flex items-center justify-center mb-3">
+              <DollarSign className="w-5 h-5" />
             </div>
-            <h3 className="text-lg font-bold text-slate-900 mb-2">
-              Biaya Langganan Mencekik
-            </h3>
-            <p className="text-sm text-slate-600 leading-relaxed">
-              Aplikasi kasir lain minta Rp 150.000 – Rp 300.000 tiap bulan. Setahun sudah habis <strong className="text-rose-600">Rp 2,4 s/d Rp 3,6 Juta</strong> hanya untuk sewa aplikasi!
+            <h3 className="font-bold text-slate-900 text-sm mb-1.5">Sewa Bulanan Menguras Modal</h3>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Aplikasi lain membebani biaya Rp 150.000–300.000/bulan. Setahun habis Rp 2,4 s/d 3,6 juta hanya untuk sewa aplikasi.
             </p>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl border border-rose-100 shadow-sm relative overflow-hidden">
-            <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center mb-4">
-              <WifiOff className="w-6 h-6" />
+          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
+            <div className="w-10 h-10 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center mb-3">
+              <WifiOff className="w-5 h-5" />
             </div>
-            <h3 className="text-lg font-bold text-slate-900 mb-2">
-              Kasir Macet Saat Sinyal Hilang
-            </h3>
-            <p className="text-sm text-slate-600 leading-relaxed">
-              Toko lagi ramai antrean pembeli, tiba-tiba aplikasi kasir online *loading* muter-muter karena WiFi ngadat atau paket data habis. Pembeli kabur!
+            <h3 className="font-bold text-slate-900 text-sm mb-1.5">Macet Saat Sinyal Lemah</h3>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Saat toko sedang ramai antrean, kasir online loading karena kuota habis atau server down. Pembeli tertahan dan mengeluh.
             </p>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl border border-rose-100 shadow-sm relative overflow-hidden">
-            <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4">
-              <AlertTriangle className="w-6 h-6" />
+          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
+            <div className="w-10 h-10 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center mb-3">
+              <AlertTriangle className="w-5 h-5" />
             </div>
-            <h3 className="text-lg font-bold text-slate-900 mb-2">
-              Lembur Rekap Nota Manual
-            </h3>
-            <p className="text-sm text-slate-600 leading-relaxed">
-              Jualan seharian capek, malamnya masih harus lembur 2 jam hitung kertas nota pakai kalkulator. Giliran ada bon tercecer, pembukuan selisih jutaan.
+            <h3 className="font-bold text-slate-900 text-sm mb-1.5">Lembur Rekap Nota Kertas</h3>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Tutup toko masih harus menghitung tumpukan kertas bon manual pakai kalkulator. Bon hilang bikin pembukuan selisih.
             </p>
           </div>
         </div>
 
-        {/* The Solution Box */}
-        <div className="bg-gradient-to-br from-[#183630] to-[#122a25] rounded-3xl p-6 sm:p-10 text-white shadow-xl">
-          <div className="max-w-3xl mx-auto text-center">
-            <span className="text-emerald-400 text-xs sm:text-sm font-extrabold uppercase tracking-widest bg-emerald-950/80 px-4 py-1 rounded-full border border-emerald-500/30">
-              Solusi Cerdas Pengusaha Modern
-            </span>
-            <h3 className="text-2xl sm:text-3xl font-black text-white mt-4 mb-3">
-              POS OFFLINE: Sekali Beli, Beres Selamanya!
-            </h3>
-            <p className="text-sm sm:text-base text-emerald-100/80 mb-8 leading-relaxed">
-              Tanpa server luar, tanpa internet, tanpa biaya langganan bulanan. Seluruh data transaksi, omset, dan katalog produk Anda tersimpan 100% aman di smartphone Anda sendiri.
+        {/* Crisp Contrasting Solution Banner */}
+        <div className="bg-[#183630] rounded-2xl p-6 sm:p-8 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+          <div className="max-w-xl">
+            <p className="text-emerald-400 font-mono text-xs uppercase tracking-wider font-semibold mb-1">
+              Solusi POS OFFLINE
             </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
-              <div className="flex items-start gap-3 bg-white/5 border border-white/10 p-4 rounded-xl">
-                <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-bold text-sm text-white">Modal Aman & Untung Utuh</p>
-                  <p className="text-xs text-emerald-200/70 mt-0.5">Tidak ada potongan komisi sepeser pun per transaksi penjualan Anda.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3 bg-white/5 border border-white/10 p-4 rounded-xl">
-                <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-bold text-sm text-white">Transaksi Kilat 1 Detik</p>
-                  <p className="text-xs text-emerald-200/70 mt-0.5">Printer Bluetooth langsung bunyi dan mengeluarkan struk tanpa jeda loading.</p>
-                </div>
-              </div>
-            </div>
+            <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">
+              Satu Kali Bayar, Untung 100% Milik Anda
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+              Bekerja mandiri tanpa server luar. Transaksi kilat 1 detik, cetak struk instan, dan pembukuan laba beres otomatis.
+            </p>
           </div>
+          <a
+            href="#checkout"
+            className="shrink-0 bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-bold text-xs sm:text-sm px-6 py-3 rounded-xl transition-transform active:scale-[0.98]"
+          >
+            PILIH PAKET SEKARANG
+          </a>
         </div>
       </div>
     </section>

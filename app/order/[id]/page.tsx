@@ -18,7 +18,7 @@ import {
   Loader2,
   ExternalLink,
 } from 'lucide-react';
-import { Order, PACKAGES } from '@/lib/types';
+import { Order, PACKAGES, ADMIN_CONTACTS } from '@/lib/types';
 
 export default function OrderPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -51,7 +51,7 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
             storeName: 'Toko Anda',
             packageType: 'software_only',
             amount: 149000,
-            paymentMethod: 'qris',
+            paymentMethod: 'manual_transfer',
             paymentStatus: 'pending',
             createdAt: new Date().toISOString(),
           });
@@ -162,6 +162,57 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
               </span>
             </div>
           </div>
+        </div>
+
+        {/* Payment Confirmation via WhatsApp */}
+        <div className="bg-white rounded-3xl border border-emerald-200 shadow-sm p-6 mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
+              <MessageCircle className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="font-bold text-slate-900 text-sm">Konfirmasi Transfer via WhatsApp</h3>
+              <p className="text-xs text-slate-500">Kirim bukti transfer ke salah satu admin kami:</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+            {ADMIN_CONTACTS.map((admin) => {
+              const waText = encodeURIComponent(
+                `Halo ${admin.name} (Admin POS OFFLINE), saya mau konfirmasi pembayaran lisensi aplikasi kasir.\n\n` +
+                `Nomor Pesanan: ${orderId}\n` +
+                `Nama Pembeli: ${order?.customerName || '-'}\n` +
+                `Nama Toko: ${order?.storeName || '-'}\n` +
+                `Nominal: Rp ${pkg.price.toLocaleString('id-ID')}\n\n` +
+                `Berikut saya lampirkan bukti transfer. Mohon diverifikasi.`
+              );
+              return (
+                <a
+                  key={admin.id}
+                  href={`https://wa.me/${admin.waNumber}?text=${waText}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between p-3.5 rounded-xl border border-emerald-300 bg-emerald-50/50 hover:bg-emerald-100/70 transition-all group"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center justify-center">
+                      {admin.name[0]}
+                    </div>
+                    <div>
+                      <p className="font-bold text-xs text-slate-900 group-hover:text-emerald-900">
+                        {admin.role}: {admin.name}
+                      </p>
+                      <p className="text-[11px] text-slate-600">{admin.phone}</p>
+                    </div>
+                  </div>
+                  <MessageCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                </a>
+              );
+            })}
+          </div>
+          <p className="text-[11px] text-slate-500 text-center">
+            Setelah transfer terverifikasi atau jika sudah memiliki Device ID, Anda dapat langsung memasukkan kodenya di bawah ini.
+          </p>
         </div>
 
         {/* Claim License Box (The Magic Flow) */}

@@ -286,7 +286,7 @@ export default function AdminPage() {
                         </td>
                         <td className="py-3 px-4">
                           <p className="font-semibold text-slate-800">
-                            {o.packageType === 'bundling_printer' ? 'Bundling Printer' : 'Software Only'}
+                            Lisensi Software (Rp 149rb)
                           </p>
                           <p className="font-bold text-emerald-800">
                             Rp {o.amount.toLocaleString('id-ID')}

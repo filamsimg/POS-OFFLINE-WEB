@@ -50,7 +50,7 @@ export function FloatingWhatsApp() {
                     <p className="text-xs font-bold text-slate-900 group-hover:text-emerald-800">
                       {admin.name}
                     </p>
-                    <p className="text-[10px] text-slate-500">{admin.role} • {admin.phone}</p>
+                    <p className="text-[10px] text-emerald-600 font-medium">{admin.role} • Chat Langsung</p>
                   </div>
                 </div>
                 <MessageCircle className="w-4 h-4 text-emerald-600 shrink-0" />
@@ -67,7 +67,7 @@ export function FloatingWhatsApp() {
         aria-label="Hubungi Admin WhatsApp"
       >
         <MessageCircle className="w-5 h-5 fill-white" />
-        <span className="hidden sm:inline">Hubungi Admin ({ADMIN_CONTACTS.length})</span>
+        <span className="hidden sm:inline">Hubungi Admin</span>
         <span className="sm:hidden">Chat WA</span>
       </button>
     </div>

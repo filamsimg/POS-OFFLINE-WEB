@@ -200,9 +200,9 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
                     </div>
                     <div>
                       <p className="font-bold text-xs text-slate-900 group-hover:text-emerald-900">
-                        {admin.role}: {admin.name}
+                        {admin.role} ({admin.name})
                       </p>
-                      <p className="text-[11px] text-slate-600">{admin.phone}</p>
+                      <p className="text-[11px] text-emerald-700 font-medium">Klik untuk Kirim Bukti Transfer &rarr;</p>
                     </div>
                   </div>
                   <MessageCircle className="w-4 h-4 text-emerald-600 shrink-0" />

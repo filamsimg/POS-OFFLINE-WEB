@@ -226,9 +226,9 @@ export function CheckoutForm() {
                       </div>
                       <div>
                         <p className="font-bold text-xs text-slate-900">
-                          {admin.role}: {admin.name}
+                          {admin.role} ({admin.name})
                         </p>
-                        <p className="text-[11px] text-slate-500">{admin.phone}</p>
+                        <p className="text-[11px] text-emerald-600 font-medium">Klik untuk Lanjut ke WhatsApp</p>
                       </div>
                     </div>
                     <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${

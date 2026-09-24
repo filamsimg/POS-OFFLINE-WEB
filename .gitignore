@@ -30,9 +30,13 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
-!.env.example
+# local env files (allow .env and .env.example with dummy data to be committed)
+.env.local
+.env.*.local
+
+# AI agent workspace files
+AGENTS.md
+CLAUDE.md
 
 # vercel
 .vercel

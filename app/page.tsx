@@ -1,71 +1,147 @@
-import Image from 'next/image';
-import { UrgencyBar } from '@/components/UrgencyBar';
-import { HeroSection } from '@/components/HeroSection';
-import { PainPoints } from '@/components/PainPoints';
-import { FeatureGrid } from '@/components/FeatureGrid';
+import { UrgencyBar }      from '@/components/UrgencyBar';
+import { HeroSection }     from '@/components/HeroSection';
+import { PainPoints }      from '@/components/PainPoints';
+import { FeatureGrid }     from '@/components/FeatureGrid';
+import { SocialProof }     from '@/components/SocialProof';
 import { ComparisonTable } from '@/components/ComparisonTable';
-import { CheckoutForm } from '@/components/CheckoutForm';
-import { FaqSection } from '@/components/FaqSection';
+import { CheckoutForm }    from '@/components/CheckoutForm';
+import { FaqSection }      from '@/components/FaqSection';
 import { StickyMobileCta } from '@/components/StickyMobileCta';
-import { FloatingWhatsApp } from '@/components/FloatingWhatsApp';
+import { FloatingWhatsApp} from '@/components/FloatingWhatsApp';
+import Image               from 'next/image';
 
 export default function Home() {
+  const waNumber = process.env.NEXT_PUBLIC_WA_NUMBER ?? '6285853685622';
+  const siteUrl  = process.env.NEXT_PUBLIC_SITE_URL  ?? 'https://posoffline.id';
+
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900 pb-16 sm:pb-0 font-sans selection:bg-emerald-500 selection:text-white">
-      {/* 1. Urgency Bar */}
+    <main>
+      {/* 1. Urgency countdown bar */}
       <UrgencyBar />
 
-      {/* 2. Hero Section */}
+      {/* 2. Hero */}
       <HeroSection />
 
-      {/* 3. Pain Points vs Solution */}
+      {/* 3. Pain → Solution */}
       <PainPoints />
 
-      {/* 4. Core Features Grid */}
+      {/* 4. Feature grid */}
       <FeatureGrid />
 
-      {/* 5. SaaS vs POS OFFLINE Comparison */}
+      {/* 5. Social proof / testimonials */}
+      <SocialProof />
+
+      {/* 6. Comparison table */}
       <ComparisonTable />
 
-      {/* 6. Scalev-Style One-Page Checkout Form */}
+      {/* 7. Checkout form */}
       <CheckoutForm />
 
-      {/* 7. FAQ Accordion */}
+      {/* 8. FAQ */}
       <FaqSection />
 
-      {/* 8. Footer */}
-      <footer className="bg-[#0b1714] text-slate-400 py-12 px-4 sm:px-6 border-t border-[#183630] text-center text-xs sm:text-sm">
-        <div className="max-w-4xl mx-auto flex flex-col items-center gap-4">
-          <div className="flex items-center gap-3 text-white font-extrabold text-lg">
-            <Image
-              src="/icon.png"
-              alt="POS OFFLINE Logo"
-              width={32}
-              height={32}
-              className="rounded-lg shadow-sm border border-emerald-500/30"
-            />
-            <span>POS OFFLINE</span>
+      {/* 9. Footer */}
+      <footer
+        style={{
+          background: '#080f0c',
+          borderTop: '1px solid var(--clr-sage)',
+          padding: 'clamp(40px, 6vw, 64px) clamp(16px, 4vw, 48px)',
+          color: 'var(--clr-fog)',
+          fontSize: 13,
+        }}
+      >
+        <div
+          style={{
+            maxWidth: 1100,
+            margin: '0 auto',
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 40,
+            justifyContent: 'space-between',
+          }}
+        >
+          {/* Brand */}
+          <div style={{ maxWidth: 280 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+              <Image
+                src="/icon.png"
+                alt="POS OFFLINE Logo"
+                width={32}
+                height={32}
+                style={{ borderRadius: 8 }}
+              />
+              <span style={{ fontWeight: 800, fontSize: 16, color: 'var(--clr-cream)' }}>
+                POS OFFLINE
+              </span>
+            </div>
+            <p style={{ lineHeight: 1.7, fontSize: 13, color: 'var(--clr-fog)' }}>
+              Aplikasi kasir Android 100% offline untuk UMKM Indonesia.
+              Bayar sekali, aktif seumur hidup.
+            </p>
           </div>
 
-          <p className="max-w-md text-slate-500 text-xs leading-relaxed">
-            Sistem aplikasi kasir pintar Android 100% offline non-langganan. Dirancang untuk memajukan UMKM di seluruh Indonesia.
-          </p>
+          {/* Links */}
+          <div style={{ display: 'flex', gap: 48, flexWrap: 'wrap' }}>
+            <div>
+              <div style={{ fontWeight: 700, color: 'var(--clr-sand)', marginBottom: 12, fontSize: 12, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                Produk
+              </div>
+              {['#fitur', '#perbandingan', '#testimoni', '#faq'].map((href) => (
+                <div key={href} style={{ marginBottom: 8 }}>
+                  <a href={href} style={{ color: 'var(--clr-fog)', textDecoration: 'none', fontSize: 13 }}>
+                    {href === '#fitur'        && 'Fitur Lengkap'}
+                    {href === '#perbandingan' && 'Perbandingan'}
+                    {href === '#testimoni'    && 'Testimoni'}
+                    {href === '#faq'          && 'FAQ'}
+                  </a>
+                </div>
+              ))}
+            </div>
 
-          <div className="flex items-center gap-4 text-slate-500 text-xs">
-            <span>Sekali Beli Aktif Seumur Hidup</span>
-            <span>•</span>
-            <span>Garansi Lisensi Permanen</span>
-            <span>•</span>
-            <span>Bantuan WhatsApp Resmi</span>
+            <div>
+              <div style={{ fontWeight: 700, color: 'var(--clr-sand)', marginBottom: 12, fontSize: 12, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                Kontak
+              </div>
+              <div style={{ marginBottom: 8 }}>
+                <a
+                  href={`https://wa.me/${waNumber}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: '#25d366', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}
+                >
+                  WhatsApp Admin
+                </a>
+              </div>
+              <div style={{ fontSize: 13, color: 'var(--clr-fog)' }}>
+                Jam: 09.00 – 21.00 WIB
+              </div>
+            </div>
           </div>
+        </div>
 
-          <p className="text-[11px] text-slate-600 mt-4">
-            &copy; {new Date().getFullYear()} POS OFFLINE. Hak Cipta Dilindungi Undang-Undang.
-          </p>
+        <div
+          style={{
+            maxWidth: 1100,
+            margin: '32px auto 0',
+            paddingTop: 20,
+            borderTop: '1px solid var(--clr-sage)',
+            display: 'flex',
+            flexWrap: 'wrap',
+            justifyContent: 'space-between',
+            gap: 12,
+            fontSize: 11,
+            color: 'var(--clr-fog)',
+          }}
+        >
+          <span>© {new Date().getFullYear()} POS OFFLINE. Hak Cipta Dilindungi.</span>
+          <span>
+            <a href={`${siteUrl}/privacy`} style={{ color: 'var(--clr-fog)', marginRight: 16, textDecoration: 'none' }}>Kebijakan Privasi</a>
+            <a href={`${siteUrl}/terms`}   style={{ color: 'var(--clr-fog)', textDecoration: 'none' }}>Syarat & Ketentuan</a>
+          </span>
         </div>
       </footer>
 
-      {/* 9. Floating Conversions */}
+      {/* Floating */}
       <StickyMobileCta />
       <FloatingWhatsApp />
     </main>

@@ -1,68 +1,85 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import type { Metadata } from 'next';
+import Script from 'next/script';
+import './globals.css';
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+// ─── Metadata ────────────────────────────────────────────────────────────────
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://pos-offline.vercel.app'),
-  title: "POS OFFLINE - Aplikasi Kasir Android Lisensi Permanen Tanpa Langganan",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ?? 'https://posoffline.id'
+  ),
+  title: 'POS OFFLINE – Kasir Android Lisensi Permanen, Sekali Bayar Seumur Hidup',
   description:
-    "Aplikasi kasir pintar untuk HP & Tablet Android 100% offline tanpa internet dan tanpa biaya bulanan. Cetak struk Bluetooth thermal, scan barcode, dan laporan laba bersih otomatis.",
+    'Aplikasi kasir Android 100% offline tanpa biaya bulanan. Cetak struk Bluetooth thermal, scan barcode, laporan laba otomatis. Beli sekali, aktif seumur hidup.',
   keywords: [
-    "aplikasi kasir offline",
-    "pos offline",
-    "kasir android tanpa langganan",
-    "kasir lisensi permanen",
-    "aplikasi kasir tanpa internet",
-    "cetak struk bluetooth",
-    "kasir umkm",
+    'aplikasi kasir offline',
+    'pos offline android',
+    'kasir android tanpa langganan',
+    'kasir lisensi permanen',
+    'aplikasi kasir tanpa internet',
+    'cetak struk bluetooth',
+    'kasir umkm indonesia',
+    'software kasir toko',
   ],
   icons: {
-    icon: [
-      { url: '/favicon.png', sizes: '32x32', type: 'image/png' },
-      { url: '/icon.png', sizes: '192x192', type: 'image/png' },
-    ],
+    icon:    [{ url: '/favicon.png', sizes: '32x32', type: 'image/png' }],
     shortcut: '/favicon.png',
-    apple: '/icon.png',
+    apple:   '/icon.png',
   },
   openGraph: {
-    title: "POS OFFLINE - Aplikasi Kasir Android Lisensi Sekali Bayar Seumur Hidup",
-    description: "100% Offline Tanpa Biaya Bulanan. Cetak struk Bluetooth thermal instan dan kelola pembukuan toko Anda.",
-    url: "https://pos-offline.vercel.app",
-    siteName: "POS OFFLINE",
-    images: [
-      {
-        url: "/hero-mockup.jpg",
-        width: 1280,
-        height: 720,
-        alt: "POS OFFLINE Android Cashier App",
-      },
-    ],
-    locale: "id_ID",
-    type: "website",
+    title:       'POS OFFLINE – Kasir Android Sekali Bayar, Aktif Seumur Hidup',
+    description: '100% Offline. Tanpa Biaya Bulanan. Cetak struk Bluetooth, scan barcode, laporan laba otomatis. Lisensi permanen Rp 149.000.',
+    url:         process.env.NEXT_PUBLIC_SITE_URL ?? 'https://posoffline.id',
+    siteName:    'POS OFFLINE',
+    images: [{ url: '/hero-mockup.jpg', width: 1280, height: 720, alt: 'Aplikasi Kasir POS OFFLINE di Android' }],
+    locale:      'id_ID',
+    type:        'website',
   },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+// ─── Meta Pixel Component ─────────────────────────────────────────────────────
+
+const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID;
+
+// ─── Root Layout ──────────────────────────────────────────────────────────────
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang="id"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased scroll-smooth`}
-    >
-      <body className="min-h-full flex flex-col font-sans bg-slate-50 text-slate-900 selection:bg-emerald-500 selection:text-white">
+    <html lang="id">
+      <body>
+        {/* Meta Pixel: only rendered when NEXT_PUBLIC_META_PIXEL_ID is set */}
+        {META_PIXEL_ID && (
+          <>
+            <Script
+              id="meta-pixel"
+              strategy="afterInteractive"
+              dangerouslySetInnerHTML={{
+                __html: `
+                  !function(f,b,e,v,n,t,s){
+                    if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+                    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+                    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+                    n.queue=[];t=b.createElement(e);t.async=!0;
+                    t.src=v;s=b.getElementsByTagName(e)[0];
+                    s.parentNode.insertBefore(t,s)
+                  }(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+                  fbq('init', '${META_PIXEL_ID}');
+                  fbq('track', 'PageView');
+                `,
+              }}
+            />
+            <noscript>
+              <img
+                height="1"
+                width="1"
+                style={{ display: 'none' }}
+                src={`https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=PageView&noscript=1`}
+                alt=""
+              />
+            </noscript>
+          </>
+        )}
+
         {children}
       </body>
     </html>

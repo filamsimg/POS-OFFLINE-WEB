@@ -1,77 +1,253 @@
+'use client';
+
 import Image from 'next/image';
-import { ArrowDown, Check, Zap } from 'lucide-react';
+import { ArrowDown, ShieldCheck, WifiOff, Infinity } from 'lucide-react';
+
+const TRUST_ITEMS = [
+  { icon: <WifiOff size={14} />,     label: '100% Offline' },
+  { icon: <Infinity size={14} />,    label: 'Lisensi Seumur Hidup' },
+  { icon: <ShieldCheck size={14} />, label: 'Garansi Resmi' },
+];
 
 export function HeroSection() {
   return (
-    <section className="relative bg-[#112420] text-white pt-12 sm:pt-16 pb-16 px-4 sm:px-6 border-b border-[#1f423b]">
-      <div className="max-w-6xl mx-auto">
-        {/* Split Layout: Left Content, Right Asset */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
-          {/* Left Column: Copy & Actions */}
-          <div className="lg:col-span-6 text-left">
-            {/* 1. Eyebrow */}
-            <div className="inline-flex items-center gap-2 text-emerald-400 text-xs font-mono font-semibold tracking-wider uppercase mb-4 bg-emerald-950/60 border border-emerald-500/30 px-3 py-1 rounded-full">
-              <span className="w-2 h-2 rounded-full bg-emerald-400" />
-              <span>Lisensi Permanen • Sekali Bayar Seumur Hidup</span>
+    <section
+      style={{
+        position: 'relative',
+        background: 'var(--clr-forest)',
+        borderBottom: '1px solid var(--clr-sage)',
+        paddingTop: 'clamp(48px, 8vw, 96px)',
+        paddingBottom: 'clamp(48px, 8vw, 96px)',
+        overflow: 'hidden',
+      }}
+    >
+      <style>{`
+        /* ─── Hero-Specific Aura & Layout Styles (Modular Animations in globals.css) ─── */
+        
+        @keyframes aura-glow {
+          0%, 100% {
+            opacity: 0.55;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 0.85;
+            transform: scale(1.08);
+          }
+        }
+
+        .hero-mockup-card {
+          border-radius: 20px;
+          overflow: hidden;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          background: var(--clr-moss);
+          box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(34, 197, 94, 0.1);
+          transition: box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+
+        .hardware-float:hover .hero-mockup-card {
+          border-color: rgba(34, 197, 94, 0.4);
+          box-shadow: 0 32px 80px rgba(0, 0, 0, 0.65), 0 0 30px rgba(34, 197, 94, 0.2);
+        }
+
+        .hero-aurora-glow {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: 120%;
+          height: 120%;
+          transform: translate(-50%, -50%);
+          background: radial-gradient(
+            ellipse at center,
+            rgba(34, 197, 94, 0.22) 0%,
+            rgba(20, 184, 166, 0.12) 40%,
+            transparent 70%
+          );
+          filter: blur(45px);
+          pointer-events: none;
+          z-index: 0;
+          animation: aura-glow 8s ease-in-out infinite;
+        }
+
+        .hero-ghost-btn {
+          transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .hero-ghost-btn:hover {
+          transform: translateY(-2px);
+          background: rgba(255, 255, 255, 0.05);
+          border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        .trust-pill {
+          transition: transform 0.2s ease, color 0.2s ease;
+        }
+        .trust-pill:hover {
+          transform: translateY(-1px);
+          color: var(--clr-cream) !important;
+        }
+
+        @media (max-width: 640px) {
+          .hero-cta-btn {
+            width: 100% !important;
+            justify-content: center !important;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .hero-aurora-glow {
+            animation: none !important;
+          }
+        }
+      `}</style>
+
+      <div className="container" style={{ position: 'relative', zIndex: 1 }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 460px), 1fr))',
+            gap: 'clamp(32px, 6vw, 72px)',
+            alignItems: 'center',
+          }}
+        >
+          {/* ── Left: Copy ──────────────────────────────────────────────── */}
+          <div>
+            {/* Eyebrow */}
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
+                background: 'rgba(61,186,120,0.1)',
+                border: '1px solid rgba(61,186,120,0.25)',
+                borderRadius: 99,
+                padding: '6px 14px',
+                fontSize: 11,
+                fontWeight: 700,
+                color: 'var(--clr-mint)',
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                marginBottom: 24,
+              }}
+            >
+              <span className="radar-dot" />
+              Sekali Bayar, Aktif Seumur Hidup
             </div>
 
-            {/* 2. Headline: max 2 lines desktop */}
-            <h1 className="text-3xl sm:text-5xl lg:text-5xl font-black tracking-tight leading-[1.1] text-white mb-4">
-              Mesin Kasir Android. <br />
-              <span className="text-emerald-400">100% Offline Tanpa Biaya Bulanan.</span>
+            {/* Headline */}
+            <h1
+              className="heading-xl"
+              style={{ marginBottom: 20 }}
+            >
+              Kasir Android{' '}
+              <span style={{ color: 'var(--clr-leaf)', display: 'block' }}>
+                Tanpa Biaya Bulanan.<br />Selamanya.
+              </span>
             </h1>
 
-            {/* 3. Subtext: exactly 18 words (disciplined under 20 words) */}
-            <p className="text-sm sm:text-base text-slate-300 mb-8 leading-relaxed max-w-[50ch]">
-              Cetak struk Bluetooth instan, scan barcode, dan kelola keuntungan toko dari smartphone Anda tanpa biaya bulanan seumur hidup.
+            {/* Sub */}
+            <p
+              style={{
+                fontSize: 'clamp(15px, 2vw, 17px)',
+                color: 'var(--clr-sand)',
+                lineHeight: 1.7,
+                maxWidth: '46ch',
+                marginBottom: 36,
+              }}
+            >
+              Beli sekali, cukup bayar <strong style={{ color: 'var(--clr-cream)' }}>Rp 149.000</strong> dan aplikasi kasir Android Anda aktif selamanya.
+              Cetak struk Bluetooth, scan barcode, kelola stok dan laporan laba tanpa kuota atau internet.
             </p>
 
-            {/* 4. CTAs: 1 primary + 1 secondary */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-8">
+            {/* CTAs */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 32 }}>
               <a
                 href="#checkout"
-                className="inline-flex items-center justify-center gap-2 bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-black text-sm sm:text-base px-7 py-3.5 rounded-xl transition-transform active:scale-[0.98] shadow-md shadow-emerald-950/40"
+                className="btn-primary btn-shimmer hero-cta-btn"
+                style={{ fontSize: 16, padding: '15px 32px' }}
               >
-                <Zap className="w-4 h-4 fill-slate-950" />
-                <span>DAPATKAN LISENSI PERMANEN</span>
+                Dapatkan Lisensi (Rp 149.000)
               </a>
               <a
                 href="#fitur"
-                className="inline-flex items-center justify-center gap-1.5 text-slate-300 hover:text-white text-xs sm:text-sm font-semibold px-4 py-3 rounded-xl border border-slate-700 hover:border-slate-500 transition-colors"
+                className="btn-ghost hero-cta-btn hero-ghost-btn"
               >
-                <span>Lihat Fitur Lengkap</span>
-                <ArrowDown className="w-3.5 h-3.5" />
+                Lihat Fitur Lengkap
+                <ArrowDown size={15} />
               </a>
             </div>
 
-            {/* Micro proof row under hero */}
-            <div className="flex items-center gap-4 text-xs text-slate-400 border-t border-slate-800/80 pt-4">
-              <span className="flex items-center gap-1">
-                <Check className="w-3.5 h-3.5 text-emerald-400" /> Tanpa Kuota
-              </span>
-              <span className="flex items-center gap-1">
-                <Check className="w-3.5 h-3.5 text-emerald-400" /> Printer 58 & 80mm
-              </span>
-              <span className="flex items-center gap-1">
-                <Check className="w-3.5 h-3.5 text-emerald-400" /> Garansi Seumur Hidup
-              </span>
+            {/* Trust row */}
+            <div
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '8px 20px',
+                paddingTop: 20,
+                borderTop: '1px solid var(--clr-sage)',
+              }}
+            >
+              {TRUST_ITEMS.map((item) => (
+                <span
+                  key={item.label}
+                  className="trust-pill"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: 'var(--clr-sand)',
+                    cursor: 'default',
+                  }}
+                >
+                  <span style={{ color: 'var(--clr-leaf)' }}>{item.icon}</span>
+                  {item.label}
+                </span>
+              ))}
             </div>
           </div>
 
-          {/* Right Column: Authentic Product Photography */}
-          <div className="lg:col-span-6">
-            <div className="relative rounded-2xl overflow-hidden border border-emerald-500/20 bg-slate-950 shadow-2xl group">
-              <Image
-                src="/hero-mockup.jpg"
-                alt="Aplikasi Kasir POS OFFLINE di smartphone Android dengan printer thermal Bluetooth mini"
-                width={1280}
-                height={720}
-                priority
-                className="w-full h-auto object-cover transform group-hover:scale-[1.01] transition-transform duration-500"
-              />
-              <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-transparent p-4 sm:p-5 flex items-center justify-between text-xs text-slate-300">
-                <span className="font-mono text-emerald-400 text-[11px]">POS OFFLINE v1.0 • Android Native</span>
-                <span className="text-[11px] text-slate-400">Kompatibel 50+ Merk Printer Thermal</span>
+          {/* ── Right: Product Image with Ambient Aurora & Float ────────── */}
+          <div style={{ position: 'relative' }}>
+            {/* Ambient Aurora Studio Glow */}
+            <div className="hero-aurora-glow" />
+
+            {/* Floating Hardware Card */}
+            <div className="hardware-float">
+              <div className="hero-mockup-card">
+                <Image
+                  src="/hero-mockup.jpg"
+                  alt="Aplikasi Kasir POS OFFLINE di smartphone Android dengan printer thermal Bluetooth"
+                  width={700}
+                  height={480}
+                  priority
+                  style={{
+                    width: '100%',
+                    height: 'auto',
+                    display: 'block',
+                    objectFit: 'cover',
+                  }}
+                />
+                {/* Caption bar */}
+                <div
+                  style={{
+                    padding: '12px 18px',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: 8,
+                    fontSize: 11,
+                    color: 'var(--clr-sand)',
+                    borderTop: '1px solid var(--clr-sage)',
+                    background: 'rgba(14, 15, 24, 0.95)',
+                  }}
+                >
+                  <span style={{ fontFamily: 'monospace', color: 'var(--clr-mint)' }}>
+                    POS OFFLINE v1.0 • Android Native
+                  </span>
+                  <span>Kompatibel 50+ Merk Printer Thermal</span>
+                </div>
               </div>
             </div>
           </div>

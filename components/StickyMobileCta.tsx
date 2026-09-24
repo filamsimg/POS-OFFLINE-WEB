@@ -1,25 +1,49 @@
 'use client';
 
-import { ArrowRight } from 'lucide-react';
-
 export function StickyMobileCta() {
   return (
-    <div className="sm:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 p-3 z-40 shadow-2xl flex items-center justify-between gap-3">
-      <div>
-        <p className="text-[10px] text-slate-500 font-medium line-through">Rp 350.000</p>
-        <div className="flex items-baseline gap-1">
-          <p className="text-base font-extrabold text-slate-900">Rp 149.000</p>
-          <span className="text-[9px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded">SEKALI BAYAR</span>
-        </div>
-      </div>
-
-      <a
-        href="#checkout"
-        className="bg-[#10B981] hover:bg-[#059669] text-slate-950 font-extrabold text-xs px-5 py-2.5 rounded-xl shadow-sm flex items-center gap-1.5 active:scale-[0.98] transition-all shrink-0"
+    <>
+      <style>{`
+        @media (min-width: 640px) {
+          .sticky-mobile-cta { display: none !important; }
+        }
+      `}</style>
+      <div
+        className="sticky-mobile-cta"
+        style={{
+          position:             'fixed',
+          bottom:               0,
+          left:                 0,
+          right:                0,
+          zIndex:               40,
+          padding:              '10px 16px max(12px, env(safe-area-inset-bottom))',
+          background:           'rgba(8, 9, 14, 0.92)',
+          backdropFilter:       'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          borderTop:            '1px solid var(--clr-sage)',
+          boxShadow:            '0 -6px 24px rgba(0, 0, 0, 0.4)',
+          display:              'flex',
+          gap:                  10,
+        }}
       >
-        <span>Beli Sekarang</span>
-        <ArrowRight className="w-3.5 h-3.5" />
-      </a>
-    </div>
+        <a
+          href="#checkout"
+          className="btn-primary btn-shimmer"
+          style={{
+            flex:           1,
+            fontSize:       15,
+            fontWeight:     800,
+            padding:        '13px 18px',
+            minHeight:      48,
+            boxSizing:      'border-box',
+            justifyContent: 'center',
+            borderRadius:   10,
+            boxShadow:      '0 4px 16px rgba(34, 197, 94, 0.35)',
+          }}
+        >
+          Dapatkan Lisensi Sekarang (Rp 149.000)
+        </a>
+      </div>
+    </>
   );
 }

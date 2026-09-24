@@ -5,69 +5,134 @@ import { ChevronDown } from 'lucide-react';
 
 const FAQS = [
   {
-    q: 'Apakah benar-benar sekali bayar tanpa biaya bulanan lagi?',
-    a: 'Benar 100%! Anda hanya membayar satu kali saat pembelian pertama. Tidak ada biaya langganan bulanan, biaya tahunan, maupun potongan komisi dari setiap transaksi penjualan Anda.',
+    q: 'Apakah aplikasinya benar-benar tidak perlu internet sama sekali?',
+    a: 'Ya, 100% offline. Setelah diinstall dan diaktivasi, aplikasi bekerja sepenuhnya di perangkat Anda tanpa koneksi internet. Data transaksi, produk, dan laporan tersimpan di HP Anda sendiri.',
   },
   {
-    q: 'Bagaimana jika nanti saya ganti HP baru? Apakah harus beli lisensi lagi?',
-    a: 'Tidak perlu! POS OFFLINE dilengkapi fitur Backup & Restore database. Anda cukup mencadangkan data toko Anda ke file JSON, lalu memulihkannya di smartphone baru dalam hitungan detik. Semua data katalog produk dan riwayat transaksi akan kembali utuh 100%.',
+    q: 'Berapa lama lisensi ini berlaku?',
+    a: 'Seumur hidup. Anda bayar satu kali Rp 149.000 dan aplikasi aktif permanen di perangkat tersebut. Tidak ada perpanjangan, tidak ada biaya tambahan.',
   },
   {
-    q: 'Apakah aplikasi membutuhkan koneksi internet saat melayani pembeli?',
-    a: 'Sama sekali tidak! Aplikasi ini bekerja 100% secara offline mandiri di perangkat Android Anda. Bahkan saat HP dalam Mode Pesawat (Airplane Mode) atau saat mati lampu, kasir tetap bisa cetak struk dan mencatat penjualan dengan lancar.',
+    q: 'Bagaimana proses aktivasi setelah saya bayar?',
+    a: 'Setelah pembayaran terkonfirmasi otomatis, link download APK langsung dikirim ke email Anda dan portal aktivasi instan akan terbuka. Cukup install APK di HP Android, buka aplikasi untuk menyalin Device ID unik, lalu tempelkan ke portal pesanan untuk menerbitkan Serial Key resmi Anda secara langsung dalam hitungan detik.',
   },
   {
-    q: 'Printer apa saja yang kompatibel dengan aplikasi ini?',
-    a: 'Mendukung semua merk printer thermal Bluetooth standar ESC/POS ukuran 58mm maupun 80mm yang ada di pasaran, seperti Panda, Eppos, VSC, RPP02N, Zijiang, Iware, Zywell, dan sejenisnya.',
+    q: 'Apakah bisa diinstall di lebih dari satu HP?',
+    a: 'Satu lisensi berlaku untuk satu perangkat (satu Device ID). Jika Anda membutuhkan lebih dari satu HP kasir, silakan hubungi kami untuk pembelian lisensi tambahan.',
   },
   {
-    q: 'Bagaimana cara instalasi dan mendapatkan kode aktivasinya?',
-    a: 'Sangat mudah! Setelah menyelesaikan pesanan di halaman ini, Anda akan langsung mendapatkan file APK dan petunjuk instalasi. Buka aplikasi di HP, salin Device ID yang muncul, lalu masukkan ke halaman verifikasi untuk mendapatkan Serial Key aktivasi seumur hidup secara instan.',
+    q: 'Printer apa saja yang kompatibel?',
+    a: 'Kompatibel dengan 50+ merk printer thermal Bluetooth ukuran 58mm dan 80mm, termasuk Epson, Cashino, Gprinter, HPRT, RONGTA, Xprinter, dan lainnya. Cukup hubungkan via Bluetooth di HP Android Anda.',
   },
   {
-    q: 'Saya gaptek dan belum pernah pakai aplikasi kasir, apakah dibantu?',
-    a: 'Pasti dibantu! Paket pembelian sudah termasuk akses 11 video tutorial lengkap langkah-demi-langkah (mulai dari pertama buka sampai cetak struk), serta layanan konsultasi WhatsApp dengan tim teknis kami.',
+    q: 'Bagaimana jika HP saya rusak atau ganti HP baru?',
+    a: 'Kami memiliki fitur Reset Device resmi. Hubungi admin WhatsApp kami dengan bukti nomor order, kami akan bantu reset lisensi agar Anda dapat aktivasi ulang di HP baru tanpa bayar lagi.',
+  },
+  {
+    q: 'Apakah ada update aplikasi gratis?',
+    a: 'Ya, pembaruan aplikasi gratis. Kami akan memberitahu file update terbaru via grup WhatsApp pengguna.',
+  },
+  {
+    q: 'Berapa lama proses aktivasi setelah memasukkan Device ID?',
+    a: 'Aktivasi berlangsung otomatis dalam hitungan detik melalui portal pesanan Anda. Tim admin WhatsApp kami juga siap membantu jika Anda memerlukan panduan setup tambahan.',
   },
 ];
 
 export function FaqSection() {
-  const [openIdx, setOpenIdx] = useState<number | null>(0);
+  const [open, setOpen] = useState<number | null>(0);
 
   return (
-    <section className="py-16 px-4 sm:px-6 bg-white text-slate-900 border-b border-slate-200">
-      <div className="max-w-2xl mx-auto">
-        <div className="max-w-xl mb-10 text-left sm:text-center sm:mx-auto">
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Pertanyaan yang Sering Diajukan
+    <section
+      id="faq"
+      className="section section-light"
+      style={{ background: 'var(--clr-paper)' }}
+    >
+      <div className="container" style={{ maxWidth: 760 }}>
+        <div style={{ textAlign: 'center', marginBottom: 'clamp(40px, 6vw, 56px)' }}>
+          <div className="section-label" style={{ justifyContent: 'center' }}>FAQ</div>
+          <h2 className="heading-lg" style={{ color: '#111827', marginBottom: 12 }}>
+            Pertanyaan yang Sering Ditanyakan
           </h2>
-          <p className="text-slate-600 text-xs sm:text-sm mt-1.5">
-            Hal penting yang perlu Anda ketahui sebelum membeli aplikasi POS OFFLINE.
+          <p style={{ fontSize: 15, color: '#6b7280', lineHeight: 1.7 }}>
+            Masih ada pertanyaan lain?{' '}
+            <a
+              href={`https://wa.me/${process.env.NEXT_PUBLIC_WA_NUMBER ?? '6285853685622'}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: '#16a34a', fontWeight: 600, textDecoration: 'none' }}
+            >
+              Hubungi admin kami via WhatsApp
+            </a>
+            .
           </p>
         </div>
 
-        <div className="space-y-2.5">
-          {FAQS.map((faq, idx) => {
-            const isOpen = openIdx === idx;
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {FAQS.map((faq, i) => {
+            const isOpen = open === i;
             return (
               <div
-                key={idx}
-                className="border border-slate-200 rounded-xl overflow-hidden"
+                key={i}
+                style={{
+                  background: '#fff',
+                  border: `1px solid ${isOpen ? '#86efac' : '#e5e7eb'}`,
+                  borderRadius: 12,
+                  overflow: 'hidden',
+                  transition: 'border-color 0.15s',
+                }}
               >
                 <button
                   type="button"
-                  onClick={() => setOpenIdx(isOpen ? null : idx)}
-                  className="w-full text-left p-4 font-bold text-xs sm:text-sm text-slate-900 flex justify-between items-center gap-3 bg-slate-50/50 hover:bg-slate-100/60 transition-colors"
+                  aria-expanded={isOpen}
+                  onClick={() => setOpen(isOpen ? null : i)}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-start',
+                    gap: 16,
+                    padding: '18px 20px',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    fontFamily: 'inherit',
+                  }}
                 >
-                  <span>{faq.q}</span>
+                  <span
+                    style={{
+                      fontSize: 14,
+                      fontWeight: 700,
+                      color: isOpen ? '#15803d' : '#111827',
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    {faq.q}
+                  </span>
                   <ChevronDown
-                    className={`w-4 h-4 text-slate-500 shrink-0 transition-transform duration-200 ${
-                      isOpen ? 'rotate-180 text-emerald-600' : ''
-                    }`}
+                    size={18}
+                    style={{
+                      color: '#9ca3af',
+                      flexShrink: 0,
+                      marginTop: 2,
+                      transition: 'transform 0.2s',
+                      transform: isOpen ? 'rotate(180deg)' : 'none',
+                    }}
                   />
                 </button>
+
                 {isOpen && (
-                  <div className="p-4 pt-0 text-xs text-slate-600 leading-relaxed bg-slate-50/50">
-                    <p className="border-t border-slate-200 pt-3">{faq.a}</p>
+                  <div
+                    style={{
+                      padding: '0 20px 18px',
+                      fontSize: 14,
+                      color: '#4b5563',
+                      lineHeight: 1.7,
+                      borderTop: '1px solid #f3f4f6',
+                      paddingTop: 14,
+                    }}
+                  >
+                    {faq.a}
                   </div>
                 )}
               </div>

@@ -26,10 +26,40 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Pesanan tidak ditemukan.' }, { status: 404 });
     }
 
-    // Generate valid serial key
+    // 1. Validasi Status Pembayaran
+    if (order.paymentStatus !== 'paid') {
+      return NextResponse.json(
+        { error: 'Pembayaran belum terkonfirmasi lunas. Silakan selesaikan transfer atau hubungi admin kami untuk verifikasi.' },
+        { status: 402 }
+      );
+    }
+
+    // 2. Kunci 1-to-1 Device ID: Cek apakah pesanan sudah dikunci ke perangkat lain
+    if (order.deviceId && order.deviceId !== cleanDeviceId) {
+      return NextResponse.json(
+        {
+          error: `Pesanan ini sudah dikunci secara permanen untuk perangkat ${order.deviceId}. Satu pesanan berlaku untuk 1 perangkat. Jika HP Anda rusak/ganti perangkat, silakan hubungi admin untuk bantuan reset perangkat.`,
+        },
+        { status: 403 }
+      );
+    }
+
+    // 3. Jika perangkat sama dan sudah memiliki Serial Key, kembalikan kunci yang tersimpan
+    if (order.deviceId === cleanDeviceId && order.serialKey) {
+      return NextResponse.json({
+        success: true,
+        deviceId: cleanDeviceId,
+        serialKey: order.serialKey,
+        customerName: order.customerName,
+        storeName: order.storeName,
+        message: 'Serial Key untuk perangkat ini berhasil dimuat kembali!',
+      });
+    }
+
+    // 4. Generate Serial Key baru jika perangkat baru pertama kali didaftarkan
     const serialKey = generateSerialKey(cleanDeviceId);
 
-    // Save to database
+    // Simpan ke database
     await attachLicenseToOrder(orderId, cleanDeviceId, serialKey);
 
     return NextResponse.json({
@@ -38,10 +68,9 @@ export async function POST(request: Request) {
       serialKey,
       customerName: order.customerName,
       storeName: order.storeName,
-      message: 'Lisensi berhasil diterbitkan!',
+      message: 'Serial Key resmi Anda berhasil diterbitkan!',
     });
   } catch (error: any) {
-    console.error('Claim key error:', error);
     return NextResponse.json(
       { error: error?.message || 'Gagal menerbitkan lisensi.' },
       { status: 500 }

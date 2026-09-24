@@ -38,10 +38,32 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
     async function loadOrder() {
       try {
         const res = await fetch(`/api/checkout?orderId=${orderId}`);
+        const data = await res.json();
+        if (data.order) {
+          setOrder(data.order);
+          if (data.order.serialKey) {
+            setGeneratedKey(data.order.serialKey);
+            setClaimSuccess(true);
+            setDeviceIdInput(data.order.deviceId || '');
+          } else {
+            // Jika device di-reset oleh admin:
+            setClaimSuccess(false);
+            setGeneratedKey('');
+            setDeviceIdInput('');
+          }
+          return;
+        }
+
         // If not found in API yet, use stored state from sessionStorage or fallback
         const saved = sessionStorage.getItem(`order_${orderId}`);
         if (saved) {
-          setOrder(JSON.parse(saved));
+          const parsed = JSON.parse(saved);
+          setOrder(parsed);
+          if (parsed.serialKey) {
+            setGeneratedKey(parsed.serialKey);
+            setClaimSuccess(true);
+            setDeviceIdInput(parsed.deviceId || '');
+          }
         } else {
           // Default placeholder order for presentation
           setOrder({
@@ -92,6 +114,14 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
 
       setGeneratedKey(data.serialKey);
       setClaimSuccess(true);
+      if (order) {
+        setOrder({
+          ...order,
+          deviceId: data.deviceId,
+          serialKey: data.serialKey,
+          paymentStatus: 'paid',
+        });
+      }
     } catch (err: any) {
       setClaimError(err?.message || 'Gagal memproses Device ID.');
     } finally {
@@ -250,12 +280,25 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
                 <button
                   type="button"
                   onClick={() => copyToClipboard(generatedKey)}
-                  className="mt-2 inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-slate-950 font-black text-xs px-4 py-2 rounded-xl transition-all"
+                  className="mt-2 inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 active:scale-95 text-slate-950 font-black text-xs px-4 py-2 rounded-xl transition-all cursor-pointer"
                 >
                   <Copy className="w-3.5 h-3.5" />
                   <span>{copiedKey ? 'BERHASIL DISALIN!' : 'SALIN SERIAL KEY'}</span>
                 </button>
               </div>
+
+              {/* Locked Device Indicator */}
+              {(order?.deviceId || deviceIdInput) && (
+                <div className="flex items-center justify-between p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs">
+                  <span className="text-slate-600 font-medium flex items-center gap-1.5">
+                    <Smartphone className="w-4 h-4 text-emerald-600 shrink-0" />
+                    Terkunci untuk Device ID:
+                  </span>
+                  <span className="font-mono font-bold text-slate-900 bg-white px-2.5 py-1 rounded-lg border border-slate-200">
+                    {order?.deviceId || deviceIdInput}
+                  </span>
+                </div>
+              )}
 
               {/* Instructions */}
               <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-xs text-emerald-900 space-y-2">

@@ -1,12 +1,11 @@
 import { NextResponse } from 'next/server';
 import { getAllOrders, updateOrderPayment } from '@/lib/db';
-
-const ADMIN_PIN = process.env.ADMIN_PIN || '123456';
+import { extractAuthHeader } from '@/lib/auth';
 
 export async function GET(request: Request) {
-  const pin = request.headers.get('x-admin-pin');
-  if (pin !== ADMIN_PIN) {
-    return NextResponse.json({ error: 'PIN Admin salah atau tidak valid.' }, { status: 401 });
+  const isAuthorized = extractAuthHeader(request);
+  if (!isAuthorized) {
+    return NextResponse.json({ error: 'Sesi Admin tidak valid atau telah kedaluwarsa. Silakan login kembali.' }, { status: 401 });
   }
 
   try {
@@ -18,9 +17,9 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const pin = request.headers.get('x-admin-pin');
-  if (pin !== ADMIN_PIN) {
-    return NextResponse.json({ error: 'PIN Admin salah atau tidak valid.' }, { status: 401 });
+  const isAuthorized = extractAuthHeader(request);
+  if (!isAuthorized) {
+    return NextResponse.json({ error: 'Sesi Admin tidak valid atau telah kedaluwarsa. Silakan login kembali.' }, { status: 401 });
   }
 
   try {

@@ -1,12 +1,11 @@
 import { NextResponse } from 'next/server';
 import { generateSerialKey } from '@/lib/license';
-
-const ADMIN_PIN = process.env.ADMIN_PIN || '123456';
+import { extractAuthHeader } from '@/lib/auth';
 
 export async function POST(request: Request) {
-  const pin = request.headers.get('x-admin-pin');
-  if (pin !== ADMIN_PIN) {
-    return NextResponse.json({ error: 'PIN Admin salah atau tidak valid.' }, { status: 401 });
+  const isAuthorized = extractAuthHeader(request);
+  if (!isAuthorized) {
+    return NextResponse.json({ error: 'Sesi Admin tidak valid atau telah kedaluwarsa. Silakan login kembali.' }, { status: 401 });
   }
 
   try {
@@ -29,7 +28,7 @@ Berikut rincian aktivasi lisensi resmi Anda:
 Cara Aktivasi:
 1. Buka aplikasi POS OFFLINE di HP Anda.
 2. Salin dan tempelkan Serial Key di atas ke kolom yang tersedia.
-3. Klik tombol 'Aktivasi Sekarang'.
+3. Klik tombol 'Aktivasi Aplikasi'.
 
 Aplikasi Anda langsung aktif permanen seumur hidup! Jika ada pertanyaan, jangan ragu untuk menghubungi kami kembali ya Kak. 🙏`;
 

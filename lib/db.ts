@@ -151,6 +151,31 @@ export async function attachLicenseToOrder(id: string, deviceId: string, serialK
   return false;
 }
 
+export async function resetOrderDevice(id: string): Promise<boolean> {
+  const sql = getNeonSql();
+  if (sql) {
+    try {
+      await sql`
+        UPDATE orders
+        SET device_id = NULL, serial_key = NULL, activated_at = NULL
+        WHERE id = ${id};
+      `;
+      return true;
+    } catch (err) {
+      console.warn('Neon resetOrderDevice error:', err);
+    }
+  }
+
+  const existing = inMemoryOrders.get(id);
+  if (existing) {
+    existing.deviceId = undefined;
+    existing.serialKey = undefined;
+    existing.activatedAt = undefined;
+    return true;
+  }
+  return false;
+}
+
 export async function getAllOrders(): Promise<Order[]> {
   const sql = getNeonSql();
   if (sql) {

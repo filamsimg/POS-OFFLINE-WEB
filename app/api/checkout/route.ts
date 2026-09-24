@@ -1,56 +1,97 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { v4 as uuidv4 } from 'uuid';
 import { createOrder } from '@/lib/db';
-import { PACKAGES, PackageType, Order } from '@/lib/types';
+import { createMayarPayment } from '@/lib/mayar';
+import { PACKAGES, Order } from '@/lib/types';
 
-export async function POST(request: Request) {
+export const runtime = 'nodejs';
+
+export async function POST(req: NextRequest) {
   try {
-    const body = await request.json();
-    const { customerName, customerPhone, storeName, businessType, packageType, paymentMethod, shippingAddress, notes } = body;
+    const body = await req.json();
+    const {
+      customerName,
+      customerPhone,
+      customerEmail,
+      storeName,
+      businessType,
+      notes,
+    } = body;
 
-    if (!customerName || !customerPhone || !packageType) {
+    // ── Validation ──────────────────────────────────────────────────────────
+    if (!customerName?.trim()) {
+      return NextResponse.json({ error: 'Nama lengkap wajib diisi.' }, { status: 400 });
+    }
+    if (!customerPhone?.trim() || customerPhone.trim().length < 9) {
       return NextResponse.json(
-        { error: 'Nama lengkap, nomor WhatsApp, dan pilihan paket wajib diisi.' },
+        { error: 'Nomor WhatsApp tidak valid. Contoh: 081234567890.' },
+        { status: 400 }
+      );
+    }
+    if (!customerEmail?.trim() || !customerEmail.includes('@')) {
+      return NextResponse.json(
+        { error: 'Alamat email wajib diisi untuk pengiriman link APK.' },
         { status: 400 }
       );
     }
 
-    const pkg = PACKAGES[packageType as PackageType];
-    if (!pkg) {
-      return NextResponse.json({ error: 'Paket tidak valid.' }, { status: 400 });
+    const pkg       = PACKAGES['software_only'];
+    const orderId   = uuidv4();
+    const siteUrl   = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000';
+    const successUrl = `${siteUrl}/order/${orderId}`;
+
+    // ── Create Mayar.id Payment Link ─────────────────────────────────────────
+    let mayarPaymentId:  string | undefined;
+    let mayarPaymentUrl: string | undefined;
+
+    try {
+      const mayarResult = await createMayarPayment({
+        orderId,
+        amount:        pkg.price,
+        customerName:  customerName.trim(),
+        customerEmail: customerEmail.trim(),
+        customerPhone: customerPhone.trim(),
+        description:   `Lisensi POS OFFLINE Permanen – ${storeName?.trim() ?? customerName.trim()}`,
+        successUrl,
+      });
+      mayarPaymentId  = mayarResult.paymentId;
+      mayarPaymentUrl = mayarResult.paymentUrl;
+    } catch (mayarErr) {
+      console.warn('[Checkout] Mayar.id not available, saving order without payment URL:', mayarErr);
+      // Continue without Mayar if not configured yet (dev mode)
     }
 
-    // Generate readable Order ID: POS-YYMM-XXXX
-    const datePrefix = new Date().toISOString().slice(2, 7).replace('-', '');
-    const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
-    const orderId = `POS-${datePrefix}-${randomSuffix}`;
-
-    const newOrder: Order = {
-      id: orderId,
-      customerName: customerName.trim(),
-      customerPhone: customerPhone.trim().replace(/^0/, '62'),
-      storeName: storeName?.trim() || 'Toko',
-      businessType: businessType?.trim() || 'Retail / F&B',
-      packageType: 'software_only',
-      amount: pkg.price,
-      paymentMethod: 'manual_transfer',
-      paymentStatus: 'pending',
-      targetAdmin: body.targetAdmin || 'filamsi',
-      shippingAddress: shippingAddress?.trim(),
-      notes: notes?.trim(),
-      createdAt: new Date().toISOString(),
+    // ── Persist Order ────────────────────────────────────────────────────────
+    const order: Order = {
+      id:             orderId,
+      customerName:   customerName.trim(),
+      customerPhone:  customerPhone.trim(),
+      customerEmail:  customerEmail.trim(),
+      storeName:      storeName?.trim()      ?? undefined,
+      businessType:   businessType?.trim()   ?? undefined,
+      packageType:    'software_only',
+      amount:         pkg.price,
+      paymentMethod:  'mayar',
+      paymentStatus:  'pending',
+      mayarPaymentId,
+      mayarPaymentUrl,
+      notes:          notes?.trim() ?? undefined,
+      createdAt:      new Date().toISOString(),
     };
 
-    await createOrder(newOrder);
+    await createOrder(order);
 
-    return NextResponse.json({
-      success: true,
-      order: newOrder,
-      redirectUrl: `/order/${orderId}`,
-    });
-  } catch (error: any) {
-    console.error('Checkout API error:', error);
+    // ── Response ─────────────────────────────────────────────────────────────
+    if (mayarPaymentUrl) {
+      return NextResponse.json({ redirectUrl: mayarPaymentUrl });
+    }
+
+    // Fallback when Mayar not configured: redirect to order status page
+    return NextResponse.json({ redirectUrl: successUrl });
+  } catch (err) {
+    console.error('[Checkout] Unexpected error:', err);
     return NextResponse.json(
-      { error: error?.message || 'Terjadi kesalahan saat memproses pesanan.' },
+      { error: 'Terjadi kesalahan pada server. Silakan coba lagi.' },
       { status: 500 }
     );
   }

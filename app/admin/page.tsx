@@ -1,900 +1,1503 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
 import {
   ShieldCheck,
   Lock,
-  User,
   Key,
-  DollarSign,
   Search,
   Copy,
   CheckCircle,
   MessageCircle,
-  Sparkles,
   RefreshCw,
   LogOut,
-  AlertTriangle,
   RotateCcw,
-  Check,
   Eye,
   EyeOff,
   Smartphone,
-  Store,
   Calendar,
-  ExternalLink,
+  Mail,
+  Package,
+  TrendingUp,
+  Users,
+  AlertCircle,
+  X,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Store,
+  Loader2,
 } from 'lucide-react';
 import { Order } from '@/lib/types';
+import {
+  T,
+  inputStyle,
+  btnPrimary,
+  btnSecondary,
+  btnDanger,
+  cardStyle,
+  errorBoxStyle,
+  warningBoxStyle,
+  fmtCurrency,
+  fmtDate,
+  copyText,
+  statusBadgeConfig,
+} from '@/lib/ui-tokens';
 
+// Status Badge
+function StatusBadge({ status }: { status: Order['paymentStatus'] }) {
+  const s = statusBadgeConfig[status] ?? statusBadgeConfig.pending;
+  return (
+    <span
+      style={{
+        background:    s.bg,
+        color:         s.color,
+        fontSize:      11,
+        fontWeight:    700,
+        padding:       '3px 10px',
+        borderRadius:  99,
+        letterSpacing: '0.04em',
+        display:       'inline-block',
+        whiteSpace:    'nowrap',
+      }}
+    >
+      {s.label}
+    </span>
+  );
+}
+
+// ─── Stat Card ────────────────────────────────────────────────────────────────
+
+function StatCard({
+  label, value, icon, accent, sub,
+}: {
+  label: string; value: string | number; icon: React.ReactNode; accent: string; sub?: string;
+}) {
+  return (
+    <div
+      style={{
+        background:   T.white,
+        border:       `1px solid ${T.border}`,
+        borderRadius: 14,
+        padding:      '18px 20px',
+        display:      'flex',
+        alignItems:   'center',
+        gap:          16,
+        boxShadow:    '0 1px 4px rgba(0,0,0,0.04)',
+      }}
+    >
+      <div
+        style={{
+          width:          44,
+          height:         44,
+          borderRadius:   12,
+          background:     `${accent}15`,
+          display:        'flex',
+          alignItems:     'center',
+          justifyContent: 'center',
+          color:          accent,
+          flexShrink:     0,
+        }}
+      >
+        {icon}
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 22, fontWeight: 800, color: T.heading, letterSpacing: '-0.03em', lineHeight: 1 }}>
+          {value}
+        </div>
+        <div style={{ fontSize: 12, color: T.muted, marginTop: 3 }}>{label}</div>
+        {sub && <div style={{ fontSize: 11, color: accent, fontWeight: 600, marginTop: 2 }}>{sub}</div>}
+      </div>
+    </div>
+  );
+}
+
+// ─── Copy Button ──────────────────────────────────────────────────────────────
+
+function CopyBtn({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      type="button"
+      onClick={() => copyText(text).then(() => { setCopied(true); setTimeout(() => setCopied(false), 1800); })}
+      title="Salin"
+      style={{
+        background: copied ? '#dcfce7' : '#f3f4f8',
+        border:     `1px solid ${copied ? '#bbf7d0' : T.border}`,
+        borderRadius: 6,
+        cursor:     'pointer',
+        padding:    '4px 8px',
+        color:      copied ? '#15803d' : T.muted,
+        display:    'inline-flex',
+        alignItems: 'center',
+        gap:        4,
+        fontSize:   11,
+        fontWeight: 600,
+        transition: 'all 0.15s',
+      }}
+    >
+      {copied ? <><Check size={11} /> Disalin</> : <><Copy size={11} /> Salin</>}
+    </button>
+  );
+}
+
+// ─── InfoRow ──────────────────────────────────────────────────────────────────
+
+function InfoRow({ label, value, copy }: { label: string; value: string; copy?: string }) {
+  return (
+    <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', fontSize: 12 }}>
+      <span style={{ color: T.muted, minWidth: 110, flexShrink: 0, paddingTop: 1 }}>{label}</span>
+      <span style={{ color: T.heading, fontFamily: copy ? 'monospace' : 'inherit', flex: 1, wordBreak: 'break-all', fontWeight: copy ? 600 : 400 }}>
+        {value}
+      </span>
+      {copy && <CopyBtn text={copy} />}
+    </div>
+  );
+}
+
+// Main Page
 export default function AdminPage() {
-  // Authentication State
-  const [username, setUsername] = useState('admin');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [authToken, setAuthToken] = useState<string | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [authError, setAuthError] = useState('');
+  // Auth
+  const [username, setUsername]         = useState('admin');
+  const [password, setPassword]         = useState('');
+  const [showPw, setShowPw]             = useState(false);
+  const [authToken, setAuthToken]       = useState<string | null>(null);
+  const [isAuth, setIsAuth]             = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+  const [authError, setAuthError]       = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
 
-  // Dashboard Data
-  const [orders, setOrders] = useState<Order[]>([]);
+  // Orders
+  const [orders, setOrders]           = useState<Order[]>([]);
   const [dataLoading, setDataLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'paid' | 'pending' | 'cancelled'>('all');
-  const [activeTab, setActiveTab] = useState<'orders' | 'generator'>('orders');
+  const [search, setSearch]           = useState('');
+  const [filter, setFilter]           = useState<'all' | 'paid' | 'pending' | 'cancelled'>('all');
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
-  // Double Security Reset Device Modal State
-  const [resetModalOpen, setResetModalOpen] = useState(false);
-  const [selectedOrderToReset, setSelectedOrderToReset] = useState<Order | null>(null);
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  // Generator
+  const [tab, setTab]                 = useState<'orders' | 'generator'>('orders');
+  const [genDeviceId, setGenDeviceId] = useState('');
+  const [genOrderId, setGenOrderId]   = useState('');
+  const [genResult, setGenResult]     = useState<{ serialKey: string; waTemplate: string } | null>(null);
+  const [genLoading, setGenLoading]   = useState(false);
+  const [genError, setGenError]       = useState('');
+
+  // Reset modal
+  const [resetOrder, setResetOrder]     = useState<Order | null>(null);
+  const [resetPw, setResetPw]           = useState('');
   const [resetLoading, setResetLoading] = useState(false);
-  const [resetError, setResetError] = useState('');
-  const [resetSuccessMessage, setResetSuccessMessage] = useState('');
+  const [resetError, setResetError]     = useState('');
 
-  // Manual Generator State
-  const [manualDeviceId, setManualDeviceId] = useState('');
-  const [manualCustomer, setManualCustomer] = useState('');
-  const [manualStore, setManualStore] = useState('');
-  const [manualResult, setManualResult] = useState<{ serialKey: string; whatsappTemplate: string } | null>(null);
-  const [manualLoading, setManualLoading] = useState(false);
-  const [copiedKey, setCopiedKey] = useState(false);
-  const [copiedWa, setCopiedWa] = useState(false);
-
-  // Copy Feedback Map for order rows
-  const [copiedRowKey, setCopiedRowKey] = useState<string | null>(null);
-
-  // Restore session from sessionStorage on mount
-  useEffect(() => {
-    const savedToken = sessionStorage.getItem('pos_admin_token');
-    if (savedToken) {
-      setAuthToken(savedToken);
-      setIsAuthenticated(true);
-      fetchOrders(savedToken);
+  // Logout handler
+  const handleLogout = useCallback(async () => {
+    try {
+      await fetch('/api/admin/logout', { method: 'POST' });
+    } catch {
+      // ignore
     }
+    sessionStorage.removeItem('pos_admin_token');
+    setAuthToken(null);
+    setIsAuth(false);
+    setOrders([]);
+    setPassword('');
   }, []);
 
-  const fetchOrders = async (token: string) => {
+  // Fetch orders
+  const fetchOrders = useCallback(async (token: string) => {
     setDataLoading(true);
     try {
-      const res = await fetch('/api/admin/orders', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res  = await fetch('/api/admin/orders', { headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json();
-      if (!res.ok) {
-        if (res.status === 401) {
-          handleLogout();
-          throw new Error('Sesi telah kedaluwarsa. Silakan login kembali.');
-        }
-        throw new Error(data.error || 'Gagal memuat daftar pesanan.');
-      }
-      setOrders(data.orders || []);
-    } catch (err: any) {
-      setAuthError(err?.message || 'Gagal memuat pesanan.');
+      if (!res.ok) throw new Error(data.error);
+      setOrders(data.orders ?? []);
+    } catch {
+      handleLogout();
     } finally {
       setDataLoading(false);
     }
-  };
+  }, [handleLogout]);
 
+  // Session verification on mount
+  useEffect(() => {
+    async function verifySession() {
+      const saved = typeof window !== 'undefined' ? sessionStorage.getItem('pos_admin_token') : null;
+      try {
+        const res = await fetch('/api/admin/verify', {
+          headers: saved ? { Authorization: `Bearer ${saved}` } : {},
+        });
+        const data = await res.json();
+        if (res.ok && data.authenticated) {
+          const token = saved || 'session';
+          setAuthToken(token);
+          setIsAuth(true);
+          fetchOrders(token);
+        } else {
+          sessionStorage.removeItem('pos_admin_token');
+          setAuthToken(null);
+          setIsAuth(false);
+        }
+      } catch {
+        sessionStorage.removeItem('pos_admin_token');
+        setAuthToken(null);
+        setIsAuth(false);
+      } finally {
+        setCheckingAuth(false);
+      }
+    }
+    verifySession();
+  }, [fetchOrders]);
+
+  // Login
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError('');
     setLoginLoading(true);
-
     try {
-      const res = await fetch('/api/admin/login', {
+      const res  = await fetch('/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
       });
       const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Username atau Password salah.');
-      }
-
-      const token = data.token;
-      sessionStorage.setItem('pos_admin_token', token);
-      setAuthToken(token);
-      setIsAuthenticated(true);
-      setPassword('');
-      fetchOrders(token);
-    } catch (err: any) {
-      setAuthError(err?.message || 'Gagal masuk.');
+      if (!res.ok) throw new Error(data.error ?? 'Login gagal.');
+      sessionStorage.setItem('pos_admin_token', data.token);
+      setAuthToken(data.token);
+      setIsAuth(true);
+      fetchOrders(data.token);
+    } catch (err: unknown) {
+      setAuthError(err instanceof Error ? err.message : 'Login gagal.');
     } finally {
       setLoginLoading(false);
     }
   };
 
-  const handleLogout = () => {
-    sessionStorage.removeItem('pos_admin_token');
-    setAuthToken(null);
-    setIsAuthenticated(false);
-    setOrders([]);
-    setPassword('');
+  // ── WhatsApp URL Helper for Orders ──────────────────────────────────────────
+  const getOrderWhatsAppUrl = (order: Order) => {
+    const phone = order.customerPhone.replace(/\D/g, '').replace(/^0/, '62');
+    let text = '';
+    if (order.serialKey) {
+      text =
+        `Halo Kak ${order.customerName}! Terima kasih atas pesanannya di POS OFFLINE 😊\n\n` +
+        `Berikut rincian aktivasi lisensi resmi Anda:\n` +
+        `🏪 Nama Toko: ${order.storeName || '-'}\n` +
+        `📱 Device ID: ${order.deviceId || '-'}\n` +
+        `🔑 SERIAL KEY: ${order.serialKey}\n\n` +
+        `Cara Aktivasi:\n` +
+        `1. Buka aplikasi POS OFFLINE di HP Anda.\n` +
+        `2. Salin dan tempelkan Serial Key di atas ke kolom yang tersedia.\n` +
+        `3. Klik tombol "Aktivasi Aplikasi".\n\n` +
+        `Aplikasi Anda langsung aktif permanen seumur hidup! ` +
+        `Jika ada pertanyaan, jangan ragu hubungi kami kembali ya Kak. 🙏`;
+    } else if (order.paymentStatus === 'paid') {
+      text =
+        `Halo Kak ${order.customerName}! Pembayaran Anda untuk pesanan POS OFFLINE #${order.id.slice(0, 8).toUpperCase()} telah berhasil dikonfirmasi.\n\n` +
+        `Silakan download & pasang aplikasi POS OFFLINE di HP Anda, lalu berikan Device ID yang tertera di layar aktivasi untuk kami terbitkan Serial Key permanen Anda. Terima kasih!`;
+    } else {
+      text =
+        `Halo Kak ${order.customerName}! Terima kasih sudah melakukan pemesanan POS OFFLINE.\n` +
+        `No. Pesanan: #${order.id.slice(0, 8).toUpperCase()}\n\n` +
+        `Apakah ada pertanyaan atau kendala dalam menyelesaikan pembayaran yang bisa kami bantu?`;
+    }
+    return `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
   };
 
-  const handleUpdateStatus = async (orderId: string, newStatus: 'paid' | 'pending' | 'cancelled') => {
-    if (!authToken) return;
-    try {
-      const res = await fetch('/api/admin/orders', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${authToken}`,
-        },
-        body: JSON.stringify({ orderId, status: newStatus }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Gagal memperbarui status');
-      fetchOrders(authToken);
-    } catch (err: any) {
-      alert(err?.message);
+  // ── Open Generator from Orders List ─────────────────────────────────────────
+  const handleOpenGeneratorForOrder = (order: Order) => {
+    setGenOrderId(order.id);
+    if (order.deviceId) {
+      setGenDeviceId(order.deviceId);
+    }
+    setGenError('');
+    if (order.serialKey) {
+      const waText =
+        `Halo Kak ${order.customerName}! Terima kasih atas pesanannya di POS OFFLINE 😊\n\n` +
+        `Berikut rincian aktivasi lisensi resmi Anda:\n` +
+        `🏪 Nama Toko: ${order.storeName || '-'}\n` +
+        `📱 Device ID: ${order.deviceId || '-'}\n` +
+        `🔑 SERIAL KEY: ${order.serialKey}\n\n` +
+        `Cara Aktivasi:\n` +
+        `1. Buka aplikasi POS OFFLINE di HP Anda.\n` +
+        `2. Salin dan tempelkan Serial Key di atas ke kolom yang tersedia.\n` +
+        `3. Klik tombol "Aktivasi Aplikasi".\n\n` +
+        `Aplikasi Anda langsung aktif permanen seumur hidup! ` +
+        `Jika ada pertanyaan, jangan ragu hubungi kami kembali ya Kak. 🙏`;
+      setGenResult({ serialKey: order.serialKey, waTemplate: waText });
+    } else {
+      setGenResult(null);
+    }
+    setTab('generator');
+  };
+
+  // ── Select Order in Generator Dropdown ──────────────────────────────────────
+  const handleSelectGenOrder = (orderId: string) => {
+    setGenOrderId(orderId);
+    setGenError('');
+    if (orderId) {
+      const order = orders.find((o) => o.id === orderId);
+      if (order) {
+        if (order.deviceId) {
+          setGenDeviceId(order.deviceId);
+        }
+        if (order.serialKey) {
+          const waText =
+            `Halo Kak ${order.customerName}! Terima kasih atas pesanannya di POS OFFLINE 😊\n\n` +
+            `Berikut rincian aktivasi lisensi resmi Anda:\n` +
+            `🏪 Nama Toko: ${order.storeName || '-'}\n` +
+            `📱 Device ID: ${order.deviceId || '-'}\n` +
+            `🔑 SERIAL KEY: ${order.serialKey}\n\n` +
+            `Cara Aktivasi:\n` +
+            `1. Buka aplikasi POS OFFLINE di HP Anda.\n` +
+            `2. Salin dan tempelkan Serial Key di atas ke kolom yang tersedia.\n` +
+            `3. Klik tombol "Aktivasi Aplikasi".\n\n` +
+            `Aplikasi Anda langsung aktif permanen seumur hidup! ` +
+            `Jika ada pertanyaan, jangan ragu hubungi kami kembali ya Kak. 🙏`;
+          setGenResult({ serialKey: order.serialKey, waTemplate: waText });
+        } else {
+          setGenResult(null);
+        }
+      }
+    } else {
+      setGenResult(null);
     }
   };
 
-  // Open the Double-Security Reset Device Modal
-  const openResetModal = (order: Order) => {
-    setSelectedOrderToReset(order);
-    setConfirmPassword('');
-    setResetError('');
-    setResetSuccessMessage('');
-    setResetModalOpen(true);
-  };
-
-  const handleConfirmResetDevice = async (e: React.FormEvent) => {
+  // ── Generate key ──────────────────────────────────────────────────────────────
+  const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedOrderToReset || !confirmPassword.trim()) {
-      setResetError('Masukkan password admin untuk mengonfirmasi tindakan ini.');
+    setGenError(''); setGenResult(null);
+    const rawInput = genDeviceId.trim().toUpperCase();
+    if (!rawInput) {
+      setGenError('Device ID wajib diisi.');
       return;
     }
-
-    setResetLoading(true);
-    setResetError('');
-
+    const cleanChars = rawInput.replace(/[^A-Z0-9]/g, '');
+    if (cleanChars.length < 8) {
+      setGenError('Format Device ID tidak valid. Contoh yang benar: POS-8F92-4B21-7A09.');
+      return;
+    }
+    setGenLoading(true);
     try {
-      const res = await fetch('/api/admin/reset-device', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          orderId: selectedOrderToReset.id,
-          adminPassword: confirmPassword,
+      const order = orders.find((o) => o.id === genOrderId);
+      const res   = await fetch('/api/admin/generate-key', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+        body:    JSON.stringify({
+          deviceId: rawInput,
+          orderId: genOrderId || undefined,
+          customerName: order?.customerName ?? '',
+          storeName: order?.storeName ?? '',
         }),
       });
-
       const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Password konfirmasi salah.');
-      }
+      if (!res.ok) throw new Error(data.error);
+      setGenResult({ serialKey: data.serialKey, waTemplate: data.whatsappTemplate });
+      if (authToken) fetchOrders(authToken);
+    } catch (err: unknown) {
+      setGenError(err instanceof Error ? err.message : 'Gagal generate key.');
+    } finally {
+      setGenLoading(false);
+    }
+  };
 
-      setResetSuccessMessage(data.message);
-      if (authToken) {
-        fetchOrders(authToken);
-      }
-      setTimeout(() => {
-        setResetModalOpen(false);
-        setSelectedOrderToReset(null);
-        setConfirmPassword('');
-      }, 1500);
-    } catch (err: any) {
-      setResetError(err?.message || 'Gagal mereset Device ID.');
+  // ── Reset device ──────────────────────────────────────────────────────────────
+  const handleReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setResetError(''); setResetLoading(true);
+    try {
+      const res  = await fetch('/api/admin/reset-device', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+        body:    JSON.stringify({ orderId: resetOrder?.id, confirmPassword: resetPw }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setResetOrder(null); setResetPw('');
+      if (authToken) fetchOrders(authToken);
+    } catch (err: unknown) {
+      setResetError(err instanceof Error ? err.message : 'Reset gagal.');
     } finally {
       setResetLoading(false);
     }
   };
 
-  const handleManualGenerate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!manualDeviceId.trim() || !authToken) return;
-
-    setManualLoading(true);
-    try {
-      const res = await fetch('/api/admin/generate-key', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${authToken}`,
-        },
-        body: JSON.stringify({
-          deviceId: manualDeviceId,
-          customerName: manualCustomer,
-          storeName: manualStore,
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Gagal generate kunci.');
-      }
-
-      setManualResult(data);
-    } catch (err: any) {
-      alert(err?.message);
-    } finally {
-      setManualLoading(false);
-    }
-  };
-
-  const copyRowKey = (key: string) => {
-    navigator.clipboard.writeText(key);
-    setCopiedRowKey(key);
-    setTimeout(() => setCopiedRowKey(null), 2000);
-  };
-
-  const copyManualText = (text: string, isWa: boolean = false) => {
-    navigator.clipboard.writeText(text);
-    if (isWa) {
-      setCopiedWa(true);
-      setTimeout(() => setCopiedWa(false), 2000);
-    } else {
-      setCopiedKey(true);
-      setTimeout(() => setCopiedKey(false), 2000);
-    }
-  };
-
-  // Filtered Orders
-  const filteredOrders = useMemo(() => {
-    return orders.filter((order) => {
-      const matchesSearch =
-        order.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (order.storeName || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-        order.customerPhone.includes(searchQuery) ||
-        order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (order.deviceId || '').toLowerCase().includes(searchQuery.toLowerCase());
-
-      const matchesStatus = statusFilter === 'all' || order.paymentStatus === statusFilter;
-
-      return matchesSearch && matchesStatus;
+  // ── Derived ──────────────────────────────────────────────────────────────────
+  const filtered = useMemo(() => {
+    return orders.filter((o) => {
+      const matchStatus = filter === 'all' || o.paymentStatus === filter;
+      const q           = search.toLowerCase();
+      const matchSearch =
+        !q ||
+        o.customerName.toLowerCase().includes(q) ||
+        o.customerPhone.includes(q) ||
+        (o.storeName ?? '').toLowerCase().includes(q) ||
+        (o.customerEmail ?? '').toLowerCase().includes(q) ||
+        o.id.toLowerCase().includes(q);
+      return matchStatus && matchSearch;
     });
-  }, [orders, searchQuery, statusFilter]);
+  }, [orders, filter, search]);
 
-  // Statistics
   const stats = useMemo(() => {
-    const total = orders.length;
-    const paidOrders = orders.filter((o) => o.paymentStatus === 'paid');
-    const totalRevenue = paidOrders.reduce((sum, o) => sum + (o.amount || 149000), 0);
-    const claimedDevices = orders.filter((o) => !!o.deviceId).length;
-    return {
-      total,
-      paidCount: paidOrders.length,
-      totalRevenue,
-      claimedDevices,
-    };
+    const paid    = orders.filter((o) => o.paymentStatus === 'paid');
+    const active  = orders.filter((o) => o.serialKey);
+    const pending = orders.filter((o) => o.paymentStatus === 'pending');
+    const revenue = paid.reduce((s, o) => s + o.amount, 0);
+    return { total: orders.length, paid: paid.length, active: active.length, pending: pending.length, revenue };
   }, [orders]);
 
-  // 1. LOGIN SCREEN
-  if (!isAuthenticated) {
+  // Checking session loader
+  if (checkingAuth) {
     return (
-      <div className="min-h-screen bg-[#0d1f1c] flex items-center justify-center p-4">
-        <div className="w-full max-w-md bg-[#183630] border border-emerald-500/20 rounded-3xl p-8 shadow-2xl text-slate-100">
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mx-auto mb-4 text-emerald-400">
-              <ShieldCheck className="w-8 h-8" />
+      <div
+        style={{
+          minHeight:      '100vh',
+          background:     'linear-gradient(135deg, #1a1c2b 0%, #0f1117 100%)',
+          display:        'flex',
+          flexDirection:  'column',
+          alignItems:     'center',
+          justifyContent: 'center',
+          gap:            12,
+          fontFamily:     "'Plus Jakarta Sans', system-ui, sans-serif",
+          color:          '#94a3b8',
+        }}
+      >
+        <Loader2 size={32} style={{ color: T.green, animation: 'spin 1s linear infinite' }} />
+        <span style={{ fontSize: 13, fontWeight: 500 }}>Memverifikasi sesi admin...</span>
+      </div>
+    );
+  }
+
+  // Login Screen
+  if (!isAuth) {
+    return (
+      <div
+        style={{
+          minHeight:      '100vh',
+          background:     'linear-gradient(135deg, #1a1c2b 0%, #0f1117 100%)',
+          display:        'flex',
+          alignItems:     'center',
+          justifyContent: 'center',
+          padding:        16,
+          fontFamily:     "'Plus Jakarta Sans', system-ui, sans-serif",
+        }}
+      >
+        <div style={{ width: '100%', maxWidth: 400 }}>
+          {/* Logo */}
+          <div style={{ textAlign: 'center', marginBottom: 32 }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+              <Image src="/icon.png" alt="Logo" width={36} height={36} style={{ borderRadius: 10 }} />
+              <span style={{ fontSize: 20, fontWeight: 800, color: '#f0f1f8' }}>POS OFFLINE</span>
             </div>
-            <h1 className="text-2xl font-black text-white">POS OFFLINE</h1>
-            <p className="text-xs text-emerald-200/70 mt-1 uppercase tracking-wider font-semibold">
-              Portal Admin & Manajemen Lisensi
-            </p>
+            <div style={{ fontSize: 12, color: '#6b6f8e', marginTop: 4 }}>Admin Dashboard | Akses Terbatas</div>
           </div>
 
-          {authError && (
-            <div className="p-3.5 mb-6 bg-red-950/50 border border-red-500/30 text-red-200 text-xs rounded-xl flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 shrink-0 text-red-400" />
-              <span>{authError}</span>
-            </div>
-          )}
-
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-emerald-100/80 mb-1.5 flex items-center gap-1.5">
-                <User className="w-3.5 h-3.5 text-emerald-400" /> Username Admin
-              </label>
-              <input
-                type="text"
-                required
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Contoh: admin"
-                className="w-full px-4 py-3 bg-[#0d1f1c]/70 border border-emerald-500/30 rounded-xl text-white font-medium text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-all placeholder:text-slate-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-emerald-100/80 mb-1.5 flex items-center gap-1.5">
-                <Lock className="w-3.5 h-3.5 text-emerald-400" /> Password Admin
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Masukkan password admin"
-                  className="w-full px-4 py-3 bg-[#0d1f1c]/70 border border-emerald-500/30 rounded-xl text-white font-medium text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-all placeholder:text-slate-500 pr-11"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
+          <div
+            style={{
+              background:   T.white,
+              border:       `1px solid ${T.border}`,
+              borderRadius: 16,
+              padding:      '32px 28px',
+              boxShadow:    '0 8px 40px rgba(0,0,0,0.25)',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 22 }}>
+              <div
+                style={{
+                  width: 36, height: 36, borderRadius: 10,
+                  background: '#dcfce7', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}
+              >
+                <ShieldCheck size={18} style={{ color: '#16a34a' }} />
+              </div>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: T.heading }}>Masuk ke Dashboard</div>
+                <div style={{ fontSize: 11, color: T.muted }}>Khusus administrator</div>
               </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={loginLoading}
-              className="w-full mt-2 py-3.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm rounded-xl transition-all shadow-lg shadow-emerald-950/50 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-            >
-              {loginLoading ? (
-                <span>MEMVERIFIKASI...</span>
-              ) : (
-                <>
-                  <Key className="w-4 h-4" />
-                  <span>MASUK KE DASHBOARD ADMIN</span>
-                </>
-              )}
-            </button>
-          </form>
+            <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                <label style={{ fontSize: 12, fontWeight: 600, color: T.body }}>Username</label>
+                <input
+                  type="text"
+                  required
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  style={inputStyle}
+                />
+              </div>
 
-          <div className="mt-8 pt-6 border-t border-emerald-500/10 text-center">
-            <Link href="/" className="text-xs text-emerald-400/80 hover:text-emerald-300 transition-colors">
-              &larr; Kembali ke Landing Page
-            </Link>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                <label style={{ fontSize: 12, fontWeight: 600, color: T.body }}>Password</label>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type={showPw ? 'text' : 'password'}
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    style={{ ...inputStyle, paddingRight: 42 }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPw((v) => !v)}
+                    style={{
+                      position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
+                      background: 'none', border: 'none', cursor: 'pointer', color: T.muted, display: 'flex',
+                    }}
+                  >
+                    {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </div>
+
+              {authError && (
+                <div
+                  style={{
+                    background: '#fef2f2', border: '1px solid #fecaca',
+                    borderRadius: 8, padding: '10px 14px', fontSize: 13, color: '#dc2626',
+                    display: 'flex', alignItems: 'center', gap: 7,
+                  }}
+                >
+                  <AlertCircle size={14} style={{ flexShrink: 0 }} /> {authError}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loginLoading}
+                style={{
+                  background:  T.dark,
+                  color:       '#fff',
+                  border:      'none',
+                  borderRadius: 9,
+                  padding:     '13px',
+                  fontSize:    14,
+                  fontWeight:  700,
+                  cursor:      loginLoading ? 'not-allowed' : 'pointer',
+                  opacity:     loginLoading ? 0.75 : 1,
+                  display:     'flex',
+                  alignItems:  'center',
+                  justifyContent: 'center',
+                  gap:         8,
+                  fontFamily:  'inherit',
+                  marginTop:   4,
+                }}
+              >
+                {loginLoading
+                  ? <><Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} /> Memverifikasi...</>
+                  : <><Lock size={14} /> Masuk ke Dashboard</>}
+              </button>
+            </form>
           </div>
         </div>
       </div>
     );
   }
 
-  // 2. AUTHENTICATED DASHBOARD
+  // ─────────────────────────────────────────────────────────────────────────────
+  // DASHBOARD
+  // ─────────────────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 pb-20">
-      {/* Top Navbar */}
-      <header className="bg-[#183630] border-b border-emerald-500/20 sticky top-0 z-30 shadow-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Image
-              src="/icon.png"
-              alt="Logo"
-              width={32}
-              height={32}
-              className="rounded-lg border border-emerald-500/30"
-            />
-            <div>
-              <span className="font-black text-white text-base sm:text-lg tracking-tight">POS OFFLINE</span>
-              <span className="hidden sm:inline-block ml-2 px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/30 rounded-md text-[10px] font-bold text-emerald-400 uppercase tracking-widest">
-                Admin Panel
-              </span>
-            </div>
-          </div>
+    <div
+      style={{
+        minHeight:  '100vh',
+        background: T.pageBg,
+        fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif",
+        color:      T.body,
+      }}
+    >
+      {/* ── Top Header ──────────────────────────────────────────────────────── */}
+      <header
+        style={{
+          background:    T.dark,
+          padding:       '0 clamp(16px, 4vw, 32px)',
+          height:        56,
+          display:       'flex',
+          alignItems:    'center',
+          justifyContent: 'space-between',
+          position:      'sticky',
+          top:           0,
+          zIndex:        50,
+          boxShadow:     '0 2px 12px rgba(0,0,0,0.2)',
+        }}
+      >
+        {/* Brand */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <Image src="/icon.png" alt="Logo" width={28} height={28} style={{ borderRadius: 7 }} />
+          <span style={{ fontWeight: 800, fontSize: 15, color: '#f0f1f8' }}>POS OFFLINE</span>
+          <span
+            style={{
+              fontSize: 9, fontWeight: 700, background: T.green,
+              color: '#fff', padding: '2px 7px', borderRadius: 4, letterSpacing: '0.07em',
+            }}
+          >
+            ADMIN
+          </span>
+        </div>
 
-          <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-[#0d1f1c] rounded-xl border border-emerald-500/20 text-xs text-emerald-300">
-              <User className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Admin: <strong>{username}</strong></span>
-            </div>
+        {/* Actions */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <button
+            type="button"
+            onClick={() => authToken && fetchOrders(authToken)}
+            disabled={dataLoading}
+            title="Refresh data"
+            style={{
+              background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)',
+              borderRadius: 7, padding: '6px 10px', color: '#94a3b8', cursor: 'pointer', display: 'flex',
+            }}
+          >
+            <RefreshCw size={14} style={{ animation: dataLoading ? 'spin 1s linear infinite' : 'none' }} />
+          </button>
 
-            <button
-              onClick={() => authToken && fetchOrders(authToken)}
-              disabled={dataLoading}
-              title="Refresh Data"
-              className="p-2 bg-emerald-950/40 hover:bg-emerald-900/50 border border-emerald-500/20 rounded-xl text-emerald-300 hover:text-white transition-all cursor-pointer disabled:opacity-50"
-            >
-              <RefreshCw className={`w-4 h-4 ${dataLoading ? 'animate-spin' : ''}`} />
-            </button>
-
-            <button
-              onClick={handleLogout}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-red-950/40 hover:bg-red-900/60 border border-red-500/30 text-red-300 hover:text-red-200 text-xs font-bold rounded-xl transition-all cursor-pointer"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              <span>Keluar</span>
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={handleLogout}
+            style={{
+              background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.25)',
+              borderRadius: 7, padding: '6px 14px', color: '#fca5a5', fontSize: 12, fontWeight: 600,
+              cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, fontFamily: 'inherit',
+            }}
+          >
+            <LogOut size={13} /> Keluar
+          </button>
         </div>
       </header>
 
-      {/* Main Container */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-6">
-        {/* Statistics Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div className="bg-[#183630]/60 border border-emerald-500/20 rounded-2xl p-4 sm:p-5">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-300/70 block mb-1">
-              Total Pesanan
-            </span>
-            <div className="text-2xl sm:text-3xl font-black text-white">{stats.total}</div>
-            <span className="text-[11px] text-slate-400 mt-1 block">Seluruh order masuk</span>
-          </div>
+      {/* ── Main Content ────────────────────────────────────────────────────── */}
+      <div style={{ maxWidth: 1240, margin: '0 auto', padding: 'clamp(20px, 3vw, 32px) clamp(16px, 4vw, 32px)' }}>
 
-          <div className="bg-[#183630]/60 border border-emerald-500/20 rounded-2xl p-4 sm:p-5">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-300/70 block mb-1">
-              Pesanan Lunas
-            </span>
-            <div className="text-2xl sm:text-3xl font-black text-emerald-400">{stats.paidCount}</div>
-            <span className="text-[11px] text-emerald-200/60 mt-1 block">Terkonfirmasi bayar</span>
-          </div>
-
-          <div className="bg-[#183630]/60 border border-emerald-500/20 rounded-2xl p-4 sm:p-5">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-300/70 block mb-1">
-              Total Omset Lunas
-            </span>
-            <div className="text-xl sm:text-2xl font-black text-[#E5C690]">
-              Rp {stats.totalRevenue.toLocaleString('id-ID')}
-            </div>
-            <span className="text-[11px] text-slate-400 mt-1 block">Dana masuk terverifikasi</span>
-          </div>
-
-          <div className="bg-[#183630]/60 border border-emerald-500/20 rounded-2xl p-4 sm:p-5">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-300/70 block mb-1">
-              Device Terdaftar
-            </span>
-            <div className="text-2xl sm:text-3xl font-black text-cyan-400">{stats.claimedDevices}</div>
-            <span className="text-[11px] text-cyan-200/60 mt-1 block">HP kasir aktif permanen</span>
-          </div>
+        {/* Page title */}
+        <div style={{ marginBottom: 24 }}>
+          <h1 style={{ fontSize: 22, fontWeight: 800, color: T.heading, margin: 0, letterSpacing: '-0.02em' }}>
+            Dashboard Pesanan
+          </h1>
+          <p style={{ fontSize: 13, color: T.muted, margin: '4px 0 0' }}>
+            Kelola semua transaksi dan lisensi POS OFFLINE
+          </p>
         </div>
 
-        {/* Tab Controls */}
-        <div className="flex items-center gap-2 mb-6 border-b border-emerald-500/20 pb-4">
-          <button
-            onClick={() => setActiveTab('orders')}
-            className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center gap-2 cursor-pointer ${
-              activeTab === 'orders'
-                ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-950/50'
-                : 'bg-[#183630]/50 text-slate-300 hover:bg-[#183630] border border-emerald-500/10'
-            }`}
-          >
-            <DollarSign className="w-4 h-4" />
-            <span>Daftar Pesanan & Lisensi ({filteredOrders.length})</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('generator')}
-            className={`px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center gap-2 cursor-pointer ${
-              activeTab === 'generator'
-                ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-950/50'
-                : 'bg-[#183630]/50 text-slate-300 hover:bg-[#183630] border border-emerald-500/10'
-            }`}
-          >
-            <Sparkles className="w-4 h-4" />
-            <span>Manual Key Generator</span>
-          </button>
+        {/* ── Stat Cards ──────────────────────────────────────────────────── */}
+        <div
+          style={{
+            display:             'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))',
+            gap:                 14,
+            marginBottom:        28,
+          }}
+        >
+          <StatCard
+            label="Total Pesanan"
+            value={stats.total}
+            icon={<Package size={20} />}
+            accent={T.blue}
+          />
+          <StatCard
+            label="Menunggu Bayar"
+            value={stats.pending}
+            icon={<AlertCircle size={20} />}
+            accent={T.amber}
+            sub={stats.pending > 0 ? 'Perlu tindak lanjut' : undefined}
+          />
+          <StatCard
+            label="Lunas"
+            value={stats.paid}
+            icon={<CheckCircle size={20} />}
+            accent={T.green}
+          />
+          <StatCard
+            label="Lisensi Aktif"
+            value={stats.active}
+            icon={<Key size={20} />}
+            accent={T.purple}
+          />
+          <StatCard
+            label="Total Pendapatan"
+            value={fmtCurrency(stats.revenue)}
+            icon={<TrendingUp size={20} />}
+            accent={T.green}
+            sub="Semua transaksi lunas"
+          />
         </div>
 
-        {/* TAB 1: ORDERS & LICENSES TABLE */}
-        {activeTab === 'orders' && (
-          <div className="space-y-4">
-            {/* Filter & Search Bar */}
-            <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between bg-[#183630]/40 p-4 rounded-2xl border border-emerald-500/20">
-              <div className="relative flex-1">
-                <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+        {/* ── Tabs ────────────────────────────────────────────────────────── */}
+        <div
+          style={{
+            display:      'flex',
+            gap:          4,
+            background:   T.white,
+            border:       `1px solid ${T.border}`,
+            borderRadius: 10,
+            padding:      4,
+            marginBottom: 20,
+            width:        'fit-content',
+            boxShadow:    '0 1px 3px rgba(0,0,0,0.04)',
+          }}
+        >
+          {(['orders', 'generator'] as const).map((t) => (
+            <button
+              key={t}
+              type="button"
+              onClick={() => setTab(t)}
+              style={{
+                background:   tab === t ? T.dark : 'transparent',
+                color:        tab === t ? '#fff' : T.muted,
+                border:       'none',
+                borderRadius: 7,
+                padding:      '8px 20px',
+                fontSize:     13,
+                fontWeight:   700,
+                cursor:       'pointer',
+                fontFamily:   'inherit',
+                display:      'flex',
+                alignItems:   'center',
+                gap:          6,
+                transition:   'all 0.15s',
+              }}
+            >
+              {t === 'orders' ? <><Users size={14} /> Daftar Pesanan</> : <><Key size={14} /> Generate Serial Key</>}
+            </button>
+          ))}
+        </div>
+
+        {/* ─────────────────────────────────────────────────────────────────── */}
+        {/* ORDERS TAB                                                          */}
+        {/* ─────────────────────────────────────────────────────────────────── */}
+        {tab === 'orders' && (
+          <>
+            {/* Filter bar */}
+            <div
+              style={{
+                display:      'flex',
+                flexWrap:     'wrap',
+                gap:          10,
+                marginBottom: 16,
+              }}
+            >
+              {/* Search */}
+              <div style={{ flex: '1 1 220px', position: 'relative' }}>
+                <Search
+                  size={14}
+                  style={{
+                    position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)',
+                    color: T.muted, pointerEvents: 'none',
+                  }}
+                />
                 <input
                   type="text"
-                  placeholder="Cari nama pembeli, toko, WhatsApp, ID pesanan, atau Device ID..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-[#0d1f1c] border border-emerald-500/30 rounded-xl text-xs sm:text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                  placeholder="Cari nama, email, no. HP, toko, order ID..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  style={{
+                    ...inputStyle,
+                    paddingLeft:  36,
+                    background:   T.white,
+                    boxShadow:    '0 1px 3px rgba(0,0,0,0.04)',
+                  }}
                 />
               </div>
 
-              <div className="flex items-center gap-2">
-                <select
-                  value={statusFilter}
-                  onChange={(e: any) => setStatusFilter(e.target.value)}
-                  className="px-3 py-2 bg-[#0d1f1c] border border-emerald-500/30 rounded-xl text-xs font-semibold text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 cursor-pointer"
-                >
-                  <option value="all">Semua Status</option>
-                  <option value="paid">Lunas (Paid)</option>
-                  <option value="pending">Menunggu (Pending)</option>
-                  <option value="cancelled">Dibatalkan (Cancelled)</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Orders Table Container */}
-            <div className="bg-[#183630]/30 border border-emerald-500/20 rounded-2xl overflow-hidden shadow-xl">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs sm:text-sm">
-                  <thead className="bg-[#183630] border-b border-emerald-500/20 text-emerald-200/80 uppercase text-[10px] font-black tracking-wider">
-                    <tr>
-                      <th className="py-3.5 px-4">Order ID & Waktu</th>
-                      <th className="py-3.5 px-4">Pelanggan & Toko</th>
-                      <th className="py-3.5 px-4">Tagihan & Status</th>
-                      <th className="py-3.5 px-4">Kaitan Device ID & Serial Key</th>
-                      <th className="py-3.5 px-4 text-right">Aksi Manajemen</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-emerald-500/10">
-                    {filteredOrders.length === 0 ? (
-                      <tr>
-                        <td colSpan={5} className="py-12 text-center text-slate-400 text-xs">
-                          {dataLoading ? 'Memuat data pesanan...' : 'Tidak ada pesanan yang sesuai filter.'}
-                        </td>
-                      </tr>
-                    ) : (
-                      filteredOrders.map((order) => {
-                        const isPaid = order.paymentStatus === 'paid';
-                        const isPending = order.paymentStatus === 'pending';
-                        const hasDevice = !!order.deviceId;
-
-                        return (
-                          <tr key={order.id} className="hover:bg-emerald-950/20 transition-colors">
-                            {/* Order ID & Time */}
-                            <td className="py-3.5 px-4 align-top">
-                              <span className="font-mono font-bold text-white text-xs block">{order.id}</span>
-                              <span className="text-[11px] text-slate-400 flex items-center gap-1 mt-1">
-                                <Calendar className="w-3 h-3 text-slate-500" />
-                                {new Date(order.createdAt).toLocaleDateString('id-ID', {
-                                  day: '2-digit',
-                                  month: 'short',
-                                  year: 'numeric',
-                                  hour: '2-digit',
-                                  minute: '2-digit',
-                                })}
-                              </span>
-                              <Link
-                                href={`/order/${order.id}`}
-                                target="_blank"
-                                className="inline-flex items-center gap-1 text-[10px] text-emerald-400 hover:underline mt-1.5"
-                              >
-                                <span>Lihat Invoice</span>
-                                <ExternalLink className="w-2.5 h-2.5" />
-                              </Link>
-                            </td>
-
-                            {/* Customer & Store Info */}
-                            <td className="py-3.5 px-4 align-top">
-                              <div className="font-bold text-white text-xs sm:text-sm">{order.customerName}</div>
-                              <div className="text-[11px] text-slate-300 flex items-center gap-1 mt-0.5">
-                                <Store className="w-3 h-3 text-emerald-400" />
-                                <span>{order.storeName || 'Toko Retail'}</span>
-                              </div>
-                              <a
-                                href={`https://wa.me/${order.customerPhone.replace(/[^0-9]/g, '')}`}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="inline-flex items-center gap-1 text-[11px] text-emerald-400 hover:text-emerald-300 mt-1 font-mono"
-                              >
-                                <MessageCircle className="w-3 h-3" />
-                                <span>{order.customerPhone}</span>
-                              </a>
-                            </td>
-
-                            {/* Payment Status & Amount */}
-                            <td className="py-3.5 px-4 align-top">
-                              <div className="font-black text-[#E5C690] text-xs sm:text-sm">
-                                Rp {(order.amount || 149000).toLocaleString('id-ID')}
-                              </div>
-                              <div className="mt-1.5 flex items-center gap-1">
-                                <select
-                                  value={order.paymentStatus}
-                                  onChange={(e: any) => handleUpdateStatus(order.id, e.target.value)}
-                                  className={`text-[10px] font-black uppercase tracking-wider px-2 py-1 rounded-lg border cursor-pointer focus:outline-none ${
-                                    isPaid
-                                      ? 'bg-emerald-950/60 border-emerald-500/40 text-emerald-300'
-                                      : isPending
-                                      ? 'bg-amber-950/60 border-amber-500/40 text-amber-300'
-                                      : 'bg-red-950/60 border-red-500/40 text-red-300'
-                                  }`}
-                                >
-                                  <option value="paid">● LUNAS</option>
-                                  <option value="pending">● MENUNGGU</option>
-                                  <option value="cancelled">● BATAL</option>
-                                </select>
-                              </div>
-                            </td>
-
-                            {/* Device ID & Serial Key (1-to-1 Lock) */}
-                            <td className="py-3.5 px-4 align-top">
-                              {hasDevice ? (
-                                <div className="space-y-1.5">
-                                  <div className="flex items-center gap-1.5">
-                                    <Smartphone className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                                    <span className="font-mono text-xs font-bold text-cyan-300 bg-cyan-950/40 px-2 py-0.5 rounded border border-cyan-500/30">
-                                      {order.deviceId}
-                                    </span>
-                                  </div>
-
-                                  {order.serialKey && (
-                                    <div className="flex items-center gap-1.5">
-                                      <Key className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                                      <span className="font-mono text-xs font-black text-emerald-300 tracking-wider">
-                                        {order.serialKey}
-                                      </span>
-                                      <button
-                                        onClick={() => copyRowKey(order.serialKey!)}
-                                        title="Salin Serial Key"
-                                        className="p-1 hover:bg-emerald-500/20 rounded text-slate-400 hover:text-emerald-300 transition-colors"
-                                      >
-                                        {copiedRowKey === order.serialKey ? (
-                                          <Check className="w-3 h-3 text-emerald-400" />
-                                        ) : (
-                                          <Copy className="w-3 h-3" />
-                                        )}
-                                      </button>
-                                    </div>
-                                  )}
-                                  <span className="text-[10px] text-slate-400 block">
-                                    Terkunci 1 Perangkat Permanen
-                                  </span>
-                                </div>
-                              ) : (
-                                <div className="text-slate-500 text-xs italic flex items-center gap-1">
-                                  <Smartphone className="w-3.5 h-3.5" />
-                                  <span>Belum klaim Device ID</span>
-                                </div>
-                              )}
-                            </td>
-
-                            {/* Management Actions */}
-                            <td className="py-3.5 px-4 align-top text-right">
-                              {hasDevice ? (
-                                <button
-                                  onClick={() => openResetModal(order)}
-                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-950/40 hover:bg-red-900/60 border border-red-500/40 text-red-300 hover:text-red-200 text-xs font-bold rounded-xl transition-all shadow-sm cursor-pointer"
-                                  title="Ganti atau reset Device ID untuk pelanggan ini"
-                                >
-                                  <RotateCcw className="w-3.5 h-3.5" />
-                                  <span>Reset Device</span>
-                                </button>
-                              ) : (
-                                <span className="text-[11px] text-slate-500">-</span>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 2: MANUAL KEY GENERATOR TOOL */}
-        {activeTab === 'generator' && (
-          <div className="max-w-2xl bg-[#183630]/40 border border-emerald-500/20 rounded-3xl p-6 sm:p-8 shadow-xl">
-            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-emerald-500/20">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
-                <Sparkles className="w-5 h-5" />
-              </div>
-              <div>
-                <h2 className="text-lg font-black text-white">Generator Serial Key Manual</h2>
-                <p className="text-xs text-slate-400">
-                  Gunakan untuk menerbitkan lisensi pembeli khusus atau pesanan via WhatsApp
-                </p>
-              </div>
-            </div>
-
-            <form onSubmit={handleManualGenerate} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
-                  Device ID Perangkat HP Pembeli: *
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Contoh: POS-YPJZ-L92W-5GJY"
-                  value={manualDeviceId}
-                  onChange={(e) => setManualDeviceId(e.target.value.toUpperCase())}
-                  className="w-full px-4 py-3 bg-[#0d1f1c] border border-emerald-500/30 rounded-xl font-mono text-sm sm:text-base font-bold text-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-400 uppercase tracking-wide placeholder:text-slate-600"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
-                    Nama Pembeli (Opsional):
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Contoh: Budi Santoso"
-                    value={manualCustomer}
-                    onChange={(e) => setManualCustomer(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-[#0d1f1c] border border-emerald-500/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-400 placeholder:text-slate-600"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold uppercase text-slate-300 mb-1.5">
-                    Nama Toko (Opsional):
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Contoh: Kopi Kenangan"
-                    value={manualStore}
-                    onChange={(e) => setManualStore(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-[#0d1f1c] border border-emerald-500/30 rounded-xl text-xs sm:text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-400 placeholder:text-slate-600"
-                  />
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={manualLoading}
-                className="w-full py-3.5 bg-emerald-500 hover:bg-emerald-400 active:scale-98 text-slate-950 font-black text-sm rounded-xl transition-all shadow-lg shadow-emerald-950/40 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 mt-2"
-              >
-                {manualLoading ? (
-                  <span>MENERBITKAN KUNCI...</span>
-                ) : (
-                  <>
-                    <Key className="w-4 h-4" />
-                    <span>TERBITKAN SERIAL KEY RESMI</span>
-                  </>
-                )}
-              </button>
-            </form>
-
-            {manualResult && (
-              <div className="mt-6 pt-6 border-t border-emerald-500/20 space-y-4">
-                <div className="bg-[#0d1f1c] border border-emerald-500/30 rounded-2xl p-5 text-center">
-                  <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-widest block mb-1">
-                    SERIAL KEY RESMI PERMANEN:
-                  </span>
-                  <div className="font-mono text-2xl sm:text-3xl font-black text-emerald-300 tracking-wider py-2 select-all">
-                    {manualResult.serialKey}
-                  </div>
-                  <button
-                    onClick={() => copyManualText(manualResult.serialKey, false)}
-                    className="mt-2 inline-flex items-center gap-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 text-xs font-bold px-4 py-2 rounded-xl border border-emerald-500/30 transition-all cursor-pointer"
-                  >
-                    <Copy className="w-3.5 h-3.5" />
-                    <span>{copiedKey ? 'BERHASIL DISALIN!' : 'SALIN SERIAL KEY'}</span>
-                  </button>
-                </div>
-
-                <div className="bg-[#0d1f1c] border border-emerald-500/20 rounded-2xl p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                      <MessageCircle className="w-3.5 h-3.5 text-emerald-400" />
-                      Template Pesan WhatsApp Siap Kirim:
-                    </span>
+              {/* Status filters */}
+              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                {(['all', 'pending', 'paid', 'cancelled'] as const).map((s) => {
+                  const labels = { all: 'Semua', pending: 'Menunggu', paid: 'Lunas', cancelled: 'Batal' };
+                  const colors = { all: T.dark, pending: T.amber, paid: T.green, cancelled: T.red };
+                  const active = filter === s;
+                  return (
                     <button
-                      onClick={() => copyManualText(manualResult.whatsappTemplate, true)}
-                      className="text-xs text-emerald-400 hover:text-emerald-300 font-bold cursor-pointer"
+                      key={s}
+                      type="button"
+                      onClick={() => setFilter(s)}
+                      style={{
+                        background:   active ? colors[s] : T.white,
+                        border:       `1px solid ${active ? colors[s] : T.border}`,
+                        borderRadius: 8,
+                        padding:      '7px 14px',
+                        fontSize:     12,
+                        fontWeight:   700,
+                        color:        active ? '#fff' : T.body,
+                        cursor:       'pointer',
+                        fontFamily:   'inherit',
+                        boxShadow:    '0 1px 3px rgba(0,0,0,0.04)',
+                        transition:   'all 0.15s',
+                      }}
                     >
-                      {copiedWa ? '✓ Disalin' : 'Salin Pesan'}
+                      {labels[s]}{' '}
+                      <span style={{ opacity: active ? 0.8 : 0.5, fontSize: 11 }}>
+                        ({s === 'all' ? orders.length : orders.filter((o) => o.paymentStatus === s).length})
+                      </span>
                     </button>
-                  </div>
-                  <pre className="text-xs text-slate-300 font-sans whitespace-pre-wrap bg-slate-900/60 p-3 rounded-xl border border-emerald-500/10 max-h-48 overflow-y-auto">
-                    {manualResult.whatsappTemplate}
-                  </pre>
-                </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Orders list */}
+            {dataLoading ? (
+              <div
+                style={{
+                  textAlign:    'center',
+                  padding:      60,
+                  color:        T.muted,
+                  background:   T.white,
+                  borderRadius: 14,
+                  border:       `1px solid ${T.border}`,
+                }}
+              >
+                <Loader2 size={28} style={{ animation: 'spin 1s linear infinite', display: 'block', margin: '0 auto 12px' }} />
+                Memuat data pesanan...
+              </div>
+            ) : filtered.length === 0 ? (
+              <div
+                style={{
+                  textAlign:    'center',
+                  padding:      60,
+                  color:        T.muted,
+                  background:   T.white,
+                  borderRadius: 14,
+                  border:       `1px solid ${T.border}`,
+                  fontSize:     14,
+                }}
+              >
+                {search ? `Tidak ada pesanan yang cocok dengan "${search}".` : 'Belum ada pesanan masuk.'}
+              </div>
+            ) : (
+              <div
+                style={{
+                  background:   T.white,
+                  border:       `1px solid ${T.border}`,
+                  borderRadius: 14,
+                  overflow:     'hidden',
+                  boxShadow:    '0 1px 4px rgba(0,0,0,0.05)',
+                }}
+              >
+                {filtered.map((order, i) => {
+                  const isExpanded = selectedOrder?.id === order.id;
+                  return (
+                    <div
+                      key={order.id}
+                      style={{ borderTop: i === 0 ? 'none' : `1px solid ${T.border}` }}
+                    >
+                      {/* Row */}
+                      <div
+                        style={{
+                          padding:    '14px 20px',
+                          display:    'flex',
+                          flexWrap:   'wrap',
+                          gap:        '8px 20px',
+                          alignItems: 'center',
+                          cursor:     'pointer',
+                          background: isExpanded ? T.surface : 'transparent',
+                          transition: 'background 0.12s',
+                        }}
+                        onClick={() => setSelectedOrder(isExpanded ? null : order)}
+                      >
+                        <StatusBadge status={order.paymentStatus} />
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 1, minWidth: 140 }}>
+                          <span style={{ fontSize: 13, fontWeight: 700, color: T.heading }}>
+                            {order.customerName}
+                          </span>
+                          <span style={{ fontSize: 11, color: T.muted, display: 'flex', alignItems: 'center', gap: 3 }}>
+                            <Store size={10} /> {order.storeName ?? '-'}
+                          </span>
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: T.body }}>
+                          <Smartphone size={12} style={{ color: T.muted }} />
+                          {order.customerPhone}
+                        </div>
+
+                        {order.customerEmail && (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: T.body }}>
+                            <Mail size={12} style={{ color: T.muted }} />
+                            {order.customerEmail}
+                          </div>
+                        )}
+
+                        {order.serialKey && (
+                          <span
+                            style={{
+                              fontSize:   10,
+                              fontWeight: 700,
+                              background: '#ede9fe',
+                              color:      '#7c3aed',
+                              padding:    '2px 8px',
+                              borderRadius: 4,
+                              letterSpacing: '0.04em',
+                            }}
+                          >
+                            ✓ AKTIF
+                          </span>
+                        )}
+
+                        <div style={{ marginLeft: 'auto', textAlign: 'right', display: 'flex', alignItems: 'center', gap: 12 }}>
+                          <div>
+                            <div style={{ fontSize: 14, fontWeight: 800, color: '#16a34a' }}>
+                              {fmtCurrency(order.amount)}
+                            </div>
+                            <div style={{ fontSize: 11, color: T.muted, display: 'flex', alignItems: 'center', gap: 3, justifyContent: 'flex-end', marginTop: 1 }}>
+                              <Calendar size={10} />
+                              {fmtDate(order.createdAt)}
+                            </div>
+                          </div>
+                          {isExpanded ? <ChevronUp size={16} style={{ color: T.muted }} /> : <ChevronDown size={16} style={{ color: T.muted }} />}
+                        </div>
+                      </div>
+
+                      {/* Expanded detail */}
+                      {isExpanded && (
+                        <div
+                          style={{
+                            borderTop:  `1px solid ${T.border}`,
+                            padding:    '18px 20px',
+                            background: T.surface,
+                            display:    'flex',
+                            flexWrap:   'wrap',
+                            gap:        20,
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {/* Info block */}
+                          <div style={{ flex: '1 1 280px', display: 'flex', flexDirection: 'column', gap: 9 }}>
+                            <InfoRow label="Order ID"        value={`#${order.id.slice(0, 8).toUpperCase()}`} copy={order.id} />
+                            <InfoRow label="Bidang Usaha"    value={order.businessType ?? '-'} />
+                            <InfoRow label="Email"           value={order.customerEmail ?? '-'} />
+                            {order.deviceId  && <InfoRow label="Device ID"   value={order.deviceId}  copy={order.deviceId} />}
+                            {order.serialKey && <InfoRow label="Serial Key"  value={order.serialKey} copy={order.serialKey} />}
+                            {order.activatedAt && <InfoRow label="Aktivasi"  value={fmtDate(order.activatedAt)} />}
+                            {order.emailSentAt && <InfoRow label="Email Dikirim" value={fmtDate(order.emailSentAt)} />}
+                          </div>
+
+                          {/* Action buttons */}
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flexShrink: 0 }}>
+                            {order.serialKey ? (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={() => copyText(order.serialKey!)}
+                                  style={{
+                                    background:   '#ede9fe',
+                                    border:       '1px solid #c4b5fd',
+                                    borderRadius: 8,
+                                    padding:      '8px 16px',
+                                    fontSize:     12,
+                                    fontWeight:   700,
+                                    color:        '#6d28d9',
+                                    cursor:       'pointer',
+                                    fontFamily:   'inherit',
+                                    display:      'flex',
+                                    alignItems:   'center',
+                                    gap:          6,
+                                  }}
+                                >
+                                  <Key size={13} /> Salin Serial Key
+                                </button>
+
+                                <a
+                                  href={getOrderWhatsAppUrl(order)}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  style={{
+                                    background:     '#f0fdf4',
+                                    border:         `1px solid ${T.greenBd}`,
+                                    borderRadius:   8,
+                                    padding:        '7px 16px',
+                                    fontSize:       12,
+                                    fontWeight:     600,
+                                    color:          '#16a34a',
+                                    cursor:         'pointer',
+                                    display:        'flex',
+                                    alignItems:     'center',
+                                    gap:            6,
+                                    textDecoration: 'none',
+                                  }}
+                                >
+                                  <MessageCircle size={13} style={{ color: '#25d366' }} /> Kirim WA Lisensi
+                                </a>
+                              </>
+                            ) : order.paymentStatus === 'paid' ? (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenGeneratorForOrder(order)}
+                                  style={{
+                                    background:   T.dark,
+                                    border:       'none',
+                                    borderRadius: 8,
+                                    padding:      '8px 16px',
+                                    fontSize:     12,
+                                    fontWeight:   700,
+                                    color:        '#fff',
+                                    cursor:       'pointer',
+                                    fontFamily:   'inherit',
+                                    display:      'flex',
+                                    alignItems:   'center',
+                                    gap:          6,
+                                  }}
+                                >
+                                  <Key size={13} /> Terbitkan Serial Key
+                                </button>
+
+                                <a
+                                  href={getOrderWhatsAppUrl(order)}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  style={{
+                                    background:     '#f0fdf4',
+                                    border:         `1px solid ${T.greenBd}`,
+                                    borderRadius:   8,
+                                    padding:        '7px 16px',
+                                    fontSize:       12,
+                                    fontWeight:     600,
+                                    color:          '#16a34a',
+                                    cursor:         'pointer',
+                                    display:        'flex',
+                                    alignItems:     'center',
+                                    gap:            6,
+                                    textDecoration: 'none',
+                                  }}
+                                >
+                                  <MessageCircle size={13} style={{ color: '#25d366' }} /> Hubungi via WA
+                                </a>
+                              </>
+                            ) : (
+                              <a
+                                href={getOrderWhatsAppUrl(order)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{
+                                  background:     '#fef9c3',
+                                  border:         '1px solid #fde68a',
+                                  borderRadius:   8,
+                                  padding:        '7px 16px',
+                                  fontSize:       12,
+                                  fontWeight:     600,
+                                  color:          '#854d0e',
+                                  cursor:         'pointer',
+                                  display:        'flex',
+                                  alignItems:     'center',
+                                  gap:            6,
+                                  textDecoration: 'none',
+                                }}
+                              >
+                                <MessageCircle size={13} style={{ color: '#ca8a04' }} /> Follow Up WhatsApp
+                              </a>
+                            )}
+
+                            {order.deviceId && (
+                              <button
+                                type="button"
+                                onClick={() => setResetOrder(order)}
+                                style={{
+                                  background:   '#fef2f2',
+                                  border:       '1px solid #fecaca',
+                                  borderRadius: 8,
+                                  padding:      '7px 16px',
+                                  fontSize:     12,
+                                  fontWeight:   600,
+                                  color:        '#dc2626',
+                                  cursor:       'pointer',
+                                  fontFamily:   'inherit',
+                                  display:      'flex',
+                                  alignItems:   'center',
+                                  gap:          6,
+                                }}
+                              >
+                                <RotateCcw size={13} /> Reset Device
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
-          </div>
+          </>
         )}
-      </main>
 
-      {/* DOUBLE-SECURITY RESET DEVICE MODAL */}
-      {resetModalOpen && selectedOrderToReset && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-lg bg-[#183630] border-2 border-red-500/40 rounded-3xl p-6 sm:p-8 shadow-2xl text-slate-100 relative animate-in fade-in zoom-in-95 duration-200">
-            {/* Header */}
-            <div className="flex items-center gap-3 mb-4 pb-4 border-b border-emerald-500/10">
-              <div className="w-12 h-12 rounded-2xl bg-red-950/60 border border-red-500/40 flex items-center justify-center text-red-400 shrink-0">
-                <AlertTriangle className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="text-lg font-black text-white">Konfirmasi Reset Device ID</h3>
-                <p className="text-xs text-red-200/80">Tindakan ini memerlukan verifikasi password admin.</p>
-              </div>
-            </div>
-
-            {/* Target Order Info */}
-            <div className="bg-[#0d1f1c] rounded-2xl p-4 border border-emerald-500/20 text-xs space-y-2 mb-4">
-              <div className="flex justify-between">
-                <span className="text-slate-400">Order ID:</span>
-                <span className="font-mono font-bold text-white">{selectedOrderToReset.id}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">Pelanggan:</span>
-                <span className="font-semibold text-white">{selectedOrderToReset.customerName}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">Toko:</span>
-                <span className="text-slate-200">{selectedOrderToReset.storeName || '-'}</span>
-              </div>
-              <div className="flex justify-between items-center pt-2 border-t border-emerald-500/10">
-                <span className="text-slate-400">Device ID Terdaftar:</span>
-                <span className="font-mono font-bold text-cyan-300 bg-cyan-950/40 px-2 py-0.5 rounded border border-cyan-500/30">
-                  {selectedOrderToReset.deviceId}
-                </span>
-              </div>
-            </div>
-
-            {/* Warning Message */}
-            <p className="text-xs text-amber-200/90 leading-relaxed mb-4 bg-amber-950/30 border border-amber-500/20 p-3 rounded-xl">
-              <strong>Peringatan Keamanan:</strong> Kaitan Device ID ({selectedOrderToReset.deviceId}) dan Serial Key akan dihapus dari pesanan ini. Pelanggan dapat mendaftarkan 1 perangkat baru di halaman order mereka.
-            </p>
-
-            {resetError && (
-              <div className="p-3 mb-4 bg-red-950/60 border border-red-500/40 text-red-200 text-xs rounded-xl flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 shrink-0 text-red-400" />
-                <span>{resetError}</span>
-              </div>
-            )}
-
-            {resetSuccessMessage && (
-              <div className="p-3 mb-4 bg-emerald-950/60 border border-emerald-500/40 text-emerald-200 text-xs rounded-xl flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 shrink-0 text-emerald-400" />
-                <span>{resetSuccessMessage}</span>
-              </div>
-            )}
-
-            {/* Password Verification Form */}
-            <form onSubmit={handleConfirmResetDevice} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5 flex items-center gap-1.5">
-                  <Lock className="w-3.5 h-3.5 text-red-400" /> Masukkan Password Admin untuk Konfirmasi: *
-                </label>
-                <div className="relative">
-                  <input
-                    type={showConfirmPassword ? 'text' : 'password'}
-                    required
-                    autoFocus
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Ketik password admin Anda"
-                    className="w-full px-4 py-3 bg-[#0d1f1c] border border-red-500/40 rounded-xl text-white font-medium text-sm focus:outline-none focus:ring-2 focus:ring-red-400 placeholder:text-slate-600 pr-11"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
-                  >
-                    {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
+        {/* ─────────────────────────────────────────────────────────────────── */}
+        {/* GENERATOR TAB                                                       */}
+        {/* ─────────────────────────────────────────────────────────────────── */}
+        {tab === 'generator' && (
+          <div style={{ maxWidth: 620 }}>
+            <div
+              style={{
+                background:   T.white,
+                border:       `1px solid ${T.border}`,
+                borderRadius: 16,
+                padding:      '28px 24px',
+                boxShadow:    '0 1px 4px rgba(0,0,0,0.05)',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 22 }}>
+                <div
+                  style={{
+                    width: 40, height: 40, borderRadius: 10,
+                    background: '#ede9fe', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}
+                >
+                  <Key size={18} style={{ color: T.purple }} />
+                </div>
+                <div>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: T.heading }}>Generate Serial Key Lisensi</div>
+                  <div style={{ fontSize: 12, color: T.muted }}>Untuk klaim manual oleh admin</div>
                 </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex items-center gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setResetModalOpen(false)}
-                  disabled={resetLoading}
-                  className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl transition-all cursor-pointer"
-                >
-                  Batal
-                </button>
+              <form onSubmit={handleGenerate} noValidate style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                {/* Order selector */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: T.body }}>
+                    Pilih Order (opsional)
+                  </label>
+                  <select
+                    value={genOrderId}
+                    onChange={(e) => handleSelectGenOrder(e.target.value)}
+                    style={{ ...inputStyle, cursor: 'pointer' }}
+                  >
+                    <option value="">(Generate tanpa order / standalone)</option>
+                    {orders.filter((o) => o.paymentStatus === 'paid').map((o) => (
+                      <option key={o.id} value={o.id}>
+                        {o.serialKey ? '✓ ' : '⚡ '}#{o.id.slice(0, 8).toUpperCase()} | {o.customerName} ({o.storeName ?? 'Tanpa toko'}) {o.serialKey ? '• (Sudah Ada Key)' : '• (Belum Ada Key)'}
+                      </option>
+                    ))}
+                  </select>
+                  <span style={{ fontSize: 11, color: T.muted }}>
+                    Pilih order untuk otomatis menghubungkan Serial Key ke data pelanggan di database.
+                  </span>
+                </div>
+
+                {/* Device ID with live format badge */}
+                {(() => {
+                  const cleanDev = genDeviceId.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+                  const isDevValid = cleanDev.length >= 10;
+                  return (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <label style={{ fontSize: 12, fontWeight: 600, color: T.body }}>
+                          Device ID <span style={{ color: T.red }}>*</span>
+                        </label>
+                        {isDevValid && (
+                          <span
+                            style={{
+                              fontSize:   11,
+                              fontWeight: 700,
+                              color:      '#16a34a',
+                              display:    'inline-flex',
+                              alignItems: 'center',
+                              gap:        4,
+                            }}
+                          >
+                            <Check size={12} /> Format Valid
+                          </span>
+                        )}
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="Contoh: POS-8F92-4B21-7A09"
+                        value={genDeviceId}
+                        onChange={(e) => {
+                          setGenDeviceId(e.target.value.toUpperCase().replace(/[^A-Z0-9-]/g, ''));
+                          if (genError) setGenError('');
+                        }}
+                        style={{
+                          ...inputStyle,
+                          fontFamily:    'monospace',
+                          fontSize:      15,
+                          letterSpacing: '0.05em',
+                          border:        genError
+                            ? '1.5px solid #ef4444'
+                            : isDevValid
+                            ? '1.5px solid #22c55e'
+                            : `1px solid ${T.border}`,
+                          background:    genError ? '#fef2f2' : isDevValid ? '#f0fdf4' : T.white,
+                          boxShadow:     isDevValid ? '0 0 0 3px rgba(34, 197, 94, 0.12)' : 'none',
+                          transition:    'all 0.15s ease',
+                        }}
+                      />
+                      <span style={{ fontSize: 11, color: T.muted }}>
+                        Format standar POS OFFLINE: <code style={{ fontFamily: 'monospace', fontWeight: 700 }}>POS-XXXX-XXXX-XXXX</code>. Sistem otomatis menormalisasi jika prefix belum diketik.
+                      </span>
+                    </div>
+                  );
+                })()}
+
+                {genError && (
+                  <div
+                    style={{
+                      background: '#fef2f2', border: '1px solid #fecaca',
+                      borderRadius: 8, padding: '10px 14px', fontSize: 13, color: '#dc2626',
+                      display: 'flex', alignItems: 'center', gap: 7,
+                    }}
+                  >
+                    <AlertCircle size={13} style={{ flexShrink: 0 }} /> {genError}
+                  </div>
+                )}
 
                 <button
                   type="submit"
-                  disabled={resetLoading || !confirmPassword.trim()}
-                  className="flex-1 py-3 bg-red-600 hover:bg-red-500 active:scale-98 text-white font-black text-xs rounded-xl transition-all shadow-lg shadow-red-950/50 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                  disabled={genLoading}
+                  style={{
+                    background:     T.dark,
+                    color:          '#fff',
+                    border:         'none',
+                    borderRadius:   9,
+                    padding:        '13px',
+                    fontSize:       14,
+                    fontWeight:     700,
+                    cursor:         genLoading ? 'not-allowed' : 'pointer',
+                    opacity:        genLoading ? 0.75 : 1,
+                    fontFamily:     'inherit',
+                    display:        'flex',
+                    alignItems:     'center',
+                    justifyContent: 'center',
+                    gap:            8,
+                  }}
                 >
-                  {resetLoading ? (
-                    <span>MEMPROSES RESET...</span>
-                  ) : (
-                    <>
-                      <RotateCcw className="w-3.5 h-3.5" />
-                      <span>YA, RESET DEVICE INI</span>
-                    </>
-                  )}
+                  {genLoading
+                    ? <><Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} /> Memproses...</>
+                    : <><Key size={15} /> Generate Serial Key</>}
+                </button>
+              </form>
+
+              {/* Result */}
+              {genResult && (
+                <div
+                  style={{
+                    marginTop:    22,
+                    background:   T.greenBg,
+                    border:       `1px solid ${T.greenBd}`,
+                    borderRadius: 12,
+                    padding:      '20px',
+                  }}
+                >
+                  <div
+                    style={{
+                      display:      'flex',
+                      alignItems:   'center',
+                      gap:          6,
+                      marginBottom: 16,
+                      color:        '#15803d',
+                      fontWeight:   700,
+                      fontSize:     13,
+                    }}
+                  >
+                    <CheckCircle size={15} /> Serial Key Berhasil Dibuat
+                  </div>
+
+                  {/* Key display */}
+                  <div style={{ marginBottom: 14 }}>
+                    <div style={{ fontSize: 11, color: T.muted, marginBottom: 6, fontWeight: 600 }}>SERIAL KEY:</div>
+                    <div
+                      style={{
+                        display:      'flex',
+                        alignItems:   'center',
+                        justifyContent: 'space-between',
+                        gap:          12,
+                        background:   T.dark,
+                        borderRadius: 9,
+                        padding:      '12px 16px',
+                        fontFamily:   'monospace',
+                        fontSize:     20,
+                        fontWeight:   800,
+                        color:        T.green,
+                        letterSpacing: '0.08em',
+                      }}
+                    >
+                      {genResult.serialKey}
+                      <CopyBtn text={genResult.serialKey} />
+                    </div>
+                  </div>
+
+                  {/* WA Template */}
+                  <div>
+                    <div style={{ fontSize: 11, color: T.muted, marginBottom: 6, fontWeight: 600 }}>TEMPLATE WHATSAPP:</div>
+                    <div
+                      style={{
+                        background:  T.white,
+                        border:      `1px solid ${T.border}`,
+                        borderRadius: 8,
+                        padding:     '12px 14px',
+                        fontSize:    12,
+                        color:       T.body,
+                        lineHeight:  1.7,
+                        whiteSpace:  'pre-wrap',
+                        maxHeight:   160,
+                        overflowY:   'auto',
+                      }}
+                    >
+                      {genResult.waTemplate}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => copyText(genResult!.waTemplate)}
+                      style={{
+                        marginTop:  8,
+                        background: 'rgba(37,211,102,0.08)',
+                        border:     '1px solid rgba(37,211,102,0.25)',
+                        borderRadius: 7,
+                        padding:    '7px 14px',
+                        fontSize:   12,
+                        fontWeight: 600,
+                        color:      '#16a34a',
+                        cursor:     'pointer',
+                        fontFamily: 'inherit',
+                        display:    'flex',
+                        alignItems: 'center',
+                        gap:        6,
+                      }}
+                    >
+                      <Copy size={13} /> Salin Template WhatsApp
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ── Reset Device Modal ───────────────────────────────────────────────── */}
+      {resetOrder && (
+        <div
+          style={{
+            position:       'fixed',
+            inset:          0,
+            background:     'rgba(0,0,0,0.5)',
+            display:        'flex',
+            alignItems:     'center',
+            justifyContent: 'center',
+            zIndex:         100,
+            padding:        16,
+            backdropFilter: 'blur(4px)',
+          }}
+          onClick={() => setResetOrder(null)}
+        >
+          <div
+            style={{
+              background:   T.white,
+              border:       `1px solid ${T.border}`,
+              borderRadius: 16,
+              padding:      '28px 24px',
+              maxWidth:     420,
+              width:        '100%',
+              boxShadow:    '0 16px 48px rgba(0,0,0,0.2)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div
+                  style={{
+                    width: 36, height: 36, borderRadius: 9,
+                    background: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}
+                >
+                  <AlertCircle size={18} style={{ color: T.red }} />
+                </div>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: T.heading }}>Reset Device Lisensi</div>
+                  <div style={{ fontSize: 11, color: T.muted }}>Tindakan tidak bisa dibatalkan</div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setResetOrder(null)}
+                style={{ background: 'none', border: 'none', color: T.muted, cursor: 'pointer', display: 'flex' }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div
+              style={{
+                background:   '#fef9c3',
+                border:       '1px solid #fde68a',
+                borderRadius: 8,
+                padding:      '12px 14px',
+                fontSize:     13,
+                color:        '#854d0e',
+                lineHeight:   1.6,
+                marginBottom: 18,
+              }}
+            >
+              Ini akan menghapus Device ID dan Serial Key dari order{' '}
+              <strong style={{ color: T.heading }}>{resetOrder.customerName}</strong>.
+              Pelanggan bisa klaim ulang Serial Key di HP baru melalui portal mereka.
+            </div>
+
+            <form onSubmit={handleReset} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                <label style={{ fontSize: 12, fontWeight: 600, color: T.body }}>
+                  Konfirmasi Password Admin
+                </label>
+                <input
+                  type="password"
+                  required
+                  placeholder="Masukkan password admin untuk konfirmasi"
+                  value={resetPw}
+                  onChange={(e) => setResetPw(e.target.value)}
+                  style={inputStyle}
+                />
+              </div>
+
+              {resetError && (
+                <div
+                  style={{
+                    background: '#fef2f2', border: '1px solid #fecaca',
+                    borderRadius: 8, padding: '10px 14px', fontSize: 13, color: '#dc2626',
+                  }}
+                >
+                  {resetError}
+                </div>
+              )}
+
+              <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+                <button
+                  type="button"
+                  onClick={() => setResetOrder(null)}
+                  style={{
+                    flex:         1,
+                    background:   T.surface,
+                    border:       `1px solid ${T.border}`,
+                    borderRadius: 8,
+                    padding:      '11px',
+                    fontSize:     13,
+                    fontWeight:   600,
+                    color:        T.body,
+                    cursor:       'pointer',
+                    fontFamily:   'inherit',
+                  }}
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={resetLoading}
+                  style={{
+                    flex:         1,
+                    background:   T.red,
+                    border:       'none',
+                    borderRadius: 8,
+                    padding:      '11px',
+                    fontSize:     13,
+                    fontWeight:   700,
+                    color:        '#fff',
+                    cursor:       resetLoading ? 'not-allowed' : 'pointer',
+                    opacity:      resetLoading ? 0.75 : 1,
+                    fontFamily:   'inherit',
+                    display:      'flex',
+                    alignItems:   'center',
+                    justifyContent: 'center',
+                    gap:          6,
+                  }}
+                >
+                  {resetLoading
+                    ? <><Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> Mereset...</>
+                    : <><RotateCcw size={14} /> Ya, Reset Device</>}
                 </button>
               </div>
             </form>

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getOrderById, attachLicenseToOrder } from '@/lib/db';
-import { generateSerialKey } from '@/lib/license';
+import { generateSerialKey, normalizeDeviceId, isValidDeviceIdFormat } from '@/lib/license';
 
 export async function POST(request: Request) {
   try {
@@ -13,13 +13,14 @@ export async function POST(request: Request) {
       );
     }
 
-    const cleanDeviceId = deviceId.trim().toUpperCase().replace(/[^A-Z0-9-]/g, '');
-    if (cleanDeviceId.replace(/-/g, '').length < 8) {
+    const cleanDeviceId = normalizeDeviceId(deviceId);
+    if (!isValidDeviceIdFormat(cleanDeviceId)) {
       return NextResponse.json(
-        { error: 'Format Device ID tidak valid. Periksa kembali Device ID di layar aplikasi POS OFFLINE Anda.' },
+        { error: 'Format Device ID tidak valid. Periksa kembali Device ID di layar aplikasi POS OFFLINE Anda (Contoh: POS-8F92-4B21-7A09).' },
         { status: 400 }
       );
     }
+
 
     const order = await getOrderById(orderId);
     if (!order) {

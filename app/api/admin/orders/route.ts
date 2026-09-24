@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getAllOrders, updateOrderPayment } from '@/lib/db';
+import { getAllOrders, updateOrderPaymentStatus } from '@/lib/db';
 import { extractAuthHeader } from '@/lib/auth';
 
 export async function GET(request: Request) {
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Parameter tidak lengkap.' }, { status: 400 });
     }
 
-    await updateOrderPayment(orderId, status);
+    await updateOrderPaymentStatus(orderId, status);
     return NextResponse.json({ success: true, message: `Status pesanan berhasil diubah menjadi ${status}` });
   } catch (err: any) {
     return NextResponse.json({ error: err?.message || 'Gagal memperbarui status.' }, { status: 500 });

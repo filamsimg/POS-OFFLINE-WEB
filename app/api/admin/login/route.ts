@@ -21,15 +21,24 @@ export async function POST(request: Request) {
     }
 
     const token = createAdminToken(username.trim());
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       token,
       user: { username: username.trim() },
     });
-  } catch (err: any) {
-    return NextResponse.json(
-      { error: err?.message || 'Gagal memproses autentikasi.' },
-      { status: 500 }
-    );
+
+    // Set cookie for browser session support
+    response.cookies.set('pos_admin_token', token, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+    });
+
+    return response;
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Gagal memproses autentikasi.';
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

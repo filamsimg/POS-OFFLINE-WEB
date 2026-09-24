@@ -40,6 +40,15 @@ export function verifyAdminToken(token?: string | null): boolean {
 
 export function extractAuthHeader(request: Request): boolean {
   const authHeader = request.headers.get('authorization') || '';
-  const token = authHeader.replace(/^Bearer\s+/i, '') || request.headers.get('x-admin-token');
+  let token = authHeader.replace(/^Bearer\s+/i, '').trim() || request.headers.get('x-admin-token') || '';
+
+  if (!token) {
+    const cookieHeader = request.headers.get('cookie') || '';
+    const match = cookieHeader.match(/pos_admin_token=([^;]+)/);
+    if (match) {
+      token = decodeURIComponent(match[1]);
+    }
+  }
+
   return verifyAdminToken(token);
 }

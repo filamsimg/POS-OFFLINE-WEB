@@ -41,7 +41,9 @@ export async function sendPurchaseConfirmationEmail(
 ): Promise<{ success: boolean; error?: string }> {
   const { to, customerName, storeName, orderId, amount, adminWaNumber } = params;
 
-  const siteUrl    = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://posoffline.id';
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://posoffline.id');
   const portalUrl  = `${siteUrl}/order/${orderId}`;
   const apkUrl     = `${siteUrl}/api/download/apk?orderId=${orderId}`;
 

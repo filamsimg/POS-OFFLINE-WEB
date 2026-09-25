@@ -218,8 +218,8 @@ export function HeroSection() {
                 <Image
                   src="/hero-mockup.jpg"
                   alt="Aplikasi Kasir POS OFFLINE di smartphone Android dengan printer thermal Bluetooth"
-                  width={700}
-                  height={480}
+                  width={1376}
+                  height={768}
                   priority
                   style={{
                     width: '100%',

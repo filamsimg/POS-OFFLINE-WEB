@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getOrderById } from '@/lib/db';
 import { syncOrderPaymentStatus } from '@/lib/order-sync';
 import { getApkBinaryStream } from '@/lib/apk-download';
+import { verifyAdminToken } from '@/lib/auth';
 
 export const runtime = 'nodejs';
 
@@ -22,10 +23,8 @@ export async function GET(req: NextRequest) {
     const orderId = searchParams.get('orderId')?.trim();
     const adminToken = searchParams.get('token')?.trim();
 
-    const isAuthorizedAdmin =
-      adminToken &&
-      process.env.LICENSE_SALT &&
-      adminToken === process.env.LICENSE_SALT;
+    // Only allow direct admin bypass if a cryptographically signed admin token is provided
+    const isAuthorizedAdmin = Boolean(adminToken && verifyAdminToken(adminToken));
 
     if (!isAuthorizedAdmin) {
       if (!orderId) {

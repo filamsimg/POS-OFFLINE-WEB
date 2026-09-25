@@ -281,7 +281,7 @@ function InfoRow({
 
 export default function AdminPage() {
   // Auth state
-  const [username, setUsername]         = useState('admin');
+  const [username, setUsername]         = useState('');
   const [password, setPassword]         = useState('');
   const [showPw, setShowPw]             = useState(false);
   const [authToken, setAuthToken]       = useState<string | null>(null);
@@ -683,6 +683,7 @@ export default function AdminPage() {
                 <input
                   type="text"
                   required
+                  autoComplete="off"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   style={{
@@ -691,7 +692,7 @@ export default function AdminPage() {
                     fontSize: 14,
                     borderColor: '#cbd5e1',
                   }}
-                  placeholder="admin"
+                  placeholder="Masukkan username admin"
                 />
               </div>
 
@@ -703,6 +704,7 @@ export default function AdminPage() {
                   <input
                     type={showPw ? 'text' : 'password'}
                     required
+                    autoComplete="new-password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     style={{

@@ -55,8 +55,8 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
             setDeviceId(data.order.deviceId ?? '');
           }
         }
-      } catch (e) {
-        console.error('[OrderPage] fetch error:', e);
+      } catch {
+        // Handled gracefully by UI (loading false, null order fallback screen)
       } finally {
         setLoading(false);
       }

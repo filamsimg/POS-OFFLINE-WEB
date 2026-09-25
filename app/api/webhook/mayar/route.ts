@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
     (payload?.id as string);
 
   if (!mayarPaymentId) {
-    console.error('[Webhook/Mayar] Could not extract payment ID from payload:', payload);
+    console.error('[Webhook/Mayar] Missing or invalid payment ID in webhook payload');
     return NextResponse.json({ error: 'Missing payment ID.' }, { status: 400 });
   }
 
@@ -100,7 +100,7 @@ export async function POST(req: NextRequest) {
 
     if (emailResult.success) {
       await markEmailSent(order.id);
-      console.log(`[Webhook/Mayar] Email sent to ${order.customerEmail} for order ${order.id}`);
+      console.info(`[Webhook/Mayar] Confirmation email sent for order ${order.id}`);
     } else {
       console.error(`[Webhook/Mayar] Email failed for order ${order.id}:`, emailResult.error);
     }

@@ -54,12 +54,7 @@ export async function POST(req: NextRequest) {
 
     // ── Honeypot Anti-Spam Check ─────────────────────────────────────────────
     if (companyWebsite && String(companyWebsite).trim().length > 0) {
-      console.warn('[Checkout] Bot spam detected via honeypot:', {
-        ip: clientIp,
-        name: customerName,
-        email: customerEmail,
-        honeypot: companyWebsite,
-      });
+      console.warn(`[Checkout] Bot spam blocked via honeypot from IP: ${clientIp}`);
       // Quietly reject bot request without hitting Mayar API or creating DB order
       return NextResponse.json(
         { error: 'Permintaan tidak dapat diproses. Silakan refresh halaman.' },

@@ -84,8 +84,9 @@ export async function createMayarPayment(
   const json = await res.json();
 
   if (!res.ok || json.statusCode !== 200) {
-    console.error('[Mayar] createPayment error:', json);
-    throw new Error(json?.messages ?? json?.message ?? 'Gagal membuat payment link Mayar.id.');
+    const errMsg = json?.messages ?? json?.message ?? res.statusText ?? 'Gagal membuat payment link Mayar.id.';
+    console.error('[Mayar] createPayment error:', errMsg);
+    throw new Error(errMsg);
   }
 
   return {

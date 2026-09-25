@@ -440,10 +440,15 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
               <strong>Butuh bantuan pembayaran?</strong> Hubungi admin kami:
               <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
                 {ADMIN_CONTACTS.map((admin) => {
+                  const isTech = admin.id === 'filamsi';
                   const waText = encodeURIComponent(
-                    `Halo ${admin.name}, saya butuh bantuan pembayaran.\n` +
-                    `No. Pesanan: #${orderId.slice(0, 8).toUpperCase()}\n` +
-                    `Nama: ${order?.customerName ?? '-'}`
+                    isTech
+                      ? `Halo Mas Filamsi, saya butuh bantuan teknis terkait aktivasi perangkat pesanan POS OFFLINE.\n` +
+                        `No. Pesanan: #${orderId.slice(0, 8).toUpperCase()}\n` +
+                        `Nama: ${order?.customerName ?? '-'}`
+                      : `Halo Mas Ariyo, saya butuh bantuan konfirmasi pembayaran pesanan POS OFFLINE.\n` +
+                        `No. Pesanan: #${orderId.slice(0, 8).toUpperCase()}\n` +
+                        `Nama: ${order?.customerName ?? '-'}`
                   );
                   return (
                     <a

@@ -28,12 +28,13 @@ export function CheckoutForm() {
   const pkg     = PACKAGES['software_only'];
 
   const [form, setForm] = useState({
-    customerName:  '',
-    customerPhone: '',
-    customerEmail: '',
-    storeName:     '',
-    businessType:  BUSINESS_TYPES[0],
-    notes:         '',
+    customerName:   '',
+    customerPhone:  '',
+    customerEmail:  '',
+    storeName:      '',
+    businessType:   BUSINESS_TYPES[0],
+    notes:          '',
+    companyWebsite: '',
   });
 
   const [loading, setLoading]   = useState(false);
@@ -201,6 +202,31 @@ export function CheckoutForm() {
           >
             <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--clr-cream)', marginBottom: 2 }}>
               Data Pemilik & Toko
+            </div>
+
+            {/* Honeypot field for bot spam prevention (invisible to humans, skipped by screen readers) */}
+            <div
+              style={{
+                position: 'absolute',
+                left: '-9999px',
+                top: '-9999px',
+                opacity: 0,
+                width: 0,
+                height: 0,
+                pointerEvents: 'none',
+              }}
+              aria-hidden="true"
+            >
+              <label htmlFor="companyWebsite">Website Perusahaan (jangan diisi)</label>
+              <input
+                id="companyWebsite"
+                type="text"
+                name="companyWebsite"
+                tabIndex={-1}
+                autoComplete="off"
+                value={form.companyWebsite}
+                onChange={set('companyWebsite')}
+              />
             </div>
 
             {/* Name */}

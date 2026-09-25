@@ -52,12 +52,12 @@ export function FaqSection() {
           <p style={{ fontSize: 15, color: '#6b7280', lineHeight: 1.7 }}>
             Masih ada pertanyaan lain?{' '}
             <a
-              href={`https://wa.me/${process.env.NEXT_PUBLIC_WA_NUMBER ?? '6285853685622'}`}
+              href={`https://wa.me/201515409378?text=${encodeURIComponent('Halo Mas Ariyo, saya membaca FAQ di website POS OFFLINE dan ingin konsultasi mengenai fitur aplikasi.')}`}
               target="_blank"
               rel="noopener noreferrer"
               style={{ color: '#16a34a', fontWeight: 600, textDecoration: 'none' }}
             >
-              Hubungi admin kami via WhatsApp
+              Konsultasi langsung via WhatsApp (Mas Ariyo)
             </a>
             .
           </p>

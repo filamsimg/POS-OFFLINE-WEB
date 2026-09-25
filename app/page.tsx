@@ -102,20 +102,30 @@ export default function Home() {
 
             <div>
               <div style={{ fontWeight: 700, color: 'var(--clr-sand)', marginBottom: 12, fontSize: 12, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-                Kontak
+                Kontak & Support
+              </div>
+              <div style={{ marginBottom: 6 }}>
+                <a
+                  href={`https://wa.me/201515409378?text=${encodeURIComponent('Halo Mas Ariyo, saya mau konsultasi mengenai pembelian aplikasi POS OFFLINE.')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: '#25d366', textDecoration: 'none', fontSize: 13, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                >
+                  WA: Ariyo (Pembelian)
+                </a>
               </div>
               <div style={{ marginBottom: 8 }}>
                 <a
-                  href={`https://wa.me/${waNumber}`}
+                  href={`https://wa.me/6285853685622?text=${encodeURIComponent('Halo Mas Filamsi, saya butuh bantuan teknis terkait aplikasi POS OFFLINE.')}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ color: '#25d366', textDecoration: 'none', fontSize: 13, fontWeight: 600 }}
+                  style={{ color: '#25d366', textDecoration: 'none', fontSize: 13, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 6 }}
                 >
-                  WhatsApp Admin
+                  WA: Filamsi (Teknis & Setup)
                 </a>
               </div>
-              <div style={{ fontSize: 13, color: 'var(--clr-fog)' }}>
-                Jam: 09.00 – 21.00 WIB
+              <div style={{ fontSize: 12, color: 'var(--clr-fog)' }}>
+                Setiap Hari: 08.00 – 22.00 WIB
               </div>
             </div>
           </div>

@@ -6,8 +6,41 @@ import { PACKAGES, Order } from '@/lib/types';
 
 export const runtime = 'nodejs';
 
+// ── In-Memory IP Rate Limiter (Max 6 requests per 5 minutes per IP) ───────────
+const ipRateMap = new Map<string, { count: number; resetAt: number }>();
+
 export async function POST(req: NextRequest) {
   try {
+    // ── Client IP & Rate Limiting ───────────────────────────────────────────
+    const clientIp =
+      req.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
+      req.headers.get('x-real-ip') ||
+      'anonymous';
+
+    const now = Date.now();
+    const windowMs = 5 * 60 * 1000; // 5 minutes
+    const maxRequests = 6; // max 6 submissions per 5 minutes
+
+    // Prune stale cache entries
+    if (ipRateMap.size > 200) {
+      for (const [ip, entry] of ipRateMap.entries()) {
+        if (now > entry.resetAt) ipRateMap.delete(ip);
+      }
+    }
+
+    const currentRate = ipRateMap.get(clientIp);
+    if (currentRate && now < currentRate.resetAt) {
+      if (currentRate.count >= maxRequests) {
+        return NextResponse.json(
+          { error: 'Terlalu banyak permintaan checkout. Silakan tunggu beberapa menit.' },
+          { status: 429 }
+        );
+      }
+      currentRate.count++;
+    } else {
+      ipRateMap.set(clientIp, { count: 1, resetAt: now + windowMs });
+    }
+
     const body = await req.json();
     const {
       customerName,
@@ -16,7 +49,23 @@ export async function POST(req: NextRequest) {
       storeName,
       businessType,
       notes,
+      companyWebsite,
     } = body;
+
+    // ── Honeypot Anti-Spam Check ─────────────────────────────────────────────
+    if (companyWebsite && String(companyWebsite).trim().length > 0) {
+      console.warn('[Checkout] Bot spam detected via honeypot:', {
+        ip: clientIp,
+        name: customerName,
+        email: customerEmail,
+        honeypot: companyWebsite,
+      });
+      // Quietly reject bot request without hitting Mayar API or creating DB order
+      return NextResponse.json(
+        { error: 'Permintaan tidak dapat diproses. Silakan refresh halaman.' },
+        { status: 400 }
+      );
+    }
 
     // ── Validation ──────────────────────────────────────────────────────────
     if (!customerName?.trim()) {

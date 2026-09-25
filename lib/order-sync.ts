@@ -61,7 +61,7 @@ export async function syncOrderPaymentStatus(
       // 2. Trigger customer confirmation email if not sent yet
       if (order.customerEmail && !order.emailSentAt) {
         try {
-          const adminContact = ADMIN_CONTACTS[0];
+          const adminContact = ADMIN_CONTACTS.find((c) => c.id === 'filamsi') ?? ADMIN_CONTACTS[0];
           const emailRes = await sendPurchaseConfirmationEmail({
             to:            order.customerEmail,
             customerName:  order.customerName,

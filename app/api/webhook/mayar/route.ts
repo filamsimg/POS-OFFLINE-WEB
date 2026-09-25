@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
 
   // ── Send confirmation email ─────────────────────────────────────────────────
   if (order.customerEmail) {
-    const adminContact = ADMIN_CONTACTS[0]; // Primary admin
+    const adminContact = ADMIN_CONTACTS.find((c) => c.id === 'filamsi') ?? ADMIN_CONTACTS[0]; // Technical admin for activation
     const emailResult  = await sendPurchaseConfirmationEmail({
       to:            order.customerEmail,
       customerName:  order.customerName,

@@ -19,24 +19,27 @@ export interface AdminContact {
   id:       'filamsi' | 'ariyo';
   name:     string;
   role:     string;
+  desc:     string;
   phone:    string;
   waNumber: string;
 }
 
 export const ADMIN_CONTACTS: AdminContact[] = [
   {
-    id:       'filamsi',
-    name:     'Filamsi',
-    role:     'Admin 1',
-    phone:    '085853685622',
-    waNumber: '6285853685622',
-  },
-  {
     id:       'ariyo',
     name:     'Ariyo',
-    role:     'Admin 2',
+    role:     'Konsultasi & Pembelian',
+    desc:     'Tanya fitur aplikasi, kecocokan toko, & cara order',
     phone:    '+201515409378',
     waNumber: '201515409378',
+  },
+  {
+    id:       'filamsi',
+    name:     'Filamsi',
+    role:     'Bantuan Teknis & Aktivasi',
+    desc:     'Setup printer thermal, kendala HP, & serial key',
+    phone:    '085853685622',
+    waNumber: '6285853685622',
   },
 ];
 

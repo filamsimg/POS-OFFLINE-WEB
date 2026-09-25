@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
+import { ADMIN_CONTACTS } from '@/lib/types';
 
 const FAQS = [
   {
@@ -37,6 +38,10 @@ const FAQS = [
 export function FaqSection() {
   const [open, setOpen] = useState<number | null>(0);
 
+  const ariyo = ADMIN_CONTACTS.find((c) => c.id === 'ariyo');
+  const ariyoWa = ariyo?.waNumber || process.env.NEXT_PUBLIC_ADMIN_ARIYO_WA || '';
+  const ariyoName = ariyo?.name || 'Mas Ariyo';
+
   return (
     <section
       id="faq"
@@ -51,14 +56,20 @@ export function FaqSection() {
           </h2>
           <p style={{ fontSize: 15, color: '#6b7280', lineHeight: 1.7 }}>
             Masih ada pertanyaan lain?{' '}
-            <a
-              href={`https://wa.me/201515409378?text=${encodeURIComponent('Halo Mas Ariyo, saya membaca FAQ di website POS OFFLINE dan ingin konsultasi mengenai fitur aplikasi.')}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: '#16a34a', fontWeight: 600, textDecoration: 'none' }}
-            >
-              Konsultasi langsung via WhatsApp (Mas Ariyo)
-            </a>
+            {ariyoWa ? (
+              <a
+                href={`https://wa.me/${ariyoWa}?text=${encodeURIComponent(`Halo ${ariyoName}, saya membaca FAQ di website POS OFFLINE dan ingin konsultasi mengenai fitur aplikasi.`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: '#16a34a', fontWeight: 600, textDecoration: 'none' }}
+              >
+                Konsultasi langsung via WhatsApp ({ariyoName})
+              </a>
+            ) : (
+              <span style={{ color: '#16a34a', fontWeight: 600 }}>
+                Konsultasi langsung via WhatsApp
+              </span>
+            )}
             .
           </p>
         </div>

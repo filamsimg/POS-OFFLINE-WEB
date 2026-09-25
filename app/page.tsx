@@ -10,12 +10,16 @@ import { CheckoutForm }        from '@/components/CheckoutForm';
 import { FaqSection }          from '@/components/FaqSection';
 import { StickyMobileCta }     from '@/components/StickyMobileCta';
 import { FloatingWhatsApp }    from '@/components/FloatingWhatsApp';
+import { ADMIN_CONTACTS }       from '@/lib/types';
 import Image                   from 'next/image';
 
 export default function Home() {
+  const ariyoContact   = ADMIN_CONTACTS.find((c) => c.id === 'ariyo');
+  const filamsiContact = ADMIN_CONTACTS.find((c) => c.id === 'filamsi');
+
   const siteUrl = (
     process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://posoffline.id')
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '')
   ).replace(/\/+$/, '');
 
   return (
@@ -112,26 +116,30 @@ export default function Home() {
               <div style={{ fontWeight: 700, color: 'var(--clr-sand)', marginBottom: 12, fontSize: 12, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
                 Kontak & Support
               </div>
-              <div style={{ marginBottom: 6 }}>
-                <a
-                  href={`https://wa.me/201515409378?text=${encodeURIComponent('Halo Mas Ariyo, saya mau konsultasi mengenai pembelian aplikasi POS OFFLINE.')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ color: '#25d366', textDecoration: 'none', fontSize: 13, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 6 }}
-                >
-                  WA: Ariyo (Pembelian)
-                </a>
-              </div>
-              <div style={{ marginBottom: 8 }}>
-                <a
-                  href={`https://wa.me/6285853685622?text=${encodeURIComponent('Halo Mas Filamsi, saya butuh bantuan teknis terkait aplikasi POS OFFLINE.')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ color: '#25d366', textDecoration: 'none', fontSize: 13, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 6 }}
-                >
-                  WA: Filamsi (Teknis & Setup)
-                </a>
-              </div>
+              {ariyoContact?.waNumber && (
+                <div style={{ marginBottom: 6 }}>
+                  <a
+                    href={`https://wa.me/${ariyoContact.waNumber}?text=${encodeURIComponent(`Halo Mas ${ariyoContact.name}, saya mau konsultasi mengenai pembelian aplikasi POS OFFLINE.`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: '#25d366', textDecoration: 'none', fontSize: 13, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                  >
+                    WA: {ariyoContact.name} (Pembelian)
+                  </a>
+                </div>
+              )}
+              {filamsiContact?.waNumber && (
+                <div style={{ marginBottom: 8 }}>
+                  <a
+                    href={`https://wa.me/${filamsiContact.waNumber}?text=${encodeURIComponent(`Halo Mas ${filamsiContact.name}, saya butuh bantuan teknis terkait aplikasi POS OFFLINE.`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: '#25d366', textDecoration: 'none', fontSize: 13, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                  >
+                    WA: {filamsiContact.name} (Teknis & Setup)
+                  </a>
+                </div>
+              )}
               <div style={{ fontSize: 12, color: 'var(--clr-fog)' }}>
                 Setiap Hari: 08.00 – 22.00 WIB
               </div>
@@ -155,8 +163,8 @@ export default function Home() {
         >
           <span>© {new Date().getFullYear()} POS OFFLINE. Hak Cipta Dilindungi.</span>
           <span>
-            <a href={`${siteUrl}/privacy`} style={{ color: 'var(--clr-fog)', marginRight: 16, textDecoration: 'none' }}>Kebijakan Privasi</a>
-            <a href={`${siteUrl}/terms`}   style={{ color: 'var(--clr-fog)', textDecoration: 'none' }}>Syarat & Ketentuan</a>
+            <a href={siteUrl ? `${siteUrl}/privacy` : '/privacy'} style={{ color: 'var(--clr-fog)', marginRight: 16, textDecoration: 'none' }}>Kebijakan Privasi</a>
+            <a href={siteUrl ? `${siteUrl}/terms` : '/terms'}   style={{ color: 'var(--clr-fog)', textDecoration: 'none' }}>Syarat & Ketentuan</a>
           </span>
         </div>
       </footer>

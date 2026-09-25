@@ -16,7 +16,11 @@ function getResendClient(): Resend {
 }
 
 function getFromEmail(): string {
-  return process.env.RESEND_FROM_EMAIL ?? 'noreply@posoffline.id';
+  const from = process.env.RESEND_FROM_EMAIL?.trim();
+  if (!from) {
+    throw new Error('[Email] Variabel lingkungan RESEND_FROM_EMAIL belum disetel di file .env.');
+  }
+  return from;
 }
 
 export interface SendPurchaseEmailParams {
@@ -41,9 +45,10 @@ export async function sendPurchaseConfirmationEmail(
 ): Promise<{ success: boolean; error?: string }> {
   const { to, customerName, storeName, orderId, amount, adminWaNumber } = params;
 
-  const siteUrl =
+  const siteUrl = (
     process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://posoffline.id');
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://posoffline.id')
+  ).replace(/\/+$/, '');
   const portalUrl  = `${siteUrl}/order/${orderId}`;
   const apkUrl     = `${siteUrl}/api/download/apk?orderId=${orderId}`;
 

@@ -14,9 +14,14 @@ function getMayarBaseUrl(): string {
   if (process.env.MAYAR_ENV === 'sandbox') {
     return 'https://api.mayar.io/hl/v1';
   }
-  // In development, default to sandbox unless explicitly configured
+  // In development or if key is sandbox, route to sandbox API
   const key = process.env.MAYAR_API_KEY ?? '';
-  if (key.includes('sandbox') || process.env.NODE_ENV !== 'production') {
+  if (
+    key.includes('sandbox') ||
+    key.includes('sand_') ||
+    process.env.MAYAR_ENV === 'sandbox' ||
+    process.env.NODE_ENV !== 'production'
+  ) {
     return 'https://api.mayar.io/hl/v1';
   }
   return 'https://api.mayar.id/hl/v1';

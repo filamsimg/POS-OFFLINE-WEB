@@ -163,8 +163,9 @@ export default function Home() {
         >
           <span>© {new Date().getFullYear()} POS OFFLINE. Hak Cipta Dilindungi.</span>
           <span>
-            <a href={siteUrl ? `${siteUrl}/privacy` : '/privacy'} style={{ color: 'var(--clr-fog)', marginRight: 16, textDecoration: 'none' }}>Kebijakan Privasi</a>
-            <a href={siteUrl ? `${siteUrl}/terms` : '/terms'}   style={{ color: 'var(--clr-fog)', textDecoration: 'none' }}>Syarat & Ketentuan</a>
+            <a href="/privacy" style={{ color: 'var(--clr-sand)', marginRight: 16, textDecoration: 'none' }}>Kebijakan Privasi</a>
+            <a href="/terms"   style={{ color: 'var(--clr-sand)', marginRight: 16, textDecoration: 'none' }}>Syarat & Ketentuan</a>
+            <a href="/terms"   style={{ color: 'var(--clr-sand)', textDecoration: 'none' }}>Pengembalian Dana & Garansi</a>
           </span>
         </div>
       </footer>

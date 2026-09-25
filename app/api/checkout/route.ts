@@ -124,10 +124,10 @@ export async function POST(req: NextRequest) {
 
     // Fallback when Mayar not configured: redirect to order status page
     return NextResponse.json({ redirectUrl: successUrl });
-  } catch (err) {
+  } catch (err: any) {
     console.error('[Checkout] Unexpected error:', err);
     return NextResponse.json(
-      { error: 'Terjadi kesalahan pada server. Silakan coba lagi.' },
+      { error: err?.message || 'Terjadi kesalahan pada server. Silakan coba lagi.' },
       { status: 500 }
     );
   }

@@ -27,19 +27,19 @@ export interface AdminContact {
 export const ADMIN_CONTACTS: AdminContact[] = [
   {
     id:       'ariyo',
-    name:     'Ariyo',
+    name:     process.env.NEXT_PUBLIC_ADMIN_ARIYO_NAME || 'Ariyo',
     role:     'Konsultasi & Pembelian',
     desc:     'Tanya fitur aplikasi, kecocokan toko, & cara order',
-    phone:    '+201515409378',
-    waNumber: '201515409378',
+    phone:    process.env.NEXT_PUBLIC_ADMIN_ARIYO_PHONE ?? '',
+    waNumber: process.env.NEXT_PUBLIC_ADMIN_ARIYO_WA ?? '',
   },
   {
     id:       'filamsi',
-    name:     'Filamsi',
+    name:     process.env.NEXT_PUBLIC_ADMIN_FILAMSI_NAME || 'Filamsi',
     role:     'Bantuan Teknis & Aktivasi',
     desc:     'Setup printer thermal, kendala HP, & serial key',
-    phone:    '085853685622',
-    waNumber: '6285853685622',
+    phone:    process.env.NEXT_PUBLIC_ADMIN_FILAMSI_PHONE ?? '',
+    waNumber: process.env.NEXT_PUBLIC_ADMIN_FILAMSI_WA || process.env.NEXT_PUBLIC_WA_NUMBER || '',
   },
 ];
 

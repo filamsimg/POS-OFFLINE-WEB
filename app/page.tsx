@@ -11,10 +11,10 @@ import { FloatingWhatsApp} from '@/components/FloatingWhatsApp';
 import Image               from 'next/image';
 
 export default function Home() {
-  const waNumber = process.env.NEXT_PUBLIC_WA_NUMBER ?? '6285853685622';
-  const siteUrl =
+  const siteUrl = (
     process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://posoffline.id');
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://posoffline.id')
+  ).replace(/\/+$/, '');
 
   return (
     <main>

@@ -47,7 +47,7 @@ export async function sendPurchaseConfirmationEmail(
 
   const siteUrl = (
     process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://posoffline.id')
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '')
   ).replace(/\/+$/, '');
   const portalUrl  = `${siteUrl}/order/${orderId}`;
   const apkUrl     = `${siteUrl}/api/download/apk?orderId=${orderId}`;
@@ -209,7 +209,7 @@ export async function sendPurchaseConfirmationEmail(
         <p>
           Email ini dikirim otomatis oleh sistem POS OFFLINE.<br/>
           Jika Anda tidak merasa melakukan pembelian ini, segera hubungi kami.<br/>
-          <a href="${siteUrl}">posoffline.id</a> &nbsp;|&nbsp; <a href="https://wa.me/${adminWaNumber}">WhatsApp Support</a>
+          <a href="${siteUrl}">${siteUrl.replace(/^https?:\/\//, '') || 'POS OFFLINE'}</a> &nbsp;|&nbsp; <a href="https://wa.me/${adminWaNumber}">WhatsApp Support</a>
         </p>
       </div>
     </div>

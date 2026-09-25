@@ -6,11 +6,11 @@ import './globals.css';
 
 const siteUrl = (
   process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
-  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://posoffline.id')
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '')
 ).replace(/\/+$/, '');
 
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+  metadataBase: siteUrl ? new URL(siteUrl) : undefined,
   title: 'POS OFFLINE – Kasir Android Lisensi Permanen, Sekali Bayar Seumur Hidup',
   description:
     'Aplikasi kasir Android 100% offline tanpa biaya bulanan. Cetak struk Bluetooth thermal, scan barcode, laporan laba otomatis. Beli sekali, aktif seumur hidup.',
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   openGraph: {
     title:       'POS OFFLINE – Kasir Android Sekali Bayar, Aktif Seumur Hidup',
     description: '100% Offline. Tanpa Biaya Bulanan. Cetak struk Bluetooth, scan barcode, laporan laba otomatis. Lisensi permanen Rp 149.000.',
-    url:         siteUrl,
+    url:         siteUrl || '/',
     siteName:    'POS OFFLINE',
     images: [{ url: '/hero-mockup.jpg', width: 1280, height: 720, alt: 'Aplikasi Kasir POS OFFLINE di Android' }],
     locale:      'id_ID',

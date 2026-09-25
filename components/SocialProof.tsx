@@ -1,44 +1,40 @@
-// Social proof testimonials: realistic, specific, not generic
+// Social proof testimonials: concise, natural, and realistic
 const TESTIMONIALS = [
   {
-    name:        'Ibu Sari Rahayu',
-    store:       'Toko Sembako Berkah',
-    city:        'Bekasi, Jawa Barat',
-    initials:    'SR',
-    color:       '#16a34a',
-    stars:       5,
-    text:        'Saya pakai aplikasi ini sudah 8 bulan. Yang paling saya suka itu laporan laba hariannya, langsung keliatan untung berapa. Dulu harus hitung manual pakai kalkulator, sekarang tinggal buka dashboard. Dan harganya sekali bayar, tidak ada potongan bulanan seperti aplikasi kasir lain yang saya coba sebelumnya.',
-    highlight:   'Laporan laba harian langsung keliatan, tidak perlu hitung manual lagi.',
+    name:     'Ibu Sari',
+    store:    'Toko Sembako Berkah',
+    city:     'Bekasi',
+    initials: 'SB',
+    color:    '#16a34a',
+    stars:    5,
+    text:     'Aplikasinya simpel dan enteng di HP. Yang paling ngebantu laporan laba hariannya, tiap tutup toko ga perlu hitung manual lagi.',
   },
   {
-    name:        'Pak Dimas Kurniawan',
-    store:       'Warung Makan Soto Bu Minem',
-    city:        'Surabaya, Jawa Timur',
-    initials:    'DK',
-    color:       '#0284c7',
-    stars:       5,
-    text:        'Warung makan saya ramai saat jam makan siang. Dulu kasir saya sering salah hitung kembalian kalau ramai. Sekarang pakai POS OFFLINE, tinggal scan menu, printer langsung cetak struk sehingga kasir jadi lebih fokus dan tidak ada salah hitung lagi. Pelanggan juga lebih percaya karena ada stuknya.',
-    highlight:   'Tidak ada salah hitung kembalian lagi. Kasir lebih tenang saat ramai.',
+    name:     'Pak Dimas',
+    store:    'Warung Soto Bu Minem',
+    city:     'Surabaya',
+    initials: 'DK',
+    color:    '#0284c7',
+    stars:    5,
+    text:     'Konek printer Bluetooth langsung lancar. Pas warung lagi rame, kasir jadi cepet dan ga pernah salah kembalian lagi.',
   },
   {
-    name:        'Kak Rina Wulandari',
-    store:       'Toko Fashion & Butik Rina',
-    city:        'Bandung, Jawa Barat',
-    initials:    'RW',
-    color:       '#7c3aed',
-    stars:       5,
-    text:        'Saya sempat ragu karena harganya murah, takutnya aplikasi abal-abal. Tapi setelah coba install dan pakai, fiturnya lengkap banget. Bisa scan barcode baju, ada fitur diskon, bisa cetak struk. Tim adminnya juga fast respon di WhatsApp waktu saya ada pertanyaan setup. Ternyata beneran worth it.',
-    highlight:   'Sempat ragu karena harga murah, ternyata fiturnya lengkap banget.',
+    name:     'Rina Wulandari',
+    store:    'Butik Rina',
+    city:     'Bandung',
+    initials: 'RW',
+    color:    '#7c3aed',
+    stars:    5,
+    text:     'Awalnya ragu karena harganya murah, ternyata fiturnya komplit. Scan barcode lancar dan mantap ga ada biaya bulanan.',
   },
   {
-    name:        'Mas Andri Santoso',
-    store:       'Minimarket Santoso',
-    city:        'Malang, Jawa Timur',
-    initials:    'AS',
-    color:       '#ea580c',
-    stars:       5,
-    text:        'Minimarket saya punya 300+ item produk. Import massal dari Excel sangat membantu, kalau input satu-satu bisa makan waktu seharian. Fitur stok otomatis berkurang setiap ada transaksi juga sangat membantu buat kontrol barang. Sudah pakai lebih dari 1 tahun dan tidak pernah ada masalah.',
-    highlight:   'Import 300+ produk dari Excel, stok otomatis terkontrol.',
+    name:     'Mas Andri',
+    store:    'Toko Kelontong Santoso',
+    city:     'Malang',
+    initials: 'AS',
+    color:    '#ea580c',
+    stars:    5,
+    text:     'Sangat terbantu ada import barang dari Excel. Stok otomatis kepotong pas ada penjualan, ga ribet kontrol barang.',
   },
 ];
 
@@ -64,7 +60,7 @@ export function SocialProof() {
         <div style={{ textAlign: 'center', marginBottom: 'clamp(40px, 6vw, 60px)' }}>
           <div className="section-label" style={{ justifyContent: 'center' }}>Testimoni Pengguna</div>
           <h2 className="heading-lg" style={{ color: '#111827', marginBottom: 12 }}>
-            Dipakai Ribuan Pemilik Toko di Seluruh Indonesia
+            Apa Kata Pemilik Usaha yang Menggunakan POS Offline
           </h2>
           <p style={{ fontSize: 15, color: '#6b7280', maxWidth: '50ch', margin: '0 auto', lineHeight: 1.7 }}>
             Bukan janji di iklan, ini cerita nyata dari sesama pemilik toko.
@@ -125,22 +121,6 @@ export function SocialProof() {
                 &ldquo;{t.text}&rdquo;
               </blockquote>
 
-              {/* Highlight pill */}
-              <div
-                style={{
-                  background: '#f0fdf4',
-                  border: '1px solid #bbf7d0',
-                  borderRadius: 8,
-                  padding: '8px 12px',
-                  fontSize: 12,
-                  color: '#15803d',
-                  fontWeight: 600,
-                  lineHeight: 1.5,
-                }}
-              >
-                💡 {t.highlight}
-              </div>
-
               {/* Author */}
               <div
                 style={{
@@ -177,41 +157,6 @@ export function SocialProof() {
           ))}
         </div>
 
-        {/* Social proof footer stat */}
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            justifyContent: 'center',
-            gap: 'clamp(24px, 6vw, 64px)',
-            marginTop: 'clamp(40px, 6vw, 64px)',
-            padding: '32px',
-            background: '#fff',
-            borderRadius: 16,
-            border: '1px solid #e5e7eb',
-          }}
-        >
-          {[
-            { value: '1.200+', label: 'Lisensi Aktif' },
-            { value: '4.9 ★', label: 'Rating Pengguna' },
-            { value: '25+', label: 'Provinsi di Indonesia' },
-            { value: '< 2 jam', label: 'Rata-rata Waktu Aktivasi' },
-          ].map((stat) => (
-            <div key={stat.label} style={{ textAlign: 'center' }}>
-              <div
-                style={{
-                  fontSize: 'clamp(22px, 4vw, 30px)',
-                  fontWeight: 800,
-                  color: '#16a34a',
-                  letterSpacing: '-0.03em',
-                }}
-              >
-                {stat.value}
-              </div>
-              <div style={{ fontSize: 13, color: '#6b7280', marginTop: 4 }}>{stat.label}</div>
-            </div>
-          ))}
-        </div>
       </div>
     </section>
   );

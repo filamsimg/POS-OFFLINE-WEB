@@ -25,10 +25,6 @@ const FAQS = [
     a: 'Kompatibel dengan 50+ merk printer thermal Bluetooth ukuran 58mm dan 80mm, termasuk Epson, Cashino, Gprinter, HPRT, RONGTA, Xprinter, dan lainnya. Cukup hubungkan via Bluetooth di HP Android Anda.',
   },
   {
-    q: 'Bagaimana jika HP saya rusak atau ganti HP baru?',
-    a: 'Kami memiliki fitur Reset Device resmi. Hubungi admin WhatsApp kami dengan bukti nomor order, kami akan bantu reset lisensi agar Anda dapat aktivasi ulang di HP baru tanpa bayar lagi.',
-  },
-  {
     q: 'Apakah ada update aplikasi gratis?',
     a: 'Ya, pembaruan aplikasi gratis. Kami akan memberitahu file update terbaru via grup WhatsApp pengguna.',
   },

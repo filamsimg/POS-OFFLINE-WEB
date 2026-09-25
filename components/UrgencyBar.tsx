@@ -129,6 +129,14 @@ export function UrgencyBar() {
           display: none;
         }
 
+        .announcement-bar-floating {
+          position: sticky;
+          top: 0;
+          z-index: 100;
+          width: 100%;
+          box-shadow: 0 4px 24px rgba(0, 0, 0, 0.6);
+        }
+
         @media (min-width: 640px) {
           .announcement-bar-inner {
             padding: 9px 16px;
@@ -149,7 +157,7 @@ export function UrgencyBar() {
         }
       `}</style>
 
-      <aside aria-label="Pengumuman Penawaran Khusus">
+      <aside aria-label="Pengumuman Penawaran Khusus" className="announcement-bar-floating">
         <a href="#checkout" className="announcement-bar-hybrid">
           <div className="announcement-bar-inner">
             <div className="bar-content">

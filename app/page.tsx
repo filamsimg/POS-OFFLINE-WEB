@@ -1,14 +1,16 @@
-import { UrgencyBar }      from '@/components/UrgencyBar';
-import { HeroSection }     from '@/components/HeroSection';
-import { PainPoints }      from '@/components/PainPoints';
-import { FeatureGrid }     from '@/components/FeatureGrid';
-import { SocialProof }     from '@/components/SocialProof';
-import { ComparisonTable } from '@/components/ComparisonTable';
-import { CheckoutForm }    from '@/components/CheckoutForm';
-import { FaqSection }      from '@/components/FaqSection';
-import { StickyMobileCta } from '@/components/StickyMobileCta';
-import { FloatingWhatsApp} from '@/components/FloatingWhatsApp';
-import Image               from 'next/image';
+import { UrgencyBar }          from '@/components/UrgencyBar';
+import { HeroSection }         from '@/components/HeroSection';
+import { PainPoints }          from '@/components/PainPoints';
+import { AppPreviewSection }   from '@/components/AppPreviewSection';
+import { FeatureGrid }         from '@/components/FeatureGrid';
+import { SocialProof }         from '@/components/SocialProof';
+import { PromoUrgencySection } from '@/components/PromoUrgencySection';
+import { ComparisonTable }     from '@/components/ComparisonTable';
+import { CheckoutForm }        from '@/components/CheckoutForm';
+import { FaqSection }          from '@/components/FaqSection';
+import { StickyMobileCta }     from '@/components/StickyMobileCta';
+import { FloatingWhatsApp }    from '@/components/FloatingWhatsApp';
+import Image                   from 'next/image';
 
 export default function Home() {
   const siteUrl = (
@@ -18,7 +20,7 @@ export default function Home() {
 
   return (
     <main>
-      {/* 1. Urgency countdown bar */}
+      {/* 1. Urgency countdown bar (Floating Sticky) */}
       <UrgencyBar />
 
       {/* 2. Hero */}
@@ -27,19 +29,25 @@ export default function Home() {
       {/* 3. Pain → Solution */}
       <PainPoints />
 
-      {/* 4. Feature grid */}
+      {/* 4. Real App Screenshot Showcase */}
+      <AppPreviewSection />
+
+      {/* 5. Feature grid */}
       <FeatureGrid />
 
-      {/* 5. Social proof / testimonials */}
+      {/* 6. Social proof / testimonials */}
       <SocialProof />
 
-      {/* 6. Comparison table */}
+      {/* 7. Special Promo Urgency & Countdown (Post-Testimonial) */}
+      <PromoUrgencySection />
+
+      {/* 8. Comparison table */}
       <ComparisonTable />
 
-      {/* 7. Checkout form */}
+      {/* 9. Checkout form */}
       <CheckoutForm />
 
-      {/* 8. FAQ */}
+      {/* 10. FAQ */}
       <FaqSection />
 
       {/* 9. Footer */}

@@ -106,10 +106,14 @@ export function verifyMayarSignature(
   rawBody: string,
   receivedSignature: string
 ): boolean {
-  const secret = process.env.MAYAR_WEBHOOK_SECRET;
+  const secret = process.env.MAYAR_WEBHOOK_SECRET?.trim();
   if (!secret || secret.startsWith('mayar_webhook_secret_xxx')) {
-    // If secret not configured, skip verification (dev-only fallback)
-    console.warn('[Mayar] MAYAR_WEBHOOK_SECRET not configured — skipping signature check.');
+    if (process.env.NODE_ENV === 'production') {
+      console.error('[Mayar] CRITICAL: MAYAR_WEBHOOK_SECRET belum dikonfigurasi di environment production. Webhook ditolak demi keamanan.');
+      return false;
+    }
+    // Only in local development fallback
+    console.warn('[Mayar] MAYAR_WEBHOOK_SECRET not configured — skipping signature check (dev only).');
     return true;
   }
 
@@ -120,7 +124,15 @@ export function verifyMayarSignature(
       .createHmac('sha256', secret)
       .update(rawBody)
       .digest('hex');
-    return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(receivedSignature));
+
+    const bufExpected = Buffer.from(expected);
+    const bufReceived = Buffer.from(receivedSignature || '');
+
+    if (bufExpected.length !== bufReceived.length) {
+      return false;
+    }
+
+    return crypto.timingSafeEqual(bufExpected, bufReceived);
   } catch {
     return false;
   }

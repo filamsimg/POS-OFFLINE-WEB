@@ -4,21 +4,36 @@
 
 import crypto from 'crypto';
 
-export const DEFAULT_ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
-export const DEFAULT_ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'posoffline2026';
+function getAdminCredentials(): { username: string; password: string } | null {
+  const username = process.env.ADMIN_USERNAME?.trim();
+  const password = process.env.ADMIN_PASSWORD?.trim();
+
+  if (!username || !password) {
+    return null;
+  }
+  return { username, password };
+}
 
 function getAdminTokenSecret(): string {
-  return process.env.ADMIN_SECRET || process.env.ADMIN_PASSWORD || 'posoffline_secret_signing_key_2026';
+  const secret = process.env.ADMIN_SECRET?.trim() || process.env.ADMIN_PASSWORD?.trim();
+  if (!secret) {
+    throw new Error('[Auth] ADMIN_PASSWORD atau ADMIN_SECRET belum disetel di environment variables.');
+  }
+  return secret;
 }
 
 export function verifyAdminCredentials(username?: string | null, password?: string | null): boolean {
   if (!username || !password) return false;
-  const expectedUser = process.env.ADMIN_USERNAME || 'admin';
-  const expectedPass = process.env.ADMIN_PASSWORD || 'posoffline2026';
 
-  const userMatch = username.trim() === expectedUser;
-  const bufInput = Buffer.from(password);
-  const bufExpected = Buffer.from(expectedPass);
+  const creds = getAdminCredentials();
+  if (!creds) {
+    console.error('[Auth] ADMIN_USERNAME atau ADMIN_PASSWORD belum disetel di Environment Variables (.env)');
+    return false;
+  }
+
+  const userMatch = username.trim() === creds.username;
+  const bufInput = Buffer.from(password.trim());
+  const bufExpected = Buffer.from(creds.password);
   const passMatch =
     bufInput.length === bufExpected.length &&
     crypto.timingSafeEqual(bufInput, bufExpected);
@@ -28,9 +43,12 @@ export function verifyAdminCredentials(username?: string | null, password?: stri
 
 export function verifyAdminPassword(password?: string | null): boolean {
   if (!password) return false;
-  const expectedPass = process.env.ADMIN_PASSWORD || 'posoffline2026';
-  const bufInput = Buffer.from(password);
-  const bufExpected = Buffer.from(expectedPass);
+
+  const creds = getAdminCredentials();
+  if (!creds) return false;
+
+  const bufInput = Buffer.from(password.trim());
+  const bufExpected = Buffer.from(creds.password);
   return (
     bufInput.length === bufExpected.length &&
     crypto.timingSafeEqual(bufInput, bufExpected)
@@ -54,6 +72,9 @@ export function createAdminToken(username: string): string {
 export function verifyAdminToken(token?: string | null): boolean {
   if (!token) return false;
   try {
+    const creds = getAdminCredentials();
+    if (!creds) return false;
+
     const parts = token.split('.');
     if (parts.length !== 2) return false;
 
@@ -74,9 +95,8 @@ export function verifyAdminToken(token?: string | null): boolean {
 
     const raw = Buffer.from(data, 'base64url').toString('utf8');
     const parsed = JSON.parse(raw);
-    const expectedUser = process.env.ADMIN_USERNAME || 'admin';
 
-    if (!parsed || parsed.u !== expectedUser) {
+    if (!parsed || parsed.u !== creds.username) {
       return false;
     }
 

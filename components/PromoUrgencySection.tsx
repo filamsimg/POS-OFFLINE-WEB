@@ -177,25 +177,6 @@ export function PromoUrgencySection() {
           transform: translateY(-2px);
           box-shadow: 0 16px 40px rgba(34, 197, 94, 0.6);
         }
-
-        .quota-progress-track {
-          width: 100%;
-          max-width: 460px;
-          height: 10px;
-          background: rgba(255, 255, 255, 0.08);
-          border-radius: 99px;
-          margin: 12px auto 0;
-          overflow: hidden;
-          position: relative;
-        }
-
-        .quota-progress-fill {
-          height: 100%;
-          width: 86.6%; /* 26 of 30 sold */
-          background: linear-gradient(90deg, #f59e0b 0%, #ef4444 100%);
-          border-radius: 99px;
-          box-shadow: 0 0 12px rgba(239, 68, 68, 0.6);
-        }
       `}</style>
 
       <div className="promo-urgency-card">
@@ -217,7 +198,7 @@ export function PromoUrgencySection() {
               textTransform: 'uppercase',
             }}
           >
-            <Flame size={14} /> Khusus 30 Orang Pertama
+            <Flame size={14} /> Penawaran Terbatas Rilis Perdana
           </span>
 
           <span
@@ -248,7 +229,7 @@ export function PromoUrgencySection() {
             marginBottom: 12,
           }}
         >
-          Waktu Terbatas! Amankan Kuota Promo Spesial Anda
+          Waktu Terbatas! Amankan Promo Spesial Anda
         </h3>
 
         {/* Subtitle */}
@@ -261,7 +242,7 @@ export function PromoUrgencySection() {
             lineHeight: 1.6,
           }}
         >
-          Penawaran harga perdana ini hanya berlaku selama slot 30 pembeli masih tersedia.
+          Penawaran harga perdana ini berlaku selama periode promo masih aktif.
         </p>
 
         {/* Live Countdown Timer */}
@@ -279,36 +260,6 @@ export function PromoUrgencySection() {
           <div className="countdown-item">
             <span className="countdown-value">{formatDigit(timeLeft.seconds)}</span>
             <span className="countdown-label">Detik</span>
-          </div>
-        </div>
-
-        {/* Quota Tracker */}
-        <div style={{ marginBottom: 28 }}>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 8,
-              fontSize: 13,
-              color: '#f8fafc',
-              fontWeight: 700,
-            }}
-          >
-            <span
-              style={{
-                width: 8,
-                height: 8,
-                borderRadius: '50%',
-                background: '#ef4444',
-                display: 'inline-block',
-                boxShadow: '0 0 10px #ef4444',
-              }}
-            />
-            Sisa Kuota Promo: <span style={{ color: '#ef4444', fontWeight: 800 }}>Tersisa 4 Lisensi</span> dari 30 Kuota
-          </div>
-          <div className="quota-progress-track">
-            <div className="quota-progress-fill" />
           </div>
         </div>
 
@@ -407,7 +358,7 @@ export function PromoUrgencySection() {
               margin: 0,
             }}
           >
-            ⚠️ Harga sewaktu-waktu bisa naik setelah kuota promo 30 orang terpenuhi.
+            ⚠️ Harga promo sewaktu-waktu dapat berakhir dan kembali ke harga normal.
           </p>
           <p
             style={{

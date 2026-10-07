@@ -24,22 +24,25 @@ export interface AdminContact {
   waNumber: string;
 }
 
+const ariyoWa = process.env.NEXT_PUBLIC_ADMIN_ARIYO_WA || process.env.NEXT_PUBLIC_ADMIN_ARIYO_PHONE || '';
+const filamsiWa = process.env.NEXT_PUBLIC_ADMIN_FILAMSI_WA || process.env.NEXT_PUBLIC_ADMIN_FILAMSI_PHONE || process.env.NEXT_PUBLIC_WA_NUMBER || '';
+
 export const ADMIN_CONTACTS: AdminContact[] = [
   {
     id:       'ariyo',
     name:     process.env.NEXT_PUBLIC_ADMIN_ARIYO_NAME || 'Ariyo',
     role:     'Konsultasi & Pembelian',
     desc:     'Tanya fitur aplikasi, kecocokan toko, & cara order',
-    phone:    process.env.NEXT_PUBLIC_ADMIN_ARIYO_PHONE ?? '',
-    waNumber: process.env.NEXT_PUBLIC_ADMIN_ARIYO_WA ?? '',
+    phone:    ariyoWa,
+    waNumber: ariyoWa,
   },
   {
     id:       'filamsi',
     name:     process.env.NEXT_PUBLIC_ADMIN_FILAMSI_NAME || 'Filamsi',
     role:     'Bantuan Teknis & Aktivasi',
     desc:     'Setup printer thermal, kendala HP, & serial key',
-    phone:    process.env.NEXT_PUBLIC_ADMIN_FILAMSI_PHONE ?? '',
-    waNumber: process.env.NEXT_PUBLIC_ADMIN_FILAMSI_WA || process.env.NEXT_PUBLIC_WA_NUMBER || '',
+    phone:    filamsiWa,
+    waNumber: filamsiWa,
   },
 ];
 

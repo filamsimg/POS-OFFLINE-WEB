@@ -1,6 +1,6 @@
 import { Order, ADMIN_CONTACTS } from '@/lib/types';
 import { getOrderById, updateOrderPaymentStatus, markEmailSent } from '@/lib/db';
-import { checkMayarInvoiceStatus } from '@/lib/mayar';
+import { getMidtransTransactionStatus } from '@/lib/midtrans';
 import { sendPurchaseConfirmationEmail } from '@/lib/email';
 
 export interface SyncOrderResult {
@@ -10,13 +10,13 @@ export interface SyncOrderResult {
 }
 
 /**
- * Actively synchronizes an order's payment status with Mayar.id.
+ * Actively synchronizes an order's payment status with Midtrans API.
  *
  * This dual-path verification ensures that:
  * 1. Even if webhooks fail or cannot reach localhost/development environments,
  *    the order status will auto-update when the user visits or polls /order/[id].
- * 2. If the user completes the payment, their license activation flow unlocks immediately.
- * 3. Idempotency is preserved: confirmation emails and DB updates are only executed once.
+ * 2. If the user completes payment via Midtrans Snap (QRIS, VA, CC), license activation unlocks immediately.
+ * 3. Idempotency is strictly preserved: confirmation emails and DB updates are only executed once.
  */
 export async function syncOrderPaymentStatus(
   orderOrId: string | Order
@@ -37,23 +37,13 @@ export async function syncOrderPaymentStatus(
     return { order, updated: false, status: 'paid' };
   }
 
-  // If no Mayar payment ID exists, cannot verify with Mayar API
-  if (!order.mayarPaymentId) {
-    return { order, updated: false, status: order.paymentStatus };
-  }
-
   try {
-    const mayarData = await checkMayarInvoiceStatus(order.mayarPaymentId);
-    if (!mayarData) {
+    const midtransStatus = await getMidtransTransactionStatus(order.id);
+    if (!midtransStatus) {
       return { order, updated: false, status: order.paymentStatus };
     }
 
-    const isPaid =
-      mayarData.status === 'paid' ||
-      mayarData.status === 'settled' ||
-      mayarData.status === 'success';
-
-    if (isPaid) {
+    if (midtransStatus.isPaid) {
       // 1. Mark order paid in DB
       await updateOrderPaymentStatus(order.id, 'paid');
       order.paymentStatus = 'paid';
@@ -84,6 +74,12 @@ export async function syncOrderPaymentStatus(
       }
 
       return { order, updated: true, status: 'paid' };
+    }
+
+    if (midtransStatus.status === 'cancelled') {
+      await updateOrderPaymentStatus(order.id, 'cancelled');
+      order.paymentStatus = 'cancelled';
+      return { order, updated: true, status: 'cancelled' };
     }
 
     return { order, updated: false, status: order.paymentStatus };

@@ -19,32 +19,40 @@ export async function GET(
       return NextResponse.json({ error: 'Pesanan tidak ditemukan.' }, { status: 404 });
     }
 
-    // Auto-reconciliation: If order is pending and has Mayar ID, check Mayar in real-time
-    if (order.paymentStatus === 'pending' && order.mayarPaymentId) {
+    // Auto-reconciliation: If order is pending, check Midtrans API in real-time
+    if (order.paymentStatus === 'pending') {
       const syncResult = await syncOrderPaymentStatus(order);
       if (syncResult.order) {
         order = syncResult.order;
       }
     }
 
+    const clientKey =
+      process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY?.trim() ||
+      process.env.MIDTRANS_CLIENT_KEY?.trim() ||
+      '';
+
     // Never expose sensitive fields to the client
     return NextResponse.json({
+      clientKey,
       order: {
-        id:             order.id,
-        customerName:   order.customerName,
-        customerPhone:  order.customerPhone,
-        customerEmail:  order.customerEmail,
-        storeName:      order.storeName,
-        businessType:   order.businessType,
-        packageType:    order.packageType,
-        amount:         order.amount,
-        paymentStatus:  order.paymentStatus,
-        deviceId:       order.deviceId,
-        serialKey:      order.serialKey,
-        activatedAt:    order.activatedAt,
-        emailSentAt:    order.emailSentAt,
-        mayarPaymentUrl: order.mayarPaymentUrl,
-        createdAt:      order.createdAt,
+        id:                    order.id,
+        customerName:          order.customerName,
+        customerPhone:         order.customerPhone,
+        customerEmail:         order.customerEmail,
+        storeName:             order.storeName,
+        businessType:          order.businessType,
+        packageType:           order.packageType,
+        amount:                order.amount,
+        paymentStatus:         order.paymentStatus,
+        paymentMethod:         order.paymentMethod,
+        midtransPaymentToken:  order.midtransPaymentToken,
+        midtransRedirectUrl:   order.midtransRedirectUrl,
+        deviceId:              order.deviceId,
+        serialKey:             order.serialKey,
+        activatedAt:           order.activatedAt,
+        emailSentAt:           order.emailSentAt,
+        createdAt:             order.createdAt,
       },
     });
   } catch (err: unknown) {
@@ -83,4 +91,3 @@ export async function POST(
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
-

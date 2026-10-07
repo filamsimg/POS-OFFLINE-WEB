@@ -42,8 +42,8 @@ export async function GET(req: NextRequest) {
         );
       }
 
-      // If pending, attempt a quick real-time reconciliation with Mayar
-      if (order.paymentStatus === 'pending' && order.mayarPaymentId) {
+      // If pending, attempt a quick real-time reconciliation with Midtrans
+      if (order.paymentStatus === 'pending') {
         const syncResult = await syncOrderPaymentStatus(order);
         if (syncResult.order) {
           order = syncResult.order;

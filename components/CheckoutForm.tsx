@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PACKAGES, ADMIN_CONTACTS } from '@/lib/types';
+import { trackInitiateCheckout } from '@/lib/fpixel';
 import { CheckCircle2, Lock, ArrowRight, Loader2, ShieldCheck, Mail, MessageCircle } from 'lucide-react';
 
 declare global {
@@ -105,12 +106,12 @@ export function CheckoutForm() {
       return;
     }
 
-    setLoading(true);
-
-    // Fire Meta Pixel InitiateCheckout
-    if (typeof window !== 'undefined' && window.fbq) {
-      window.fbq('track', 'InitiateCheckout', { value: pkg.price / 1000, currency: 'IDR' });
-    }
+    // Fire Meta Pixel InitiateCheckout with accurate package price
+    trackInitiateCheckout({
+      content_name: `Lisensi Software POS OFFLINE (${pkg.name})`,
+      value: pkg.price,
+      currency: 'IDR',
+    });
 
     try {
       const res = await fetch('/api/checkout', {
@@ -126,11 +127,6 @@ export function CheckoutForm() {
           setContactAdmin(true);
         }
         throw new Error(data.error ?? 'Gagal memproses pesanan.');
-      }
-
-      // Fire Meta Pixel Purchase (best effort before redirect)
-      if (typeof window !== 'undefined' && window.fbq) {
-        window.fbq('track', 'Purchase', { value: pkg.price / 1000, currency: 'IDR' });
       }
 
       // If Midtrans Snap token is present, launch Snap Modal right on the page

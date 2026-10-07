@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 
 import { Order, PACKAGES, ADMIN_CONTACTS } from '@/lib/types';
+import { trackPurchase } from '@/lib/fpixel';
 
 function fmtCurrency(n: number) {
   return `Rp ${n.toLocaleString('id-ID')}`;
@@ -131,6 +132,22 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
     }, 4_000);
     return () => clearInterval(id);
   }, [order, orderId]);
+
+  // ── Meta Pixel Purchase Tracking (Triggered ONLY when Paid) ───────────────
+  useEffect(() => {
+    if (order?.paymentStatus === 'paid' && orderId) {
+      const dedupeKey = `meta_purchase_fired_${orderId}`;
+      if (typeof window !== 'undefined' && !sessionStorage.getItem(dedupeKey)) {
+        sessionStorage.setItem(dedupeKey, '1');
+        trackPurchase({
+          order_id: orderId,
+          value: order.amount,
+          currency: 'IDR',
+          content_name: `Lisensi Software POS OFFLINE – ${order.storeName || order.customerName}`,
+        });
+      }
+    }
+  }, [order?.paymentStatus, order?.amount, order?.storeName, order?.customerName, orderId]);
 
   // ── Manual Payment Status Verification ───────────────────────────────────────
   const handleManualSync = async () => {

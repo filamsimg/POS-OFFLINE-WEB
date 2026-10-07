@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Script from 'next/script';
+import { MetaPixelTracker } from '@/components/MetaPixelTracker';
 import './globals.css';
 
 // ─── Metadata ────────────────────────────────────────────────────────────────
@@ -80,6 +81,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 alt=""
               />
             </noscript>
+            <MetaPixelTracker />
           </>
         )}
 

@@ -11,6 +11,7 @@ import { FaqSection }          from '@/components/FaqSection';
 import { StickyMobileCta }     from '@/components/StickyMobileCta';
 import { FloatingWhatsApp }    from '@/components/FloatingWhatsApp';
 import { ADMIN_CONTACTS }       from '@/lib/types';
+import { PixelViewContent }    from '@/components/PixelViewContent';
 import Image                   from 'next/image';
 
 export default function Home() {
@@ -24,6 +25,9 @@ export default function Home() {
 
   return (
     <main>
+      {/* Meta Pixel ViewContent Trigger */}
+      <PixelViewContent />
+
       {/* 1. Urgency countdown bar (Floating Sticky) */}
       <UrgencyBar />
 

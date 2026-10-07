@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { PACKAGES } from '@/lib/types';
-import { CheckCircle2, Lock, ArrowRight, Loader2, ShieldCheck, Mail } from 'lucide-react';
+import { PACKAGES, ADMIN_CONTACTS } from '@/lib/types';
+import { CheckCircle2, Lock, ArrowRight, Loader2, ShieldCheck, Mail, MessageCircle } from 'lucide-react';
 
 declare global {
   interface Window {
@@ -79,8 +79,9 @@ export function CheckoutForm() {
     notes:          '',
   });
 
-  const [loading, setLoading]   = useState(false);
-  const [error, setError]       = useState('');
+  const [loading, setLoading]           = useState(false);
+  const [error, setError]               = useState('');
+  const [contactAdmin, setContactAdmin] = useState(false);
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
     setForm((prev) => ({ ...prev, [k]: e.target.value }));
@@ -88,6 +89,7 @@ export function CheckoutForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setContactAdmin(false);
 
     // Basic validation
     if (!form.customerName.trim()) {
@@ -120,6 +122,9 @@ export function CheckoutForm() {
       const data = await res.json();
 
       if (!res.ok) {
+        if (data.contactAdmin) {
+          setContactAdmin(true);
+        }
         throw new Error(data.error ?? 'Gagal memproses pesanan.');
       }
 
@@ -368,9 +373,40 @@ export function CheckoutForm() {
                 fontSize: 13,
                 color: '#fca5a5',
                 marginBottom: 16,
+                lineHeight: 1.6,
               }}
             >
-              {error}
+              <div>{error}</div>
+              {contactAdmin && (
+                <div style={{ marginTop: 12 }}>
+                  <a
+                    href={`https://wa.me/${(ADMIN_CONTACTS.find((c) => c.id === 'ariyo') ?? ADMIN_CONTACTS[0]).waNumber}?text=${encodeURIComponent(
+                      `Halo Admin, saya ingin memesan Lisensi Software POS OFFLINE.\n` +
+                      `Nama: ${form.customerName.trim() || '-'}\n` +
+                      `WhatsApp: ${form.customerPhone.trim() || '-'}\n` +
+                      `Email: ${form.customerEmail.trim() || '-'}\n` +
+                      `Toko: ${form.storeName.trim() || '-'}`
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 7,
+                      background: '#16a34a',
+                      color: '#ffffff',
+                      padding: '8px 14px',
+                      borderRadius: 8,
+                      fontWeight: 700,
+                      fontSize: 12,
+                      textDecoration: 'none',
+                      boxShadow: '0 2px 8px rgba(22, 163, 74, 0.3)',
+                    }}
+                  >
+                    <MessageCircle size={15} /> Hubungi WhatsApp Admin untuk Bantuan Pemesanan
+                  </a>
+                </div>
+              )}
             </div>
           )}
 

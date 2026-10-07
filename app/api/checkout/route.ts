@@ -70,11 +70,16 @@ export async function POST(req: NextRequest) {
 
     // ── Pre-flight Server Key Check (Anti-Bypass & Anti-Ghost Order) ────────
     const serverKey = process.env.MIDTRANS_SERVER_KEY?.trim();
+    const isDev = process.env.NODE_ENV !== 'production';
+
     if (!serverKey || serverKey.includes('xxxxxxxx') || serverKey.length < 8) {
+      console.error('[Checkout] MIDTRANS_SERVER_KEY is missing or unconfigured.');
       return NextResponse.json(
         {
-          error:
-            'MIDTRANS_SERVER_KEY belum diisi di environment (.env). Silakan isi kredensial Midtrans Server Key Anda di dashboard hosting sebelum memproses pembayaran.',
+          error: isDev
+            ? 'DEV NOTICE: MIDTRANS_SERVER_KEY belum diisi di environment (.env). Silakan isi kredensial Midtrans Server Key Anda di .env.'
+            : 'Layanan pembayaran instan sedang dalam pemeliharaan berkala. Mohon maaf atas ketidaknyamanannya. Silakan hubungi admin kami via WhatsApp untuk transaksi langsung atau coba beberapa saat lagi.',
+          contactAdmin: !isDev,
         },
         { status: 503 }
       );
@@ -108,12 +113,17 @@ export async function POST(req: NextRequest) {
       });
     } catch (midtransErr) {
       console.error('[Checkout] Midtrans Snap API Error:', midtransErr);
-      const msg =
+      const devMsg =
         midtransErr instanceof Error
           ? midtransErr.message
           : 'Gagal menghubungi server Midtrans. Periksa kembali kredensial Server Key Anda.';
       return NextResponse.json(
-        { error: `Gagal membuat transaksi pembayaran: ${msg}` },
+        {
+          error: isDev
+            ? `DEV NOTICE: Gagal membuat transaksi Midtrans: ${devMsg}`
+            : 'Layanan pembayaran instan sedang mengalami gangguan sementara. Silakan hubungi admin kami via WhatsApp untuk bantuan pemesanan atau coba beberapa saat lagi.',
+          contactAdmin: !isDev,
+        },
         { status: 502 }
       );
     }

@@ -27,6 +27,54 @@ function fmtCurrency(n: number) {
   return `Rp ${n.toLocaleString('id-ID')}`;
 }
 
+declare global {
+  interface Window {
+    snap?: {
+      pay: (
+        token: string,
+        options: {
+          onSuccess?: (result: unknown) => void;
+          onPending?: (result: unknown) => void;
+          onError?: (result: unknown) => void;
+          onClose?: () => void;
+        }
+      ) => void;
+    };
+  }
+}
+
+const loadSnapScript = (clientKeyFromApi?: string): Promise<void> => {
+  return new Promise((resolve) => {
+    if (typeof window === 'undefined') return resolve();
+    if (window.snap) return resolve();
+
+    const clientKey =
+      clientKeyFromApi?.trim() ||
+      process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY?.trim() ||
+      '';
+    const isSandboxKey = clientKey.startsWith('SB-');
+    const isExplicitProd = process.env.NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION === 'true';
+    const isProduction =
+      !isSandboxKey && (isExplicitProd || process.env.NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION !== 'false');
+
+    const scriptSrc = isProduction
+      ? 'https://app.midtrans.com/snap/snap.js'
+      : 'https://app.sandbox.midtrans.com/snap/snap.js';
+
+    const existingScript = document.querySelector(`script[src*="snap.js"]`);
+    if (existingScript) return resolve();
+
+    const script = document.createElement('script');
+    script.src = scriptSrc;
+    if (clientKey) {
+      script.setAttribute('data-client-key', clientKey);
+    }
+    script.onload = () => resolve();
+    script.onerror = () => resolve();
+    document.body.appendChild(script);
+  });
+};
+
 export default function OrderPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: orderId } = use(params);
 
@@ -40,6 +88,7 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
   const [claimError, setClaimError]     = useState('');
   const [syncLoading, setSyncLoading]   = useState(false);
   const [syncMessage, setSyncMessage]   = useState<{ text: string; type: 'info' | 'success' | 'warn' } | null>(null);
+  const [clientKey, setClientKey]       = useState('');
 
   // ── Fetch order ─────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -47,6 +96,9 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
       try {
         const res  = await fetch(`/api/order/${orderId}`);
         const data = await res.json();
+        if (data.clientKey) {
+          setClientKey(data.clientKey);
+        }
         if (data.order) {
           setOrder(data.order);
           if (data.order.serialKey) {
@@ -99,7 +151,7 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
         });
       } else {
         setSyncMessage({
-          text: 'Pembayaran belum terdeteksi di Mayar. Jika baru saja transfer/scan QRIS, tunggu beberapa detik lalu cek kembali.',
+          text: 'Pembayaran belum terdeteksi. Jika baru saja transfer/scan QRIS, tunggu beberapa detik lalu cek kembali.',
           type: 'warn',
         });
       }
@@ -110,6 +162,22 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
     }
   };
 
+  const handleOpenPayment = async () => {
+    if (order?.midtransPaymentToken) {
+      await loadSnapScript(clientKey);
+      if (window.snap) {
+        window.snap.pay(order.midtransPaymentToken, {
+          onSuccess: () => handleManualSync(),
+          onPending: () => handleManualSync(),
+          onClose: () => handleManualSync(),
+        });
+        return;
+      }
+    }
+    if (order?.midtransRedirectUrl) {
+      window.open(order.midtransRedirectUrl, '_blank');
+    }
+  };
 
   // ── Claim license ─────────────────────────────────────────────────────────────
   const handleClaim = async (e: React.FormEvent) => {
@@ -344,11 +412,10 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
 
             {/* ── Action buttons: Pay now & Sync status ─────────────────────── */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
-              {order?.mayarPaymentUrl && (
-                <a
-                  href={order.mayarPaymentUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
+              {(order?.midtransPaymentToken || order?.midtransRedirectUrl) && (
+                <button
+                  type="button"
+                  onClick={handleOpenPayment}
                   style={{
                     display:         'flex',
                     alignItems:      'center',
@@ -360,15 +427,16 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
                     padding:         '12px 16px',
                     fontSize:        13,
                     fontWeight:      800,
-                    textDecoration:  'none',
+                    border:          'none',
+                    cursor:          'pointer',
                     boxShadow:       '0 2px 10px rgba(22, 163, 74, 0.25)',
                     transition:      'transform 0.15s ease',
                   }}
                 >
                   <CreditCard size={16} />
-                  Buka Halaman Pembayaran Mayar (QRIS / VA)
+                  Lanjutkan Pembayaran (QRIS / Virtual Account)
                   <ExternalLink size={13} style={{ opacity: 0.8 }} />
-                </a>
+                </button>
               )}
 
               <button
@@ -396,7 +464,7 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
                 {syncLoading ? (
                   <>
                     <Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} />
-                    Mengecek Status Langsung ke Mayar...
+                    Mengecek Status Pembayaran...
                   </>
                 ) : (
                   <>

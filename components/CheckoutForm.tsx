@@ -8,8 +8,51 @@ import { CheckCircle2, Lock, ArrowRight, Loader2, ShieldCheck, Mail } from 'luci
 declare global {
   interface Window {
     fbq?: (...args: unknown[]) => void;
+    snap?: {
+      pay: (
+        token: string,
+        options: {
+          onSuccess?: (result: unknown) => void;
+          onPending?: (result: unknown) => void;
+          onError?: (result: unknown) => void;
+          onClose?: () => void;
+        }
+      ) => void;
+    };
   }
 }
+
+const loadSnapScript = (clientKeyFromApi?: string): Promise<void> => {
+  return new Promise((resolve) => {
+    if (typeof window === 'undefined') return resolve();
+    if (window.snap) return resolve();
+
+    const clientKey =
+      clientKeyFromApi?.trim() ||
+      process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY?.trim() ||
+      '';
+    const isSandboxKey = clientKey.startsWith('SB-');
+    const isExplicitProd = process.env.NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION === 'true';
+    const isProduction =
+      !isSandboxKey && (isExplicitProd || process.env.NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION !== 'false');
+
+    const scriptSrc = isProduction
+      ? 'https://app.midtrans.com/snap/snap.js'
+      : 'https://app.sandbox.midtrans.com/snap/snap.js';
+
+    const existingScript = document.querySelector(`script[src*="snap.js"]`);
+    if (existingScript) return resolve();
+
+    const script = document.createElement('script');
+    script.src = scriptSrc;
+    if (clientKey) {
+      script.setAttribute('data-client-key', clientKey);
+    }
+    script.onload = () => resolve();
+    script.onerror = () => resolve();
+    document.body.appendChild(script);
+  });
+};
 
 const BUSINESS_TYPES = [
   'Toko Kelontong / Sembako',
@@ -85,7 +128,37 @@ export function CheckoutForm() {
         window.fbq('track', 'Purchase', { value: pkg.price / 1000, currency: 'IDR' });
       }
 
-      router.push(data.redirectUrl);
+      // If Midtrans Snap token is present, launch Snap Modal right on the page
+      if (data.snapToken) {
+        await loadSnapScript(data.clientKey);
+        if (window.snap) {
+          window.snap.pay(data.snapToken, {
+            onSuccess: () => {
+              router.push(`/order/${data.orderId}`);
+            },
+            onPending: () => {
+              router.push(`/order/${data.orderId}`);
+            },
+            onError: () => {
+              setError('Pembayaran gagal atau dibatalkan. Silakan coba lagi.');
+              setLoading(false);
+            },
+            onClose: () => {
+              setError('Jendela pembayaran ditutup. Silakan klik tombol di bawah jika ingin melanjutkan pembayaran.');
+              setLoading(false);
+            },
+          });
+          return;
+        }
+      }
+
+      // If Snap modal script blocked or external redirect URL provided
+      if (data.redirectUrl && data.redirectUrl.startsWith('http')) {
+        window.location.href = data.redirectUrl;
+        return;
+      }
+
+      throw new Error('Sesi pembayaran Midtrans tidak valid. Silakan coba beberapa saat lagi.');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Terjadi gangguan jaringan.';
       setError(msg);
@@ -270,6 +343,18 @@ export function CheckoutForm() {
                 </select>
               </div>
             </div>
+
+            {/* Notes */}
+            <div className="field">
+              <label htmlFor="notes">Catatan Tambahan (Opsional)</label>
+              <textarea
+                id="notes"
+                rows={2}
+                placeholder="Pertanyaan atau permintaan khusus..."
+                value={form.notes}
+                onChange={set('notes')}
+              />
+            </div>
           </div>
 
           {/* Error */}
@@ -359,7 +444,7 @@ export function CheckoutForm() {
                 </>
               ) : (
                 <>
-              Lanjut ke Pembayaran
+                  Lanjut ke Pembayaran
                   <ArrowRight size={17} />
                 </>
               )}

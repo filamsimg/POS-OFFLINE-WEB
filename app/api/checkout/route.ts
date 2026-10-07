@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
 import { createOrder } from '@/lib/db';
-import { createMayarPayment } from '@/lib/mayar';
+import { createMidtransSnapTransaction } from '@/lib/midtrans';
 import { PACKAGES, Order } from '@/lib/types';
 
 export const runtime = 'nodejs';
@@ -68,67 +68,91 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const pkg       = PACKAGES['software_only'];
-    const orderId   = uuidv4();
+    // ── Pre-flight Server Key Check (Anti-Bypass & Anti-Ghost Order) ────────
+    const serverKey = process.env.MIDTRANS_SERVER_KEY?.trim();
+    if (!serverKey || serverKey.includes('xxxxxxxx') || serverKey.length < 8) {
+      return NextResponse.json(
+        {
+          error:
+            'MIDTRANS_SERVER_KEY belum diisi di environment (.env). Silakan isi kredensial Midtrans Server Key Anda di dashboard hosting sebelum memproses pembayaran.',
+        },
+        { status: 503 }
+      );
+    }
+
+    // Server-Authoritative Price: User cannot tamper with amount
+    const pkg = PACKAGES['software_only'];
+    const orderId = uuidv4();
+
+    // Dynamic Site URL (zero hardcoding, handles custom domains, Vercel preview, and local dev)
     const siteUrl = (
       process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
-      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+      (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : '') ||
+      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : '') ||
+      req.nextUrl.origin
     ).replace(/\/+$/, '');
+
     const successUrl = `${siteUrl}/order/${orderId}`;
 
-    // ── Create Mayar.id Payment Link ─────────────────────────────────────────
-    let mayarPaymentId:  string | undefined;
-    let mayarPaymentUrl: string | undefined;
-
+    // ── Create Midtrans Snap Transaction ─────────────────────────────────────
+    let snapResult;
     try {
-      const mayarResult = await createMayarPayment({
+      snapResult = await createMidtransSnapTransaction({
         orderId,
         amount:        pkg.price,
         customerName:  customerName.trim(),
         customerEmail: customerEmail.trim(),
         customerPhone: customerPhone.trim(),
-        description:   `Lisensi POS OFFLINE Permanen – ${storeName?.trim() ?? customerName.trim()}`,
+        productName:   `Lisensi POS OFFLINE – ${storeName?.trim() ?? customerName.trim()}`,
         successUrl,
       });
-      mayarPaymentId  = mayarResult.paymentId;
-      mayarPaymentUrl = mayarResult.paymentUrl;
-    } catch (mayarErr) {
-      console.warn('[Checkout] Mayar.id not available, saving order without payment URL:', mayarErr);
-      // Continue without Mayar if not configured yet (dev mode)
+    } catch (midtransErr) {
+      console.error('[Checkout] Midtrans Snap API Error:', midtransErr);
+      const msg =
+        midtransErr instanceof Error
+          ? midtransErr.message
+          : 'Gagal menghubungi server Midtrans. Periksa kembali kredensial Server Key Anda.';
+      return NextResponse.json(
+        { error: `Gagal membuat transaksi pembayaran: ${msg}` },
+        { status: 502 }
+      );
     }
 
-    // ── Persist Order ────────────────────────────────────────────────────────
+    // ── Persist Order Only When Snap Session Successfully Created ────────────
     const order: Order = {
-      id:             orderId,
-      customerName:   customerName.trim(),
-      customerPhone:  customerPhone.trim(),
-      customerEmail:  customerEmail.trim(),
-      storeName:      storeName?.trim()      ?? undefined,
-      businessType:   businessType?.trim()   ?? undefined,
-      packageType:    'software_only',
-      amount:         pkg.price,
-      paymentMethod:  'mayar',
-      paymentStatus:  'pending',
-      mayarPaymentId,
-      mayarPaymentUrl,
-      notes:          notes?.trim() ?? undefined,
-      createdAt:      new Date().toISOString(),
+      id:                    orderId,
+      customerName:          customerName.trim(),
+      customerPhone:         customerPhone.trim(),
+      customerEmail:         customerEmail.trim(),
+      storeName:             storeName?.trim()      ?? undefined,
+      businessType:          businessType?.trim()   ?? undefined,
+      packageType:           'software_only',
+      amount:                pkg.price,
+      paymentMethod:         'midtrans',
+      paymentStatus:         'pending',
+      midtransPaymentToken:  snapResult.token,
+      midtransRedirectUrl:   snapResult.redirectUrl,
+      notes:                 notes?.trim() ?? undefined,
+      createdAt:             new Date().toISOString(),
     };
 
     await createOrder(order);
 
     // ── Response ─────────────────────────────────────────────────────────────
-    if (mayarPaymentUrl) {
-      return NextResponse.json({ redirectUrl: mayarPaymentUrl });
-    }
+    const clientKey =
+      process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY?.trim() ||
+      process.env.MIDTRANS_CLIENT_KEY?.trim() ||
+      '';
 
-    // Fallback when Mayar not configured: redirect to order status page
-    return NextResponse.json({ redirectUrl: successUrl });
-  } catch (err: any) {
+    return NextResponse.json({
+      orderId,
+      snapToken: snapResult.token,
+      redirectUrl: snapResult.redirectUrl,
+      clientKey,
+    });
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : 'Terjadi kesalahan pada server. Silakan coba lagi.';
     console.error('[Checkout] Unexpected error:', err);
-    return NextResponse.json(
-      { error: err?.message || 'Terjadi kesalahan pada server. Silakan coba lagi.' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: errorMsg }, { status: 500 });
   }
 }

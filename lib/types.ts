@@ -46,27 +46,27 @@ export const ADMIN_CONTACTS: AdminContact[] = [
 // ─── Order ──────────────────────────────────────────────────────────────────
 
 export interface Order {
-  id:              string;
-  customerName:    string;
-  customerPhone:   string;
-  customerEmail?:  string;
-  storeName?:      string;
-  businessType?:   string;
-  packageType:     PackageType;
-  amount:          number;
-  paymentMethod:   'mayar' | 'manual_transfer';
-  paymentStatus:   'pending' | 'paid' | 'cancelled';
-  // Mayar.id integration
-  mayarPaymentId?:  string;
-  mayarPaymentUrl?: string;
+  id:                    string;
+  customerName:          string;
+  customerPhone:         string;
+  customerEmail?:        string;
+  storeName?:            string;
+  businessType?:         string;
+  packageType:           PackageType;
+  amount:                number;
+  paymentMethod:         'midtrans' | 'manual_transfer';
+  paymentStatus:         'pending' | 'paid' | 'cancelled';
+  // Midtrans integration
+  midtransPaymentToken?: string;
+  midtransRedirectUrl?:  string;
   // License activation
-  deviceId?:       string;
-  serialKey?:      string;
-  activatedAt?:    string;
+  deviceId?:             string;
+  serialKey?:            string;
+  activatedAt?:          string;
   // Email tracking
-  emailSentAt?:    string;
-  notes?:          string;
-  createdAt:       string;
+  emailSentAt?:          string;
+  notes?:                string;
+  createdAt:             string;
 }
 
 // ─── Packages ───────────────────────────────────────────────────────────────
@@ -91,28 +91,3 @@ export const PACKAGES: Record<PackageType, PackageDetail> = {
     popular: true,
   },
 };
-
-// ─── Mayar.id API Response Types ────────────────────────────────────────────
-
-export interface MayarCreatePaymentResponse {
-  status:  string;
-  data: {
-    id:          string;
-    paymentLink: string;
-    expiredAt?:  string;
-  };
-}
-
-export interface MayarWebhookPayload {
-  event:  string;
-  status: string;
-  data: {
-    id:          string;
-    status:      string;
-    amount:      number;
-    customerName?: string;
-    customerEmail?: string;
-    customerPhone?: string;
-    metadata?:   Record<string, string>;
-  };
-}

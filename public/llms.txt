@@ -1,0 +1,32 @@
+# POS OFFLINE
+
+> Aplikasi Kasir Android 100% Offline Tanpa Biaya Langganan Bulanan. Lisensi Permanen Sekali Bayar Seumur Hidup.
+
+POS OFFLINE adalah perangkat lunak kasir (*Point of Sale*) khusus perangkat Android yang didesain untuk pelaku UMKM, toko ritel, kafe, minimarket, dan toko kelontong di Indonesia yang menginginkan kebebasan dari biaya langganan bulanan (*zero subscription fee*).
+
+## Informasi Produk & Lisensi
+- **Nama Produk**: POS OFFLINE
+- **Platform**: Android (Smartphone & Tablet, OS 5.0 Lollipop ke atas)
+- **Harga Lisensi**: Rp 149.000 (Harga Promo Sekali Bayar, Permanen Seumur Hidup)
+- **Model Lisensi**: Lisensi 1-to-1 Device ID Lock (Aman, Resmi, & Bebas Biaya Berkala)
+- **Koneksi Internet**: 100% Tidak Butuh Internet untuk operasional harian kasir
+
+## Fitur Unggulan
+1. **100% Offline Tanpa Internet**: Data transaksi dan stok tersimpan di memori HP (SQLite lokal). Kasir tetap beroperasi meski sinyal mati atau mati lampu.
+2. **Cetak Struk Bluetooth Thermal**: Kompatibel dengan semua printer thermal Bluetooth ukuran 58mm dan 80mm standar pasaran.
+3. **Scan Barcode Cepat**: Menggunakan kamera bawaan HP Android atau barcode scanner eksternal untuk kasir cepat.
+4. **Manajemen Produk & Kategori**: Mendukung ribuan item produk, varian harga modal, harga jual, dan kontrol stok minimum.
+5. **Laporan Keuangan & Laba Bersih Otomatis**: Menghitung omzet harian/bulanan, laba kotor, laba bersih, dan produk terlaris secara instan tanpa perlu pembukuan manual.
+6. **Backup & Restore Database**: Cadangkan database transaksi ke penyimpanan internal atau Google Drive kapan saja dengan 1 klik.
+
+## Alur Pembelian & Aktivasi
+1. Kunjungi website resmi: https://www.posoffline.xyz/#checkout
+2. Isi formulir data usaha (Nama, Toko, WhatsApp, Email).
+3. Bayar Rp 149.000 via QRIS (GoPay, OVO, Dana, ShopeePay) atau Virtual Account melalui Midtrans Payment Gateway.
+4. Download file APK POS OFFLINE resmi dan klaim Serial Key instan di portal invoice pesanan.
+
+## Tautan Resmi
+- **Website Utama**: https://www.posoffline.xyz/
+- **Pemesanan Lisensi**: https://www.posoffline.xyz/#checkout
+- **Ketentuan Layanan**: https://www.posoffline.xyz/terms
+- **Kebijakan Privasi**: https://www.posoffline.xyz/privacy

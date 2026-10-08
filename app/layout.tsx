@@ -24,6 +24,9 @@ export const metadata: Metadata = {
     'kasir umkm indonesia',
     'software kasir toko',
   ],
+  alternates: {
+    canonical: '/',
+  },
   icons: {
     icon:    [{ url: '/favicon.png', sizes: '32x32', type: 'image/png' }],
     shortcut: '/favicon.png',
@@ -47,9 +50,53 @@ const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID;
 // ─── Root Layout ──────────────────────────────────────────────────────────────
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'SoftwareApplication',
+        '@id': `${siteUrl || 'https://www.posoffline.xyz'}#software`,
+        name: 'POS OFFLINE',
+        operatingSystem: 'Android 5.0 and up',
+        applicationCategory: 'BusinessApplication',
+        softwareVersion: '2.4.0',
+        description:
+          'Aplikasi kasir Android 100% offline tanpa biaya langganan bulanan. Cetak struk Bluetooth thermal, scan barcode kamera, manajemen stok, dan laporan laba otomatis.',
+        offers: {
+          '@type': 'Offer',
+          price: '149000',
+          priceCurrency: 'IDR',
+          priceValidUntil: '2027-12-31',
+          availability: 'https://schema.org/InStock',
+          url: siteUrl || 'https://www.posoffline.xyz',
+        },
+        aggregateRating: {
+          '@type': 'AggregateRating',
+          ratingValue: '4.9',
+          ratingCount: '165',
+          bestRating: '5',
+          worstRating: '1',
+        },
+      },
+      {
+        '@type': 'Organization',
+        '@id': `${siteUrl || 'https://www.posoffline.xyz'}#organization`,
+        name: 'POS OFFLINE',
+        url: siteUrl || 'https://www.posoffline.xyz',
+        logo: `${siteUrl || 'https://www.posoffline.xyz'}/icon.png`,
+      },
+    ],
+  };
+
   return (
     <html lang="id">
       <head>
+        {/* Schema Markup (JSON-LD) for Google Rich Snippets */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+
         {/* Meta Pixel Base Code: placed in <head> as requested by Meta */}
         {META_PIXEL_ID && (
           <script

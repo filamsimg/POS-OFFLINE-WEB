@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { PACKAGES, ADMIN_CONTACTS } from '@/lib/types';
 import { trackInitiateCheckout } from '@/lib/fpixel';
-import { CheckCircle2, Lock, ArrowRight, Loader2, ShieldCheck, Mail, MessageCircle } from 'lucide-react';
+import { CheckCircle2, Lock, ArrowRight, Loader2, ShieldCheck, Mail, MessageCircle, Clock, X } from 'lucide-react';
 
 declare global {
   interface Window {
@@ -83,6 +83,28 @@ export function CheckoutForm() {
   const [loading, setLoading]           = useState(false);
   const [error, setError]               = useState('');
   const [contactAdmin, setContactAdmin] = useState(false);
+  const [pendingResumeOrder, setPendingResumeOrder] = useState<{
+    id: string;
+    name?: string;
+    store?: string;
+    time: number;
+  } | null>(null);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('pos_last_pending_order');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Date.now() - parsed.time < 24 * 60 * 60 * 1000) {
+          setPendingResumeOrder(parsed);
+        } else {
+          localStorage.removeItem('pos_last_pending_order');
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
     setForm((prev) => ({ ...prev, [k]: e.target.value }));
@@ -129,37 +151,24 @@ export function CheckoutForm() {
         throw new Error(data.error ?? 'Gagal memproses pesanan.');
       }
 
-      // If Midtrans Snap token is present, launch Snap Modal right on the page
-      if (data.snapToken) {
-        await loadSnapScript(data.clientKey);
-        if (window.snap) {
-          window.snap.pay(data.snapToken, {
-            onSuccess: () => {
-              router.push(`/order/${data.orderId}`);
-            },
-            onPending: () => {
-              router.push(`/order/${data.orderId}`);
-            },
-            onError: () => {
-              setError('Pembayaran gagal atau dibatalkan. Silakan coba lagi.');
-              setLoading(false);
-            },
-            onClose: () => {
-              setError('Jendela pembayaran ditutup. Silakan klik tombol di bawah jika ingin melanjutkan pembayaran.');
-              setLoading(false);
-            },
-          });
-          return;
-        }
+      // ── Solusi 1 & 2: Simpan Sesi & Direct Redirect ke Halaman Order ────────
+      try {
+        localStorage.setItem(
+          'pos_last_pending_order',
+          JSON.stringify({
+            id: data.orderId,
+            name: form.customerName,
+            store: form.storeName,
+            time: Date.now(),
+          })
+        );
+      } catch {
+        // ignore
       }
 
-      // If Snap modal script blocked or external redirect URL provided
-      if (data.redirectUrl && data.redirectUrl.startsWith('http')) {
-        window.location.href = data.redirectUrl;
-        return;
-      }
-
-      throw new Error('Sesi pembayaran Midtrans tidak valid. Silakan coba beberapa saat lagi.');
+      // Langsung arahkan browser ke halaman order dengan flag auto-pay
+      router.push(`/order/${data.orderId}?pay=true`);
+      return;
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Terjadi gangguan jaringan.';
       setError(msg);
@@ -184,6 +193,109 @@ export function CheckoutForm() {
             Isi data di bawah. Setelah pembayaran, link APK & panduan aktivasi dikirim otomatis ke email Anda.
           </p>
         </div>
+
+        {/* Resume Active Pending Order Notification (Mobile-Friendly & High-Touch Target) */}
+        {pendingResumeOrder && (
+          <div
+            style={{
+              background: 'linear-gradient(135deg, rgba(234, 179, 8, 0.16), rgba(202, 138, 4, 0.08))',
+              border: '1px solid rgba(234, 179, 8, 0.45)',
+              borderRadius: 14,
+              padding: 'clamp(14px, 3.5vw, 18px)',
+              marginBottom: 24,
+              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)',
+            }}
+          >
+            {/* Top row: Icon + Order info + Dismiss button */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 14 }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                <div
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 8,
+                    background: 'rgba(234, 179, 8, 0.22)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    marginTop: 1,
+                  }}
+                >
+                  <Clock size={17} style={{ color: '#facc15' }} />
+                </div>
+                <div>
+                  <div style={{ fontSize: 13.5, fontWeight: 800, color: '#fef08a', lineHeight: 1.35 }}>
+                    Tagihan Belum Dibayar (#{pendingResumeOrder.id.slice(0, 8).toUpperCase()})
+                  </div>
+                  <div style={{ fontSize: 12, color: '#fde047', marginTop: 3, lineHeight: 1.45 }}>
+                    {pendingResumeOrder.store || pendingResumeOrder.name ? (
+                      <strong style={{ color: '#fff' }}>{pendingResumeOrder.store || pendingResumeOrder.name} · </strong>
+                    ) : null}
+                    Selesaikan pembayaran untuk klaim Serial Key instan.
+                  </div>
+                </div>
+              </div>
+
+              {/* Close X Button (Touch-friendly) */}
+              <button
+                type="button"
+                onClick={() => {
+                  localStorage.removeItem('pos_last_pending_order');
+                  setPendingResumeOrder(null);
+                }}
+                title="Tutup pemberitahuan"
+                aria-label="Tutup pemberitahuan"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  borderRadius: 8,
+                  color: '#cbd5e1',
+                  width: 30,
+                  height: 30,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  flexShrink: 0,
+                  padding: 0,
+                }}
+              >
+                <X size={15} />
+              </button>
+            </div>
+
+            {/* Single High-Converting Action: Lanjutkan Bayar */}
+            <div style={{ marginTop: 10 }}>
+              <button
+                type="button"
+                onClick={() => router.push(`/order/${pendingResumeOrder.id}?pay=true`)}
+                style={{
+                  width: '100%',
+                  minHeight: 46,
+                  background: 'linear-gradient(135deg, #facc15, #eab308)',
+                  color: '#090a02',
+                  fontWeight: 800,
+                  fontSize: 13.5,
+                  padding: '12px 20px',
+                  borderRadius: 10,
+                  border: 'none',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
+                  boxShadow: '0 4px 16px rgba(234, 179, 8, 0.35)',
+                  fontFamily: 'inherit',
+                  transition: 'transform 0.15s ease, filter 0.15s ease',
+                }}
+              >
+                <span>Lanjutkan Pembayaran Sekarang</span>
+                <ArrowRight size={16} />
+              </button>
+            </div>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} noValidate>
           {/* Package summary */}

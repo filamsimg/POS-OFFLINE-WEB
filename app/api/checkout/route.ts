@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
-import { createOrder } from '@/lib/db';
+import { createOrder, getRecentPendingOrderByPhone } from '@/lib/db';
 import { createMidtransSnapTransaction } from '@/lib/midtrans';
 import { PACKAGES, Order } from '@/lib/types';
 
@@ -66,6 +66,24 @@ export async function POST(req: NextRequest) {
         { error: 'Alamat email wajib diisi untuk pengiriman link APK.' },
         { status: 400 }
       );
+    }
+
+    // ── Anti-Spam & Resume Active Pending Order ─────────────────────────────
+    const existingPendingOrder = await getRecentPendingOrderByPhone(customerPhone.trim(), 24);
+    if (existingPendingOrder && existingPendingOrder.midtransPaymentToken) {
+      console.log(`[Checkout] Resuming active pending order ${existingPendingOrder.id} for phone ${customerPhone.trim()}`);
+      const clientKey =
+        process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY?.trim() ||
+        process.env.MIDTRANS_CLIENT_KEY?.trim() ||
+        '';
+
+      return NextResponse.json({
+        orderId:     existingPendingOrder.id,
+        snapToken:   existingPendingOrder.midtransPaymentToken,
+        redirectUrl: existingPendingOrder.midtransRedirectUrl,
+        clientKey,
+        resumed:     true,
+      });
     }
 
     // ── Pre-flight Server Key Check (Anti-Bypass & Anti-Ghost Order) ────────

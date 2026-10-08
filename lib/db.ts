@@ -122,6 +122,50 @@ export async function getOrderByMidtransToken(token: string): Promise<Order | nu
   return null;
 }
 
+/**
+ * Anti-Spam & Resume Order:
+ * Mencari pesanan pending dalam 24 jam terakhir dengan nomor telepon yang sama.
+ */
+export async function getRecentPendingOrderByPhone(
+  phone: string,
+  maxAgeHours = 24
+): Promise<Order | null> {
+  const clean = phone.replace(/[^0-9]/g, '');
+  const digitsOnly = clean.startsWith('62') ? '0' + clean.slice(2) : clean;
+
+  const sql = getNeonSql();
+  if (sql) {
+    try {
+      const rows = await sql`
+        SELECT * FROM orders 
+        WHERE (customer_phone = ${phone} OR REPLACE(customer_phone, '-', '') = ${clean} OR customer_phone = ${digitsOnly})
+          AND payment_status = 'pending'
+          AND midtrans_token IS NOT NULL
+          AND created_at >= NOW() - INTERVAL '24 hours'
+        ORDER BY created_at DESC 
+        LIMIT 1;
+      `;
+      if (rows && rows.length > 0) return mapRow(rows[0]);
+    } catch (err) {
+      console.warn('[DB] getRecentPendingOrderByPhone error:', err);
+    }
+  }
+
+  const cutoff = Date.now() - maxAgeHours * 60 * 60 * 1000;
+  for (const o of inMemoryOrders.values()) {
+    const oClean = o.customerPhone.replace(/[^0-9]/g, '');
+    if (
+      (o.customerPhone === phone || oClean === clean || oClean === digitsOnly) &&
+      o.paymentStatus === 'pending' &&
+      o.midtransPaymentToken &&
+      new Date(o.createdAt).getTime() >= cutoff
+    ) {
+      return o;
+    }
+  }
+  return null;
+}
+
 export async function updateOrderPaymentStatus(
   id: string,
   status: 'paid' | 'pending' | 'cancelled'

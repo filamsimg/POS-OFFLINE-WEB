@@ -196,6 +196,22 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
     }
   };
 
+  // ── Auto-Open Midtrans Snap Modal if redirected with ?pay=true ─────────────
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const isAutoPay = new URLSearchParams(window.location.search).get('pay') === 'true';
+    if (!isAutoPay || !order || order.paymentStatus === 'paid') return;
+    if (order.midtransPaymentToken && clientKey) {
+      const autoOpenedKey = `snap_auto_opened_${orderId}`;
+      if (!sessionStorage.getItem(autoOpenedKey)) {
+        sessionStorage.setItem(autoOpenedKey, '1');
+        setTimeout(() => {
+          handleOpenPayment();
+        }, 500);
+      }
+    }
+  }, [order, clientKey, orderId]);
+
   // ── Claim license ─────────────────────────────────────────────────────────────
   const handleClaim = async (e: React.FormEvent) => {
     e.preventDefault();

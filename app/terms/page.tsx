@@ -230,7 +230,7 @@ export default function TermsPage() {
               Jika Anda memiliki pertanyaan seputar syarat & ketentuan ini, konsultasi fitur, atau ingin mengajukan garansi, hubungi kontak resmi kami:
             </p>
             <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8, fontSize: 14 }}>
-              <div>🏢 <strong>Entitas Usaha:</strong> POS OFFLINE (Athena Shield Technology)</div>
+              <div>🏢 <strong>Entitas Usaha:</strong> POS OFFLINE (Nawasena Indonesia)</div>
               <div>📍 <strong>Alamat Operasional:</strong> Jl. Perintis Kemerdekaan No. 14, Tegal, Jawa Tengah 52121</div>
               <div>
                 💬 <strong>WhatsApp Dukungan Teknis:</strong>{' '}

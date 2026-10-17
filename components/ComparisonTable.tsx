@@ -1,184 +1,162 @@
-const ROWS = [
-  { label: 'Biaya Awal',             pos: 'Rp 149.000 sekali bayar',  rival: 'Rp 149.000/bulan', hiPos: true },
-  { label: 'Biaya Bulan Ke-12',      pos: 'Rp 0 (gratis selamanya)',   rival: 'Rp 1.788.000 total', hiPos: true },
-  { label: 'Bekerja Tanpa Internet', pos: 'Ya (100% Offline)',         rival: 'Tidak / Terbatas',   hiPos: true },
-  { label: 'Cetak Struk Bluetooth',  pos: 'Ya (50+ Merk Printer)',     rival: 'Ya (beberapa)',       hiPos: false },
-  { label: 'Scan Barcode',           pos: 'Ya (Kamera HP)',            rival: 'Ya',                 hiPos: false },
-  { label: 'Laporan Laba Bersih',    pos: 'Ya (Harian, Mingguan, Bulanan)', rival: 'Terbatas',     hiPos: true },
-  { label: 'Import Produk Excel',    pos: 'Ya (Template Disediakan)',  rival: 'Fitur Premium',      hiPos: true },
-  { label: 'Fitur Sistem Meja/KOT',  pos: 'Ya (Restoran / Kafe)',      rival: 'Hanya Plan Mahal',   hiPos: true },
-  { label: 'Perpanjangan Lisensi',   pos: 'Tidak perlu selamanya',      rival: 'Wajib tiap bulan',   hiPos: true },
-  { label: 'Dukungan WhatsApp',      pos: 'Ya (Tim Admin Langsung)',   rival: 'Tiket Support',      hiPos: true },
-];
+'use client';
+
+import { useState } from 'react';
 
 export function ComparisonTable() {
+  const [years, setYears] = useState<number>(1);
+
+  const months = years * 12;
+  const saasMonthly = 149000;
+  const saasCost = months * saasMonthly;
+  const posOfflineCost = 299000;
+  const totalSaved = saasCost - posOfflineCost;
+
   return (
-    <section
-      id="perbandingan"
-      className="section"
-      style={{ background: 'var(--clr-soil)' }}
-    >
-      <div className="container">
-        <div style={{ textAlign: 'center', marginBottom: 'clamp(40px, 6vw, 60px)' }}>
-          <div className="section-label" style={{ justifyContent: 'center' }}>Perbandingan</div>
-          <h2 className="heading-lg" style={{ marginBottom: 12 }}>
-            POS OFFLINE vs Aplikasi Kasir SaaS Langganan
-          </h2>
-          <p style={{ fontSize: 15, color: 'var(--clr-sand)', maxWidth: '52ch', margin: '0 auto', lineHeight: 1.7 }}>
-            Bayar sekali vs terus bayar tiap bulan, selisihnya jutaan rupiah dalam setahun.
-          </p>
+    <section id="kalkulator-hemat" className="mb-10 sm:mb-14">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+        
+        {/* Left: Interactive Savings Calculator */}
+        <div className="lg:col-span-5 bg-[#F3F4F6] rounded-[28px] p-5 sm:p-8 flex flex-col justify-between border border-zinc-200/70 shadow-sm">
+          <div>
+            <span className="text-xs font-mono uppercase tracking-widest text-zinc-500 block mb-2 font-semibold">
+              SIMULASI PENGHEMATAN TOKO
+            </span>
+            <h3 className="font-display font-bold text-2xl text-[#141414] mb-2 leading-snug">
+              Hitung Uang Modal yang Diselamatkan
+            </h3>
+            <p className="text-xs sm:text-sm text-zinc-600 mb-5 leading-relaxed">
+              Kasir langganan rata-rata mengenakan <strong>Rp 149.000/bulan</strong>. Geser durasi usaha Anda untuk melihat uang yang terselamatkan:
+            </p>
+
+            <div className="bg-white rounded-2xl p-4 sm:p-5 border border-zinc-200 mb-5 shadow-xs">
+              <div className="flex items-center justify-between mb-2">
+                <label htmlFor="yearSlider" className="text-xs font-bold uppercase text-zinc-600">
+                  Durasi Pemakaian Toko:
+                </label>
+                <span className="font-mono font-bold text-xs text-[#141414] bg-[#C8F53B] px-3 py-1 rounded-full">
+                  {years} Tahun ({months} Bulan)
+                </span>
+              </div>
+              <input
+                id="yearSlider"
+                type="range"
+                min="1"
+                max="3"
+                step="1"
+                value={years}
+                onChange={(e) => setYears(parseInt(e.target.value, 10))}
+                className="w-full accent-[#141414] cursor-pointer my-2"
+              />
+              <div className="flex justify-between text-[11px] font-mono text-zinc-400">
+                <span>1 Tahun</span>
+                <span>2 Tahun</span>
+                <span>3 Tahun</span>
+              </div>
+            </div>
+
+            <div className="space-y-2.5 text-xs sm:text-sm">
+              <div className="flex items-center justify-between p-3.5 rounded-xl bg-red-50 text-red-900 border border-red-100">
+                <span>Biaya Kasir Langganan:</span>
+                <span className="font-mono font-bold">Rp {saasCost.toLocaleString('id-ID')}</span>
+              </div>
+              <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#141414] text-white">
+                <span>POS OFFLINE (Sekali Bayar):</span>
+                <span className="font-mono font-bold text-[#C8F53B]">Rp 299.000</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 pt-4 border-t border-zinc-200 flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <span className="text-xs text-zinc-500 block font-semibold">Total Uang Toko yang Dihemat:</span>
+              <span className="font-mono font-bold text-2xl sm:text-3xl text-emerald-700">
+                Rp {totalSaved.toLocaleString('id-ID')}
+              </span>
+            </div>
+            <span className="text-xs font-bold bg-emerald-100 text-emerald-800 px-3 py-1.5 rounded-full">
+              Bisa Buat Tambah Stok!
+            </span>
+          </div>
         </div>
 
-        {/* Savings callout */}
-        <div
-          style={{
-            background: 'rgba(61,186,120,0.08)',
-            border: '1px solid rgba(61,186,120,0.25)',
-            borderRadius: 12,
-            padding: '16px 24px',
-            textAlign: 'center',
-            marginBottom: 20,
-            fontSize: 15,
-            color: 'var(--clr-cream)',
-            fontWeight: 600,
-          }}
-        >
-          💰 Dengan POS OFFLINE, Anda hemat{' '}
-          <span style={{ color: 'var(--clr-leaf)', fontWeight: 800 }}>Rp 1.639.000</span>{' '}
-          di tahun pertama dibanding aplikasi kasir SaaS berlangganan.
+        {/* Right: Clean Comparison Table with Guaranteed Mobile Scroll */}
+        <div className="lg:col-span-7 bg-[#141414] text-white rounded-[28px] p-5 sm:p-8 flex flex-col justify-between border border-white/10 shadow-sm">
+          <div>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+              <div>
+                <h3 className="font-display font-bold text-xl sm:text-2xl leading-snug text-white">
+                  Perbandingan Jujur: POS OFFLINE vs Langganan
+                </h3>
+                <p className="text-xs text-zinc-400 mt-1">
+                  Hemat 83% di tahun pertama (Rp 1,48 Juta) dibanding langganan bulanan.
+                </p>
+              </div>
+              <span className="self-start sm:self-auto text-xs font-mono text-[#C8F53B] bg-white/10 px-3 py-1 rounded-full font-bold shrink-0">
+                Hemat 83%+
+              </span>
+            </div>
+
+            {/* Mobile swipe hint */}
+            <div className="sm:hidden text-[11px] font-mono text-zinc-400 mb-2 flex items-center gap-1.5">
+              <span>← Geser tabel ke kanan untuk melihat rincian →</span>
+            </div>
+
+            {/* Scroll Container */}
+            <div className="overflow-x-auto -mx-1 sm:mx-0 pb-2">
+              <table className="min-w-[480px] w-full text-left border-collapse text-xs sm:text-sm">
+                <thead>
+                  <tr className="border-b border-white/15 text-zinc-400 font-mono text-xs">
+                    <th className="py-3 pr-3 font-semibold">Fitur & Kebutuhan</th>
+                    <th className="py-3 px-3 text-[#C8F53B] font-bold">POS OFFLINE</th>
+                    <th className="py-3 pl-3 text-zinc-400 font-semibold">Kasir Langganan (SaaS)</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/10">
+                  <tr>
+                    <td className="py-3.5 pr-3 font-medium">Biaya Bulan ke-2 s/d Seterusnya</td>
+                    <td className="py-3.5 px-3 font-mono font-bold text-[#C8F53B]">✓ Rp 0 (Bebas Biaya Selamanya)</td>
+                    <td className="py-3.5 pl-3 text-zinc-400">Wajib bayar tiap bulan</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3.5 pr-3 font-medium">100% Offline Tanpa Sinyal</td>
+                    <td className="py-3.5 px-3 font-semibold text-white">✓ Jalan Terus di Memori HP</td>
+                    <td className="py-3.5 pl-3 text-zinc-400">Kasir macet / terhambat</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3.5 pr-3 font-medium">Multi-Currency (Mata Uang Asing)</td>
+                    <td className="py-3.5 px-3 font-semibold text-white">✓ Sudah Termasuk (IDR, USD, dll)</td>
+                    <td className="py-3.5 pl-3 text-zinc-400">Khusus paket enterprise mahal</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3.5 pr-3 font-medium">Bahan Baku & Peringatan Expired</td>
+                    <td className="py-3.5 px-3 font-semibold text-white">✓ Pantau Stok & Peringatan Dini</td>
+                    <td className="py-3.5 pl-3 text-zinc-400">Add-on berbayar tambahan</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3.5 pr-3 font-medium">Catat Pengeluaran Toko (Expense)</td>
+                    <td className="py-3.5 px-3 font-semibold text-white">✓ Hitung Laba Bersih Riil Otomatis</td>
+                    <td className="py-3.5 pl-3 text-zinc-400">Modul akuntansi terpisah</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3.5 pr-3 font-medium">Import Massal Produk via Excel</td>
+                    <td className="py-3.5 px-3 font-semibold text-white">✓ Template 10 Detik Siap Pakai</td>
+                    <td className="py-3.5 pl-3 text-zinc-400">Harus paket mahal</td>
+                  </tr>
+                  <tr>
+                    <td className="py-3.5 pr-3 font-medium">Dukungan & Setup Awal</td>
+                    <td className="py-3.5 px-3 font-semibold text-white">✓ Chat WA Langsung Tim Resmi</td>
+                    <td className="py-3.5 pl-3 text-zinc-400">Antre tiket bot email</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="pt-3 border-t border-white/10 text-[11px] text-zinc-400">
+            * Perhitungan berdasarkan rata-rata biaya langganan aplikasi kasir SaaS populer di Indonesia (Rp 149.000/bln).
+          </div>
         </div>
 
-        {/* Mobile Swipe Hint & Table Styles */}
-        <style>{`
-          .comp-table {
-            width: 100%;
-            min-width: 540px;
-            border-collapse: collapse;
-            font-size: 14px;
-          }
-          .comp-table tbody tr {
-            transition: background-color 0.15s ease;
-          }
-          .comp-table tbody tr:hover {
-            background: rgba(34, 197, 94, 0.08) !important;
-          }
-          .comp-pos-col {
-            background: rgba(34, 197, 94, 0.03);
-            border-left: 1px solid rgba(34, 197, 94, 0.15);
-            border-right: 1px solid rgba(34, 197, 94, 0.15);
-          }
-        `}</style>
-        <div className="mobile-table-hint">
-          <span>👉 Geser ke kanan untuk melihat perbandingan</span>
-        </div>
-
-        {/* Table */}
-        <div
-          style={{
-            overflowX: 'auto',
-            borderRadius: 16,
-            border: '1px solid var(--clr-sage)',
-            WebkitOverflowScrolling: 'touch',
-          }}
-        >
-          <table className="comp-table">
-            <thead>
-              <tr style={{ background: 'var(--clr-moss)', borderBottom: '2px solid var(--clr-sage)' }}>
-                <th
-                  style={{
-                    padding: '14px 20px',
-                    textAlign: 'left',
-                    color: 'var(--clr-sand)',
-                    fontWeight: 600,
-                    fontSize: 12,
-                    letterSpacing: '0.05em',
-                    textTransform: 'uppercase',
-                    width: '34%',
-                  }}
-                >
-                  Fitur
-                </th>
-                <th
-                  className="comp-pos-col"
-                  style={{
-                    padding: '14px 20px',
-                    textAlign: 'center',
-                    color: 'var(--clr-leaf)',
-                    fontWeight: 800,
-                    width: '33%',
-                  }}
-                >
-                  POS OFFLINE
-                </th>
-                <th
-                  style={{
-                    padding: '14px 20px',
-                    textAlign: 'center',
-                    color: 'var(--clr-fog)',
-                    fontWeight: 600,
-                    width: '33%',
-                  }}
-                >
-                  Kasir SaaS (Langganan)
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {ROWS.map((row, i) => (
-                <tr
-                  key={row.label}
-                  style={{
-                    background: i % 2 === 0 ? 'var(--clr-soil)' : 'var(--clr-forest)',
-                    borderBottom: i < ROWS.length - 1 ? '1px solid var(--clr-sage)' : 'none',
-                  }}
-                >
-                  <td
-                    style={{
-                      padding: '13px 20px',
-                      color: 'var(--clr-sand)',
-                      fontSize: 13,
-                      fontWeight: 500,
-                    }}
-                  >
-                    {row.label}
-                  </td>
-                  <td
-                    className="comp-pos-col"
-                    style={{
-                      padding: '13px 20px',
-                      textAlign: 'center',
-                      color: row.hiPos ? 'var(--clr-leaf)' : 'var(--clr-cream)',
-                      fontWeight: row.hiPos ? 700 : 500,
-                      fontSize: 13,
-                    }}
-                  >
-                    {row.hiPos && (
-                      <span style={{ marginRight: 6 }}>✓</span>
-                    )}
-                    {row.pos}
-                  </td>
-                  <td
-                    style={{
-                      padding: '13px 20px',
-                      textAlign: 'center',
-                      color: 'var(--clr-fog)',
-                      fontSize: 13,
-                    }}
-                  >
-                    {row.rival}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* CTA */}
-        <div style={{ textAlign: 'center', marginTop: 36 }}>
-          <a href="#checkout" className="btn-primary btn-shimmer" style={{ fontSize: 16, padding: '15px 36px' }}>
-            Mulai Hemat Sekarang (Rp 149.000)
-          </a>
-        </div>
       </div>
     </section>
   );

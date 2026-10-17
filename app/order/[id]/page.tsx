@@ -91,6 +91,9 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
   const [syncMessage, setSyncMessage]   = useState<{ text: string; type: 'info' | 'success' | 'warn' } | null>(null);
   const [clientKey, setClientKey]       = useState('');
 
+  const ariyo = ADMIN_CONTACTS.find((c) => c.id === 'ariyo') || ADMIN_CONTACTS[0];
+  const filamsi = ADMIN_CONTACTS.find((c) => c.id === 'filamsi') || ADMIN_CONTACTS[1];
+
   // ── Fetch order ─────────────────────────────────────────────────────────────
   useEffect(() => {
     async function load() {
@@ -445,7 +448,7 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
 
             {/* ── Action buttons: Pay now & Sync status ─────────────────────── */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
-              {(order?.midtransPaymentToken || order?.midtransRedirectUrl) && (
+              {(order?.midtransPaymentToken || order?.midtransRedirectUrl) ? (
                 <button
                   type="button"
                   onClick={handleOpenPayment}
@@ -467,9 +470,58 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
                   }}
                 >
                   <CreditCard size={16} />
-                  Lanjutkan Pembayaran (QRIS / Virtual Account)
+                  Lanjutkan Pembayaran Instan (Snap)
                   <ExternalLink size={13} style={{ opacity: 0.8 }} />
                 </button>
+              ) : (
+                <div
+                  style={{
+                    background:   '#ffffff',
+                    border:       '1.5px dashed #cbd5e1',
+                    borderRadius: 12,
+                    padding:      '16px',
+                    display:      'flex',
+                    flexDirection:'column',
+                    gap:          12,
+                  }}
+                >
+                  <div style={{ fontSize: 13, fontWeight: 800, color: C.text }}>
+                    Petunjuk Pembayaran Transfer Bank &amp; QRIS
+                  </div>
+                  <div style={{ fontSize: 12, color: C.muted, lineHeight: 1.5 }}>
+                    Silakan transfer tepat senilai <strong style={{ color: '#16a34a' }}>Rp 299.000</strong> ke rekening admin atau minta QRIS toko resmi via WhatsApp tim kami:
+                  </div>
+
+                  <a
+                    href={`https://wa.me/${ariyo?.waNumber || '6285168828063'}?text=${encodeURIComponent(
+                      `Halo Mas Ariyo, saya ingin konfirmasi pembayaran pesanan POS OFFLINE.\n` +
+                      `No. Pesanan: #${orderId.slice(0, 8).toUpperCase()}\n` +
+                      `Nama: ${order?.customerName ?? '-'}\n` +
+                      `Toko: ${order?.storeName ?? '-'}\n` +
+                      `Total: Rp 299.000\n` +
+                      `Mohon info rekening atau QRIS resmi untuk transfer.`
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display:        'flex',
+                      alignItems:     'center',
+                      justifyContent: 'center',
+                      gap:            8,
+                      background:     '#25D366',
+                      color:          '#ffffff',
+                      borderRadius:   10,
+                      padding:        '12px 16px',
+                      fontSize:       13,
+                      fontWeight:     800,
+                      textDecoration: 'none',
+                      boxShadow:      '0 2px 10px rgba(37, 211, 102, 0.25)',
+                    }}
+                  >
+                    <MessageCircle size={16} />
+                    Konfirmasi Pembayaran via WhatsApp ({ariyo.name}) →
+                  </a>
+                </div>
               )}
 
               <button

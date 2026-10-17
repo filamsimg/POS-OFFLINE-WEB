@@ -14,6 +14,7 @@ export interface CreateSnapTransactionParams {
   customerPhone: string;
   productName?: string;
   successUrl?: string;
+  enabledPayments?: string[];
 }
 
 export interface SnapTransactionResult {
@@ -49,6 +50,19 @@ function getMidtransConfig() {
   };
 }
 
+export function isMidtransConfigured(): boolean {
+  const serverKey = process.env.MIDTRANS_SERVER_KEY?.trim() || '';
+  if (!serverKey) return false;
+  if (
+    serverKey.includes('masukkan_server_key') ||
+    serverKey.includes('xxxxxxxx') ||
+    serverKey.length < 12
+  ) {
+    return false;
+  }
+  return true;
+}
+
 export async function createMidtransSnapTransaction({
   orderId,
   amount,
@@ -57,6 +71,7 @@ export async function createMidtransSnapTransaction({
   customerPhone,
   productName = 'Lisensi Software POS OFFLINE Permanen',
   successUrl,
+  enabledPayments,
 }: CreateSnapTransactionParams): Promise<SnapTransactionResult> {
   const { serverKey, snapBaseUrl } = getMidtransConfig();
   if (!serverKey) {
@@ -83,6 +98,7 @@ export async function createMidtransSnapTransaction({
       email: customerEmail,
       phone: customerPhone,
     },
+    enabled_payments: enabledPayments && enabledPayments.length > 0 ? enabledPayments : undefined,
     callbacks: successUrl ? { finish: successUrl } : undefined,
   };
 

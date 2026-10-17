@@ -171,7 +171,7 @@ export function UrgencyBar() {
               {/* Teks Penawaran */}
               <span>
                 Lisensi Permanen{' '}
-                <strong style={{ color: '#4ade80', fontWeight: 800 }}>Rp 149.000</strong>
+                <strong style={{ color: '#4ade80', fontWeight: 800 }}>Rp 299.000</strong>
                 <span className="text-desktop-only"> (Sekali Bayar)</span>
               </span>
 

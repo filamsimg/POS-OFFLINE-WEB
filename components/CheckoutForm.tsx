@@ -4,84 +4,71 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { PACKAGES, ADMIN_CONTACTS } from '@/lib/types';
 import { trackInitiateCheckout } from '@/lib/fpixel';
-import { CheckCircle2, Lock, ArrowRight, Loader2, ShieldCheck, Mail, MessageCircle, Clock, X } from 'lucide-react';
 
-declare global {
-  interface Window {
-    fbq?: (...args: unknown[]) => void;
-    snap?: {
-      pay: (
-        token: string,
-        options: {
-          onSuccess?: (result: unknown) => void;
-          onPending?: (result: unknown) => void;
-          onError?: (result: unknown) => void;
-          onClose?: () => void;
-        }
-      ) => void;
-    };
-  }
-}
+const BUSINESS_PRESETS = [
+  { id: 'Warung & Sembako', label: 'Warung & Sembako' },
+  { id: 'Kafe & Resto', label: 'Kafe & Resto' },
+  { id: 'Fashion & Butik', label: 'Fashion & Butik' },
+  { id: 'Apotek & Obat', label: 'Apotek & Obat' },
+  { id: 'Bengkel & Jasa', label: 'Bengkel & Jasa' },
+  { id: 'Usaha Lainnya', label: 'Usaha Lainnya' },
+];
 
-const loadSnapScript = (clientKeyFromApi?: string): Promise<void> => {
-  return new Promise((resolve) => {
-    if (typeof window === 'undefined') return resolve();
-    if (window.snap) return resolve();
-
-    const clientKey =
-      clientKeyFromApi?.trim() ||
-      process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY?.trim() ||
-      '';
-    const isSandboxKey = clientKey.startsWith('SB-');
-    const isExplicitProd = process.env.NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION === 'true';
-    const isProduction =
-      !isSandboxKey && (isExplicitProd || process.env.NEXT_PUBLIC_MIDTRANS_IS_PRODUCTION !== 'false');
-
-    const scriptSrc = isProduction
-      ? 'https://app.midtrans.com/snap/snap.js'
-      : 'https://app.sandbox.midtrans.com/snap/snap.js';
-
-    const existingScript = document.querySelector(`script[src*="snap.js"]`);
-    if (existingScript) return resolve();
-
-    const script = document.createElement('script');
-    script.src = scriptSrc;
-    if (clientKey) {
-      script.setAttribute('data-client-key', clientKey);
-    }
-    script.onload = () => resolve();
-    script.onerror = () => resolve();
-    document.body.appendChild(script);
-  });
-};
-
-const BUSINESS_TYPES = [
-  'Toko Kelontong / Sembako',
-  'Kafe / Warung Makan / Restoran',
-  'Fashion / Pakaian / Butik',
-  'Apotek / Toko Obat',
-  'Toko Bangunan / Material',
-  'Minimarket',
-  'Bengkel / Cuci Motor',
-  'Toko Elektronik',
-  'Usaha Lainnya',
+const PAYMENT_OPTIONS = [
+  {
+    id: 'qris',
+    name: 'QRIS Instan',
+    desc: 'GoPay, OVO, Dana, ShopeePay & Semua m-Banking',
+    tag: 'Terpopuler',
+  },
+  {
+    id: 'bca',
+    name: 'BCA Virtual Account',
+    desc: 'BCA Mobile, myBCA, KlikBCA & ATM BCA',
+    tag: 'Otomatis 24 Jam',
+  },
+  {
+    id: 'mandiri',
+    name: 'Mandiri Bill / VA',
+    desc: 'Livin by Mandiri & ATM Mandiri',
+    tag: 'Otomatis 24 Jam',
+  },
+  {
+    id: 'bri',
+    name: 'BRI Virtual Account',
+    desc: 'BRImo & ATM Bank BRI',
+    tag: 'Otomatis 24 Jam',
+  },
+  {
+    id: 'bni',
+    name: 'BNI Virtual Account',
+    desc: 'BNI Mobile Banking & ATM BNI',
+    tag: 'Otomatis 24 Jam',
+  },
+  {
+    id: 'manual',
+    name: 'Transfer Bank Manual',
+    desc: 'Transfer Rekening & Konfirmasi WhatsApp',
+    tag: 'Alternatif',
+  },
 ];
 
 export function CheckoutForm() {
-  const router  = useRouter();
-  const pkg     = PACKAGES['software_only'];
+  const router = useRouter();
+  const pkg = PACKAGES['software_only'];
 
   const [form, setForm] = useState({
-    customerName:   '',
-    customerPhone:  '',
-    customerEmail:  '',
-    storeName:      '',
-    businessType:   BUSINESS_TYPES[0],
-    notes:          '',
+    customerName: '',
+    customerPhone: '',
+    customerEmail: '',
+    storeName: '',
+    businessType: BUSINESS_PRESETS[0].id,
+    notes: '',
   });
 
-  const [loading, setLoading]           = useState(false);
-  const [error, setError]               = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<'qris' | 'bca' | 'mandiri' | 'bri' | 'bni' | 'manual'>('qris');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [contactAdmin, setContactAdmin] = useState(false);
   const [pendingResumeOrder, setPendingResumeOrder] = useState<{
     id: string;
@@ -106,29 +93,29 @@ export function CheckoutForm() {
     }
   }, []);
 
-  const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
-    setForm((prev) => ({ ...prev, [k]: e.target.value }));
+  const filamsi = ADMIN_CONTACTS.find((c) => c.id === 'filamsi') || ADMIN_CONTACTS[1];
+  const ariyo = ADMIN_CONTACTS.find((c) => c.id === 'ariyo') || ADMIN_CONTACTS[0];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setContactAdmin(false);
 
-    // Basic validation
     if (!form.customerName.trim()) {
       setError('Nama lengkap wajib diisi.');
       return;
     }
     if (!form.customerPhone.trim() || form.customerPhone.trim().length < 9) {
-      setError('Nomor WhatsApp tidak valid.');
+      setError('Nomor WhatsApp tidak valid. Masukkan nomor aktif Anda.');
       return;
     }
     if (!form.customerEmail.trim() || !form.customerEmail.includes('@')) {
-      setError('Alamat email wajib diisi karena link APK akan dikirim ke email ini setelah pembayaran.');
+      setError('Alamat email wajib diisi karena link installer APK resmi akan dikirim otomatis ke email ini.');
       return;
     }
 
-    // Fire Meta Pixel InitiateCheckout with accurate package price
+    setLoading(true);
+
     trackInitiateCheckout({
       content_name: `Lisensi Software POS OFFLINE (${pkg.name})`,
       value: pkg.price,
@@ -139,7 +126,7 @@ export function CheckoutForm() {
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, paymentMethod }),
       });
 
       const data = await res.json();
@@ -151,7 +138,6 @@ export function CheckoutForm() {
         throw new Error(data.error ?? 'Gagal memproses pesanan.');
       }
 
-      // ── Solusi 1 & 2: Simpan Sesi & Direct Redirect ke Halaman Order ────────
       try {
         localStorage.setItem(
           'pos_last_pending_order',
@@ -166,8 +152,11 @@ export function CheckoutForm() {
         // ignore
       }
 
-      // Langsung arahkan browser ke halaman order dengan flag auto-pay
-      router.push(`/order/${data.orderId}?pay=true`);
+      if (data.manualTransfer) {
+        router.push(`/order/${data.orderId}`);
+      } else {
+        router.push(`/order/${data.orderId}?pay=true`);
+      }
       return;
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Terjadi gangguan jaringan.';
@@ -177,449 +166,352 @@ export function CheckoutForm() {
   };
 
   return (
-    <section
-      id="checkout"
-      className="section"
-      style={{ background: 'var(--clr-forest)', scrollMarginTop: 20 }}
-    >
-      <div className="container" style={{ maxWidth: 680 }}>
-        {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: 40 }}>
-          <div className="section-label" style={{ justifyContent: 'center' }}>Pemesanan</div>
-          <h2 className="heading-lg" style={{ marginBottom: 12 }}>
-            Dapatkan Lisensi Permanen Anda
-          </h2>
-          <p style={{ fontSize: 14, color: 'var(--clr-sand)', lineHeight: 1.7 }}>
-            Isi data di bawah. Setelah pembayaran, link APK & panduan aktivasi dikirim otomatis ke email Anda.
+    <section id="checkout-manusiawi" className="bg-[#F3F4F6] rounded-[28px] p-4 sm:p-8 md:p-10 mb-12 border border-zinc-200/60 shadow-sm">
+      
+      {/* 1. Step Expectation Banner (Eliminates Post-Payment Anxiety) */}
+      <div className="mb-8 pb-7 border-b border-zinc-200">
+        <span className="text-xs font-mono uppercase tracking-widest text-zinc-500 block mb-2 font-semibold">
+          TRANSPARAN & TANPA RIBET
+        </span>
+        <h2 className="font-display font-bold text-2xl sm:text-3xl text-[#141414] mb-5 leading-snug">
+          Apa yang Terjadi Setelah Anda Klik Bayar?
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+          <div className="bg-white rounded-2xl p-4 border border-zinc-200 flex items-start gap-3 shadow-xs">
+            <span className="w-7 h-7 rounded-full bg-[#C8F53B] text-[#141414] font-mono font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
+              1
+            </span>
+            <div>
+              <div className="font-bold text-sm text-[#141414]">Isi Data & Bayar Instan</div>
+              <p className="text-xs text-zinc-600 mt-1 leading-relaxed">
+                Mendukung QRIS (GoPay, OVO, Dana, ShopeePay, m-Banking) serta Virtual Account BCA, Mandiri, BRI, BNI.
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl p-4 border border-zinc-200 flex items-start gap-3 shadow-xs">
+            <span className="w-7 h-7 rounded-full bg-[#C8F53B] text-[#141414] font-mono font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
+              2
+            </span>
+            <div>
+              <div className="font-bold text-sm text-[#141414]">Link APK & Serial Key Masuk</div>
+              <p className="text-xs text-zinc-600 mt-1 leading-relaxed">
+                Kurang dari 1 menit setelah verifikasi, file installer resmi dan kode lisensi permanen dikirim ke Email & WA Anda.
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl p-4 border border-zinc-200 flex items-start gap-3 shadow-xs">
+            <span className="w-7 h-7 rounded-full bg-[#C8F53B] text-[#141414] font-mono font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
+              3
+            </span>
+            <div>
+              <div className="font-bold text-sm text-[#141414]">Aktif Selamanya di Toko</div>
+              <p className="text-xs text-zinc-600 mt-1 leading-relaxed">
+                Masukkan kode aktivasi 1 kali, dan aplikasi kasir Anda langsung aktif seumur hidup tanpa biaya langganan bulanan.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Resume Pending Order Notification if exists */}
+      {pendingResumeOrder && (
+        <div className="mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-200 flex flex-wrap items-center justify-between gap-3 text-xs sm:text-sm text-amber-900">
+          <div>
+            <strong>Lanjutkan Pesanan Sebelumnya:</strong> Ada pesanan aktif atas nama{' '}
+            <strong>{pendingResumeOrder.name || 'Anda'}</strong>.
+          </div>
+          <button
+            type="button"
+            onClick={() => router.push(`/order/${pendingResumeOrder.id}?pay=true`)}
+            className="px-4 py-2 bg-[#141414] text-[#C8F53B] rounded-xl font-bold text-xs hover:bg-zinc-800 transition"
+          >
+            Lanjut Bayar Pesanan Ini →
+          </button>
+        </div>
+      )}
+
+      {/* 2. Main Checkout Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        {/* Left Column: What You Get Summary Card */}
+        <div className="lg:col-span-5 bg-[#141414] text-white rounded-[24px] p-5 sm:p-7 border border-white/10 shadow-md">
+          <div className="inline-block bg-[#C8F53B] text-[#141414] text-xs font-mono font-bold px-3 py-1 rounded-full mb-4">
+            DISKON 54% • LISENSI PERMANEN
+          </div>
+          <h3 className="font-display font-bold text-2xl mb-1 leading-snug">
+            Paket Lengkap POS OFFLINE
+          </h3>
+          <p className="text-xs text-zinc-400 mb-5 leading-relaxed">
+            Satu kali pembayaran untuk ketenangan usaha bertahun-tahun.
           </p>
+
+          <div className="flex items-baseline gap-3 pb-5 mb-5 border-b border-white/10">
+            <span className="font-mono font-bold text-3xl sm:text-4xl text-[#C8F53B]">
+              Rp 299.000
+            </span>
+            <span className="font-mono text-sm text-zinc-500 line-through">
+              Rp 650.000
+            </span>
+            <span className="text-xs text-zinc-300">/ Sekali Bayar</span>
+          </div>
+
+          <ul className="space-y-3 text-xs sm:text-[13px] text-zinc-200 mb-6">
+            <li className="flex items-center gap-2.5">
+              <span className="text-[#C8F53B] font-bold">✓</span> File APK POS OFFLINE Full Version Resmi
+            </li>
+            <li className="flex items-center gap-2.5">
+              <span className="text-[#C8F53B] font-bold">✓</span> 1x Serial Key Lisensi Permanen (Tidak Kedaluwarsa)
+            </li>
+            <li className="flex items-center gap-2.5">
+              <span className="text-[#C8F53B] font-bold">✓</span> Fitur Multi-Currency, Catat Expense & Bahan Baku
+            </li>
+            <li className="flex items-center gap-2.5">
+              <span className="text-[#C8F53B] font-bold">✓</span> Peringatan Expired Date & Database Membership
+            </li>
+            <li className="flex items-center gap-2.5">
+              <span className="text-[#C8F53B] font-bold">✓</span> 11 Video Tutorial Panduan Lengkap
+            </li>
+            <li className="flex items-center gap-2.5">
+              <span className="text-[#C8F53B] font-bold">✓</span> Template Excel Import Ratusan Produk Seketika
+            </li>
+            <li className="flex items-center gap-2.5">
+              <span className="text-[#C8F53B] font-bold">✓</span> Dukungan Teknis Langsung via WhatsApp Resmi
+            </li>
+          </ul>
+
+          <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 text-xs text-zinc-300 leading-relaxed">
+            🔒 <strong>Garansi Lisensi Resmi:</strong> Jika ganti HP baru di kemudian hari, tim kami siap membantu pemindahan lisensi permanen Anda secara gratis.
+          </div>
         </div>
 
-        {/* Resume Active Pending Order Notification (Mobile-Friendly & High-Touch Target) */}
-        {pendingResumeOrder && (
-          <div
-            style={{
-              background: 'linear-gradient(135deg, rgba(234, 179, 8, 0.16), rgba(202, 138, 4, 0.08))',
-              border: '1px solid rgba(234, 179, 8, 0.45)',
-              borderRadius: 14,
-              padding: 'clamp(14px, 3.5vw, 18px)',
-              marginBottom: 24,
-              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)',
-            }}
-          >
-            {/* Top row: Icon + Order info + Dismiss button */}
-            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 14 }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                <div
-                  style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: 8,
-                    background: 'rgba(234, 179, 8, 0.22)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                    marginTop: 1,
-                  }}
-                >
-                  <Clock size={17} style={{ color: '#facc15' }} />
-                </div>
-                <div>
-                  <div style={{ fontSize: 13.5, fontWeight: 800, color: '#fef08a', lineHeight: 1.35 }}>
-                    Tagihan Belum Dibayar (#{pendingResumeOrder.id.slice(0, 8).toUpperCase()})
-                  </div>
-                  <div style={{ fontSize: 12, color: '#fde047', marginTop: 3, lineHeight: 1.45 }}>
-                    {pendingResumeOrder.store || pendingResumeOrder.name ? (
-                      <strong style={{ color: '#fff' }}>{pendingResumeOrder.store || pendingResumeOrder.name} · </strong>
-                    ) : null}
-                    Selesaikan pembayaran untuk klaim Serial Key instan.
-                  </div>
-                </div>
-              </div>
+        {/* Right Column: Progressive Touch-Friendly Form */}
+        <form
+          onSubmit={handleSubmit}
+          className="lg:col-span-7 bg-white rounded-[24px] p-5 sm:p-8 border border-zinc-200 shadow-sm"
+        >
+          <h3 className="font-display font-bold text-xl text-[#141414] mb-1">
+            Data Penerima Lisensi & Toko
+          </h3>
+          <p className="text-xs text-zinc-500 mb-6">
+            Pastikan data di bawah terisi benar agar pengiriman file installer APK & Serial Key otomatis berjalan lancar.
+          </p>
 
-              {/* Close X Button (Touch-friendly) */}
-              <button
-                type="button"
-                onClick={() => {
-                  localStorage.removeItem('pos_last_pending_order');
-                  setPendingResumeOrder(null);
-                }}
-                title="Tutup pemberitahuan"
-                aria-label="Tutup pemberitahuan"
-                style={{
-                  background: 'rgba(255, 255, 255, 0.08)',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
-                  borderRadius: 8,
-                  color: '#cbd5e1',
-                  width: 30,
-                  height: 30,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  flexShrink: 0,
-                  padding: 0,
-                }}
-              >
-                <X size={15} />
-              </button>
-            </div>
-
-            {/* Single High-Converting Action: Lanjutkan Bayar */}
-            <div style={{ marginTop: 10 }}>
-              <button
-                type="button"
-                onClick={() => router.push(`/order/${pendingResumeOrder.id}?pay=true`)}
-                style={{
-                  width: '100%',
-                  minHeight: 46,
-                  background: 'linear-gradient(135deg, #facc15, #eab308)',
-                  color: '#090a02',
-                  fontWeight: 800,
-                  fontSize: 13.5,
-                  padding: '12px 20px',
-                  borderRadius: 10,
-                  border: 'none',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: 8,
-                  boxShadow: '0 4px 16px rgba(234, 179, 8, 0.35)',
-                  fontFamily: 'inherit',
-                  transition: 'transform 0.15s ease, filter 0.15s ease',
-                }}
-              >
-                <span>Lanjutkan Pembayaran Sekarang</span>
-                <ArrowRight size={16} />
-              </button>
-            </div>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} noValidate>
-          {/* Package summary */}
-          <div
-            style={{
-              background: 'var(--clr-moss)',
-              border: '1px solid var(--clr-leaf)',
-              borderRadius: 14,
-              padding: 'clamp(16px, 4vw, 22px)',
-              marginBottom: 16,
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 14, flexWrap: 'wrap' }}>
-              <div style={{ flex: '1 1 240px' }}>
-                <div
-                  style={{
-                    display: 'inline-block',
-                    background: 'rgba(61,186,120,0.12)',
-                    border: '1px solid rgba(61,186,120,0.25)',
-                    borderRadius: 6,
-                    padding: '3px 10px',
-                    fontSize: 10,
-                    fontWeight: 700,
-                    color: 'var(--clr-mint)',
-                    letterSpacing: '0.06em',
-                    marginBottom: 8,
-                  }}
-                >
-                  {pkg.badge}
-                </div>
-                <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--clr-cream)', marginBottom: 4 }}>
-                  {pkg.name}
-                </div>
-                <div style={{ fontSize: 13, color: 'var(--clr-sand)', lineHeight: 1.5 }}>{pkg.description}</div>
-              </div>
-              <div style={{ textAlign: 'right', flexShrink: 0, alignSelf: 'center' }}>
-                <div style={{ fontSize: 12, color: 'var(--clr-fog)', textDecoration: 'line-through' }}>
-                  Rp {pkg.originalPrice.toLocaleString('id-ID')}
-                </div>
-                <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--clr-leaf)', letterSpacing: '-0.03em' }}>
-                  Rp {pkg.price.toLocaleString('id-ID')}
-                </div>
-                <div style={{ fontSize: 11, color: 'var(--clr-fog)' }}>Sekali Bayar</div>
-              </div>
-            </div>
-
-            <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid var(--clr-sage)' }}>
-              <ul
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-                  gap: '6px 16px',
-                  margin: 0,
-                  padding: 0,
-                  listStyle: 'none',
-                }}
-              >
-                {pkg.features.map((f) => (
-                  <li
-                    key={f}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'flex-start',
-                      gap: 8,
-                      fontSize: 12,
-                      color: 'var(--clr-sand)',
-                    }}
-                  >
-                    <CheckCircle2 size={13} style={{ color: 'var(--clr-leaf)', marginTop: 2, flexShrink: 0 }} />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          {/* Form fields */}
-          <div
-            style={{
-              background: 'var(--clr-moss)',
-              border: '1px solid var(--clr-sage)',
-              borderRadius: 14,
-              padding: 'clamp(16px, 4vw, 24px)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 16,
-              marginBottom: 16,
-            }}
-          >
-            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--clr-cream)', marginBottom: 2 }}>
-              Data Pemilik & Toko
-            </div>
-
-            {/* Name */}
-            <div className="field">
-              <label htmlFor="customerName">
-                Nama Lengkap <span style={{ color: '#f87171' }}>*</span>
-              </label>
-              <input
-                id="customerName"
-                type="text"
-                required
-                placeholder="Contoh: Budi Santoso"
-                value={form.customerName}
-                onChange={set('customerName')}
-              />
-            </div>
-
-            {/* Phone + Email */}
-            <div className="form-grid-responsive">
-              <div className="field">
-                <label htmlFor="customerPhone">
-                  Nomor WhatsApp <span style={{ color: '#f87171' }}>*</span>
-                </label>
-                <input
-                  id="customerPhone"
-                  type="tel"
-                  required
-                  placeholder="Contoh: 081234567890"
-                  value={form.customerPhone}
-                  onChange={set('customerPhone')}
-                />
-              </div>
-              <div className="field">
-                <label htmlFor="customerEmail">
-                  Alamat Email <span style={{ color: '#f87171' }}>*</span>
-                </label>
-                <input
-                  id="customerEmail"
-                  type="email"
-                  required
-                  placeholder="Contoh: budi@gmail.com"
-                  value={form.customerEmail}
-                  onChange={set('customerEmail')}
-                />
-                <span className="field-hint">Link APK dikirim ke email ini setelah bayar</span>
-              </div>
-            </div>
-
-            {/* Store name + business type */}
-            <div className="form-grid-responsive">
-              <div className="field">
-                <label htmlFor="storeName">Nama Toko / Usaha</label>
-                <input
-                  id="storeName"
-                  type="text"
-                  placeholder="Contoh: Toko Sembako Berkah"
-                  value={form.storeName}
-                  onChange={set('storeName')}
-                />
-              </div>
-              <div className="field">
-                <label htmlFor="businessType">Bidang Usaha</label>
-                <select id="businessType" value={form.businessType} onChange={set('businessType')}>
-                  {BUSINESS_TYPES.map((t) => (
-                    <option key={t} value={t}>{t}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {/* Notes */}
-            <div className="field">
-              <label htmlFor="notes">Catatan Tambahan (Opsional)</label>
-              <textarea
-                id="notes"
-                rows={2}
-                placeholder="Pertanyaan atau permintaan khusus..."
-                value={form.notes}
-                onChange={set('notes')}
-              />
-            </div>
-          </div>
-
-          {/* Error */}
           {error && (
-            <div
-              style={{
-                background: 'rgba(239,68,68,0.1)',
-                border: '1px solid rgba(239,68,68,0.3)',
-                borderRadius: 10,
-                padding: '12px 16px',
-                fontSize: 13,
-                color: '#fca5a5',
-                marginBottom: 16,
-                lineHeight: 1.6,
-              }}
-            >
-              <div>{error}</div>
+            <div className="mb-5 p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs sm:text-sm font-medium">
+              ⚠️ {error}
               {contactAdmin && (
-                <div style={{ marginTop: 12 }}>
+                <div className="mt-2">
                   <a
-                    href={`https://wa.me/${(ADMIN_CONTACTS.find((c) => c.id === 'ariyo') ?? ADMIN_CONTACTS[0]).waNumber}?text=${encodeURIComponent(
-                      `Halo Admin, saya ingin memesan Lisensi Software POS OFFLINE.\n` +
-                      `Nama: ${form.customerName.trim() || '-'}\n` +
-                      `WhatsApp: ${form.customerPhone.trim() || '-'}\n` +
-                      `Email: ${form.customerEmail.trim() || '-'}\n` +
-                      `Toko: ${form.storeName.trim() || '-'}`
+                    href={`https://wa.me/${filamsi?.waNumber || ariyo?.waNumber}?text=${encodeURIComponent(
+                      'Halo Admin, saya mengalami kendala saat checkout di posoffline.xyz.'
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: 7,
-                      background: '#16a34a',
-                      color: '#ffffff',
-                      padding: '8px 14px',
-                      borderRadius: 8,
-                      fontWeight: 700,
-                      fontSize: 12,
-                      textDecoration: 'none',
-                      boxShadow: '0 2px 8px rgba(22, 163, 74, 0.3)',
-                    }}
+                    className="underline font-bold text-emerald-800"
                   >
-                    <MessageCircle size={15} /> Hubungi WhatsApp Admin untuk Bantuan Pemesanan
+                    Hubungi Admin via WhatsApp Sekarang →
                   </a>
                 </div>
               )}
             </div>
           )}
 
-          {/* Submit */}
-          <div
-            style={{
-              background: 'var(--clr-soil)',
-              border: '1px solid var(--clr-sage)',
-              borderRadius: 14,
-              padding: 'clamp(16px, 4vw, 22px)',
-            }}
-          >
-            {/* Payment methods support banner */}
-            <div style={{ marginBottom: 16, display: 'flex', flexDirection: 'column', gap: 7 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--clr-sand)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Metode Pembayaran Instan Didukung:
-              </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                {['QRIS (Semua E-Wallet/Bank)', 'BCA', 'Mandiri', 'BRI', 'BNI', 'GoPay', 'OVO', 'ShopeePay', 'Dana'].map((channel) => (
-                  <span
-                    key={channel}
-                    style={{
-                      background: 'rgba(255,255,255,0.05)',
-                      border: '1px solid var(--clr-sage)',
-                      borderRadius: 6,
-                      padding: '4px 8px',
-                      fontSize: 11,
-                      fontWeight: 600,
-                      color: 'var(--clr-cream)',
-                    }}
-                  >
-                    {channel}
-                  </span>
-                ))}
-              </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block text-xs font-bold text-[#141414] mb-1.5">
+                Nama Lengkap Pemilik *
+              </label>
+              <input
+                required
+                type="text"
+                placeholder="Contoh: Budi Santoso"
+                value={form.customerName}
+                onChange={(e) => setForm({ ...form, customerName: e.target.value })}
+                className="w-full h-12 px-4 rounded-xl bg-[#F3F4F6] border border-zinc-200 text-sm focus:outline-none focus:border-[#141414] focus:bg-white transition"
+              />
             </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, paddingTop: 14, borderTop: '1px solid var(--clr-sage)' }}>
-              <div>
-                <div style={{ fontSize: 12, color: 'var(--clr-fog)' }}>Total Pembayaran</div>
-                <div style={{ fontSize: 26, fontWeight: 800, color: 'var(--clr-leaf)', letterSpacing: '-0.03em' }}>
-                  Rp {pkg.price.toLocaleString('id-ID')}
-                </div>
-              </div>
-              <div
-                style={{
-                  fontSize: 10,
-                  fontWeight: 700,
-                  color: 'var(--clr-mint)',
-                  background: 'rgba(61,186,120,0.1)',
-                  border: '1px solid rgba(61,186,120,0.2)',
-                  padding: '4px 10px',
-                  borderRadius: 6,
-                  letterSpacing: '0.06em',
-                }}
-              >
-                LISENSI PERMANEN
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn-primary"
-              style={{ width: '100%', fontSize: 16, padding: '15px 24px', opacity: loading ? 0.7 : 1 }}
-            >
-              {loading ? (
-                <>
-                  <Loader2 size={17} style={{ animation: 'spin 1s linear infinite' }} />
-                  Memproses...
-                </>
-              ) : (
-                <>
-                  Lanjut ke Pembayaran
-                  <ArrowRight size={17} />
-                </>
-              )}
-            </button>
-
-            <div
-              style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                justifyContent: 'center',
-                gap: '6px 18px',
-                marginTop: 14,
-                fontSize: 11,
-                color: 'var(--clr-fog)',
-              }}
-            >
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                <Lock size={11} style={{ color: 'var(--clr-leaf)' }} />
-                Pembayaran 100% Aman
-              </span>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                <Mail size={11} style={{ color: 'var(--clr-leaf)' }} />
-                Konfirmasi Otomatis ke Email
-              </span>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                <ShieldCheck size={11} style={{ color: 'var(--clr-leaf)' }} />
-                Garansi Lisensi Permanen
+            <div>
+              <label className="block text-xs font-bold text-[#141414] mb-1.5">
+                Nomor WhatsApp Aktif *
+              </label>
+              <input
+                required
+                type="tel"
+                placeholder="Contoh: 081234567890"
+                value={form.customerPhone}
+                onChange={(e) => setForm({ ...form, customerPhone: e.target.value })}
+                className="w-full h-12 px-4 rounded-xl bg-[#F3F4F6] border border-zinc-200 text-sm font-mono focus:outline-none focus:border-[#141414] focus:bg-white transition"
+              />
+              <span className="text-[11px] text-zinc-500 mt-1 block">
+                Digunakan untuk kirim panduan & bantuan aktivasi.
               </span>
             </div>
           </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+            <div>
+              <label className="block text-xs font-bold text-[#141414] mb-1.5">
+                Alamat Email Aktif *
+              </label>
+              <input
+                required
+                type="email"
+                placeholder="nama@email.com"
+                value={form.customerEmail}
+                onChange={(e) => setForm({ ...form, customerEmail: e.target.value })}
+                className="w-full h-12 px-4 rounded-xl bg-[#F3F4F6] border border-zinc-200 text-sm focus:outline-none focus:border-[#141414] focus:bg-white transition"
+              />
+              <span className="text-[11px] text-zinc-500 mt-1 block">
+                Link download APK resmi otomatis dikirim ke sini.
+              </span>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-[#141414] mb-1.5">
+                Nama Toko / Usaha
+              </label>
+              <input
+                type="text"
+                placeholder="Contoh: Toko Berkah Jaya"
+                value={form.storeName}
+                onChange={(e) => setForm({ ...form, storeName: e.target.value })}
+                className="w-full h-12 px-4 rounded-xl bg-[#F3F4F6] border border-zinc-200 text-sm focus:outline-none focus:border-[#141414] focus:bg-white transition"
+              />
+            </div>
+          </div>
+
+          {/* Touch-Friendly Business Type Pill Chips */}
+          <div className="mb-6">
+            <label className="block text-xs font-bold text-[#141414] mb-2">
+              Pilih Bidang Usaha Anda (1 Klik):
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {BUSINESS_PRESETS.map((biz) => {
+                const isSelected = form.businessType === biz.id;
+                return (
+                  <button
+                    key={biz.id}
+                    type="button"
+                    onClick={() => setForm({ ...form, businessType: biz.id })}
+                    className={`px-3.5 py-2 rounded-xl text-xs font-bold transition ${
+                      isSelected
+                        ? 'bg-[#141414] text-[#C8F53B]'
+                        : 'bg-[#F3F4F6] text-zinc-700 hover:bg-zinc-200 border border-zinc-200'
+                    }`}
+                  >
+                    {biz.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Interactive Payment Method Selector */}
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-xs font-bold text-[#141414]">
+                Pilih Metode Pembayaran:
+              </label>
+              <span className="text-[11px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                Otomatis &amp; Terverifikasi
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {PAYMENT_OPTIONS.map((opt) => {
+                const isSelected = paymentMethod === opt.id;
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => setPaymentMethod(opt.id as any)}
+                    className={`p-3.5 rounded-xl text-left border transition relative flex items-start gap-3 cursor-pointer ${
+                      isSelected
+                        ? 'border-[#141414] bg-[#141414] text-white shadow-sm ring-1 ring-[#C8F53B]'
+                        : 'border-zinc-200 bg-[#F9FAFB] hover:bg-zinc-100 text-zinc-900'
+                    }`}
+                  >
+                    <div
+                      className={`w-4 h-4 rounded-full border shrink-0 mt-0.5 flex items-center justify-center ${
+                        isSelected
+                          ? 'border-[#C8F53B] bg-[#C8F53B]'
+                          : 'border-zinc-400 bg-white'
+                      }`}
+                    >
+                      {isSelected && (
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#141414]" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-1">
+                        <span className="font-bold text-xs truncate">
+                          {opt.name}
+                        </span>
+                        <span
+                          className={`text-[9px] font-mono px-1.5 py-0.5 rounded font-bold shrink-0 ${
+                            isSelected
+                              ? 'bg-[#C8F53B] text-[#141414]'
+                              : 'bg-zinc-200 text-zinc-700'
+                          }`}
+                        >
+                          {opt.tag}
+                        </span>
+                      </div>
+                      <p
+                        className={`text-[11px] mt-0.5 leading-snug line-clamp-1 ${
+                          isSelected ? 'text-zinc-300' : 'text-zinc-500'
+                        }`}
+                      >
+                        {opt.desc}
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Dynamic guidance note below selection */}
+            <div className="mt-2.5 p-2.5 rounded-lg bg-zinc-50 border border-zinc-200 text-[11px] text-zinc-600 leading-relaxed">
+              {paymentMethod === 'qris' && (
+                <span>Kode QRIS resmi akan langsung muncul setelah Anda klik tombol bayar. Bisa di-scan dari GoPay, OVO, Dana, ShopeePay, atau m-Banking apapun.</span>
+              )}
+              {paymentMethod === 'bca' && (
+                <span>Nomor Virtual Account BCA resmi akan langsung terbit untuk Anda salin ke m-BCA, myBCA, atau KlikBCA.</span>
+              )}
+              {paymentMethod === 'mandiri' && (
+                <span>Nomor Mandiri Bill / Virtual Account resmi langsung terbit untuk pembayaran via aplikasi Livin by Mandiri.</span>
+              )}
+              {paymentMethod === 'bri' && (
+                <span>Nomor BRI Virtual Account (BRIVA) resmi langsung terbit untuk pembayaran via aplikasi BRImo.</span>
+              )}
+              {paymentMethod === 'bni' && (
+                <span>Nomor BNI Virtual Account resmi langsung terbit untuk pembayaran via BNI Mobile Banking.</span>
+              )}
+              {paymentMethod === 'manual' && (
+                <span>Anda akan diarahkan ke petunjuk rekening resmi dan dapat langsung konfirmasi bukti transfer via WhatsApp ke Tim Pembelian.</span>
+              )}
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full h-14 rounded-2xl bg-[#C8F53B] hover:bg-[#BCEB28] text-[#141414] font-display font-bold text-base sm:text-lg flex items-center justify-center gap-3 shadow-md transition disabled:opacity-60 cursor-pointer"
+          >
+            {loading ? (
+              <span>Memproses Pesanan...</span>
+            ) : (
+              <>
+                <span>Lanjut ke Pembayaran Resmi (Rp 299.000)</span>
+                <span className="w-7 h-7 rounded-full bg-[#141414] text-[#C8F53B] inline-flex items-center justify-center text-sm font-mono">
+                  →
+                </span>
+              </>
+            )}
+          </button>
         </form>
+
       </div>
     </section>
   );

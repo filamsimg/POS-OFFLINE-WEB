@@ -1,984 +1,275 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
-import { 
-  Maximize2, 
-  X, 
-  ChevronLeft, 
-  ChevronRight, 
-  Tablet, 
-  Smartphone, 
-  SlidersHorizontal,
-  CheckCircle,
-  Sparkles,
-  Layers,
-  ArrowRight,
-  MoveHorizontal
-} from 'lucide-react';
 
-interface PreviewItem {
+interface WorkflowItem {
   id: string;
+  category: 'kasir' | 'stok' | 'laporan';
   title: string;
-  category: 'tablet' | 'mobile' | 'admin';
-  deviceType: 'Tablet 10"' | 'Smartphone';
-  src: string;
-  width: number;
-  height: number;
-  highlight: string;
-  description: string;
+  badge: string;
+  metric: string;
+  desc: string;
+  imgSrc: string;
 }
 
-const PREVIEWS: PreviewItem[] = [
+const WORKFLOW_ITEMS: WorkflowItem[] = [
+  // 1. Saat Antrean Kasir Ramai (5 Layar)
   {
-    id: 'katalog-tablet',
-    title: 'Katalog Kasir & Grid Menu',
-    category: 'tablet',
-    deviceType: 'Tablet 10"',
-    src: '/preview-apps/preview-katalog-tablet.webp',
-    width: 1280,
-    height: 842,
-    highlight: 'Grid produk interaktif dengan kategori & keranjang instan',
-    description: 'Tampilan kasir modern dengan navigasi kategori cepat, pencarian instan, dan kalkulasi total belanja langsung secara real-time.'
+    id: 'katalog-kasir',
+    category: 'kasir',
+    title: '1. Katalog Kasir & Grid Menu Instan',
+    badge: 'Tablet & HP',
+    metric: '3 DETIK',
+    desc: 'Tampilan produk rapi per kategori dengan pencarian cepat, scan barcode, dan hitung total belanja otomatis secara real-time.',
+    imgSrc: '/preview-apps/preview-katalog-tablet.webp',
   },
   {
-    id: 'tablet-kasir',
-    title: 'Multi-Metode Pembayaran',
-    category: 'tablet',
-    deviceType: 'Tablet 10"',
-    src: '/preview-apps/preview-tablet-kasir.webp',
-    width: 1280,
-    height: 842,
-    highlight: 'Tunai, QRIS Dinamis/Statis, Transfer, & Open Bill',
-    description: 'Dukung berbagai cara bayar pelanggan dalam satu layar sederhana. Bisa simpan pesanan (Open Bill / Meja) untuk resto dan cafe.'
+    id: 'numpad-uang-pas',
+    category: 'kasir',
+    title: '2. Numpad Cepat & Saran Pecahan Uang',
+    badge: 'Anti Salah Hitung',
+    metric: 'UANG PAS',
+    desc: 'Tombol pecahan Rp 20rb, Rp 50rb, Rp 100rb membantu kasir menghitung kembalian otomatis tanpa kalkulator tambahan.',
+    imgSrc: '/preview-apps/preview-numpad-bayar.webp',
   },
   {
-    id: 'numpad-bayar',
-    title: 'Numpad Cepat & Uang Pas',
-    category: 'tablet',
-    deviceType: 'Tablet 10"',
-    src: '/preview-apps/preview-numpad-bayar.webp',
-    width: 1280,
-    height: 842,
-    highlight: 'Saran pecahan uang pas & hitung kembalian otomatis',
-    description: 'Kasir tidak perlu menghitung manual di kalkulator. Tombol nominal pecahan uang membantu transaksi selesai dalam 3 detik.'
+    id: 'multi-metode',
+    category: 'kasir',
+    title: '3. Multi-Metode Bayar & Multi-Currency',
+    badge: 'IDR, USD, SGD, MYR',
+    metric: 'MULTI-MATA UANG',
+    desc: 'Dukung Tunai, QRIS, Transfer Bank, serta transaksi multi-currency untuk turis atau pelanggan luar negeri. Bisa Open Bill (Simpan Meja).',
+    imgSrc: '/preview-apps/preview-tablet-kasir.webp',
   },
   {
-    id: 'struk-kasir',
-    title: 'Pratinjau Cetak Struk Thermal',
-    category: 'tablet',
-    deviceType: 'Tablet 10"',
-    src: '/preview-apps/preview-struk-kasir.webp',
-    width: 1280,
-    height: 842,
-    highlight: 'Cetak langsung ke printer Bluetooth 58mm & 80mm',
-    description: 'Preview struk akurat sebelum dicetak. Dilengkapi logo toko, rincian item, nomor meja, kasir bertugas, dan ucapan terima kasih.'
+    id: 'cetak-struk',
+    category: 'kasir',
+    title: '4. Pratinjau & Cetak Struk Bluetooth',
+    badge: '58mm & 80mm',
+    metric: '2 DETIK',
+    desc: 'Koneksi stabil ke printer thermal Bluetooth. Cetak struk lengkap dengan logo toko, nama kasir, dan rincian item dalam 2 detik.',
+    imgSrc: '/preview-apps/preview-struk-kasir.webp',
   },
   {
-    id: 'struk-detail',
-    title: 'Detail Transaksi & Nota Digital',
-    category: 'tablet',
-    deviceType: 'Tablet 10"',
-    src: '/preview-apps/preview-struk-detail.webp',
-    width: 1280,
-    height: 842,
-    highlight: 'Riwayat transaksi rapi & kirim nota ke WhatsApp pelanggan',
-    description: 'Selain cetak thermal fisik, nota belanja dapat dibagikan langsung secara digital melalui WhatsApp pelanggan tanpa perlu kertas.'
+    id: 'konfirmasi-transaksi',
+    category: 'kasir',
+    title: '5. Konfirmasi Transaksi Sukses & No. Invoice',
+    badge: 'Otomatis',
+    metric: 'INVOICE RESMI',
+    desc: 'Setiap transaksi selesai otomatis menerbitkan nomor invoice unik. Kasir bisa langsung mencetak struk, melihat pratinjau, atau langsung lanjut transaksi berikutnya.',
+    imgSrc: '/preview-apps/preview-struk-detail.webp',
+  },
+
+  // 2. Saat Atur Stok, Bahan Baku & Expired (4 Layar)
+  {
+    id: 'kelola-produk',
+    category: 'stok',
+    title: '6. Kelola Produk, Grosir & Timbangan',
+    badge: 'Sembako & Eceran',
+    metric: 'ECER/GROSIR',
+    desc: 'Atur harga bertingkat (beli 1 ecer, beli 1 lusin harga grosir), stok minimal, dan input angka desimal untuk produk timbangan curah (kg).',
+    imgSrc: '/preview-apps/preview-manajemen-produk.webp',
   },
   {
-    id: 'dashboard-mobile',
-    title: 'Dashboard & Tren Penjualan',
-    category: 'mobile',
-    deviceType: 'Smartphone',
-    src: '/preview-apps/preview-dashboard-mobile.webp',
-    width: 842,
-    height: 1280,
-    highlight: 'Ringkasan omset harian, produk terlaris, & grafik 7 hari',
-    description: 'Pantau kesehatan keuangan tokomu kapan saja. Semua angka ringkas, jelas, dan dihitung otomatis langsung di genggaman.'
+    id: 'bahan-baku-expired',
+    category: 'stok',
+    title: '7. Manajemen Bahan Baku & Notifikasi Expired Date',
+    badge: 'Fitur Baru 2026',
+    metric: 'KONTROL EXPIRED',
+    desc: 'Pantau stok bahan dasar dapur/resto dan dapatkan pengingat produk yang mendekati tanggal kedaluwarsa sebelum merugikan toko.',
+    imgSrc: '/preview-apps/preview-pengaturan-fitur.webp',
   },
   {
-    id: 'laporan-keuangan',
-    title: 'Laporan Laba Rugi & HPP',
-    category: 'mobile',
-    deviceType: 'Smartphone',
-    src: '/preview-apps/preview-laporan-keuangan.webp',
-    width: 842,
-    height: 1280,
-    highlight: 'Ketahui laba bersih toko riil tanpa rekap buku manual',
-    description: 'Otomatis menghitung margin keuntungan, harga pokok penjualan (HPP), total diskon, dan analisis waktu jam paling sibuk.'
+    id: 'import-excel',
+    category: 'stok',
+    title: '8. Impor & Ekspor Ribuan Barang via Excel',
+    badge: 'Bebas Capek Ketik',
+    metric: '10 DETIK',
+    desc: 'Punya ratusan hingga ribuan SKU barang? Masukkan sekaligus dalam 10 detik menggunakan template Excel/CSV yang sudah disediakan.',
+    imgSrc: '/preview-apps/preview-impor-excel.webp',
   },
   {
-    id: 'manajemen-produk',
-    title: 'Kelola Produk & Harga Grosir',
-    category: 'admin',
-    deviceType: 'Smartphone',
-    src: '/preview-apps/preview-manajemen-produk.webp',
-    width: 842,
-    height: 1280,
-    highlight: 'Harga bertingkat eceran/grosir & barang timbangan curah',
-    description: 'Atur kategori, barcode, stok minimal, hingga varian harga grosir / bakul untuk toko kelontong, retail, dan sembako.'
+    id: 'setup-printer',
+    category: 'stok',
+    title: '9. Setup Printer Bluetooth Plug & Play',
+    badge: '50+ Merk Printer',
+    metric: 'INSTAN',
+    desc: 'Pindai dan hubungkan HP/Tablet Anda ke printer Bluetooth merk Panda, Iware, Eppos, VSC, Blueprint, dan Kassen tanpa instal driver rumit.',
+    imgSrc: '/preview-apps/preview-printer-thermal.webp',
+  },
+
+  // 3. Saat Tutup Toko, Expense & Membership (3 Layar)
+  {
+    id: 'dashboard-omzet',
+    category: 'laporan',
+    title: '10. Dashboard Omzet & Jam Sibuk Toko',
+    badge: 'Ringkasan Harian',
+    metric: 'REAL-TIME',
+    desc: 'Pantau kesehatan keuangan toko kapan saja. Ketahui jam paling ramai pembeli dan daftar produk yang paling cepat habis terjual.',
+    imgSrc: '/preview-apps/preview-dashboard-mobile.webp',
   },
   {
-    id: 'impor-excel',
-    title: 'Impor & Ekspor Massal Excel',
-    category: 'admin',
-    deviceType: 'Smartphone',
-    src: '/preview-apps/preview-impor-excel.webp',
-    width: 842,
-    height: 1280,
-    highlight: 'Upload ratusan produk sekaligus dalam 10 detik',
-    description: 'Punya banyak item barang? Cukup gunakan template Excel/CSV yang disediakan untuk memasukkan ribuan data produk sekaligus tanpa repot.'
+    id: 'expense-laba',
+    category: 'laporan',
+    title: '11. Catat Expense Toko & Laporan Laba Bersih Riil',
+    badge: 'Laba Bersih Riil',
+    metric: 'EXPENSE TRACK',
+    desc: 'Catat pengeluaran biaya operasional (listrik, sewa, gaji, kantong plastik). Sistem otomatis memotong HPP & expense untuk hitung laba bersih.',
+    imgSrc: '/preview-apps/preview-laporan-keuangan.webp',
   },
   {
-    id: 'printer-thermal',
-    title: 'Setup Printer Bluetooth',
-    category: 'admin',
-    deviceType: 'Smartphone',
-    src: '/preview-apps/preview-printer-thermal.webp',
-    width: 842,
-    height: 1280,
-    highlight: 'Koneksi instan ke berbagai printer thermal 58mm / 80mm',
-    description: 'Sambungkan perangkat ke printer struk thermal Bluetooth merk apapun (Panda, Iware, Eppos, Vsc, dsb) secara stabil dan cepat.'
-  },
-  {
-    id: 'keamanan-pin',
-    title: 'Proteksi PIN Pemilik Toko',
-    category: 'admin',
-    deviceType: 'Smartphone',
-    src: '/preview-apps/preview-keamanan-pin.webp',
-    width: 842,
-    height: 1280,
-    highlight: 'Kunci menu sensitif agar aman dari manipulasi kasir',
-    description: 'Hanya pemilik toko berwenang yang dapat membuka laporan keuntungan, mengubah harga pokok, atau mereset data riwayat kasir.'
-  },
-  {
-    id: 'pengaturan-fitur',
-    title: 'Kustomisasi Fitur Fleksibel',
-    category: 'admin',
-    deviceType: 'Smartphone',
-    src: '/preview-apps/preview-pengaturan-fitur.webp',
-    width: 842,
-    height: 1280,
-    highlight: 'Atur PPN, service charge, open bill, & format nota',
-    description: 'Sesuaikan fitur aplikasi dengan jenis usahamu, mulai dari warung makan, cafe & resto, toko sembako, laundry, hingga barbershop.'
+    id: 'pin-membership',
+    category: 'laporan',
+    title: '12. Proteksi PIN Pemilik & Data Membership',
+    badge: 'Keamanan Bos',
+    metric: 'PIN & LOYALTI',
+    desc: 'Kunci menu keuntungan dan hapus data transaksi dengan PIN Pemilik. Simpan data pelanggan setia untuk program diskon membership.',
+    imgSrc: '/preview-apps/preview-keamanan-pin.webp',
   },
 ];
 
-type CategoryFilter = 'all' | 'tablet' | 'mobile' | 'admin';
-
 export function AppPreviewSection() {
-  const [activeFilter, setActiveFilter] = useState<CategoryFilter>('all');
-  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
-  const [scrollProgress, setScrollProgress] = useState(0);
+  const [activeTab, setActiveTab] = useState<'kasir' | 'stok' | 'laporan'>('kasir');
+  const [selectedImage, setSelectedImage] = useState<WorkflowItem | null>(null);
 
-  const sliderRef = useRef<HTMLDivElement>(null);
-
-  const filteredItems = activeFilter === 'all' 
-    ? PREVIEWS 
-    : PREVIEWS.filter(item => item.category === activeFilter);
-
-  // Update scroll buttons state
-  const checkScrollState = () => {
-    if (!sliderRef.current) return;
-    const { scrollLeft, scrollWidth, clientWidth } = sliderRef.current;
-    setCanScrollLeft(scrollLeft > 10);
-    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
-    
-    const maxScroll = scrollWidth - clientWidth;
-    if (maxScroll > 0) {
-      setScrollProgress(Math.min(100, Math.max(0, (scrollLeft / maxScroll) * 100)));
-    } else {
-      setScrollProgress(100);
-    }
-  };
-
-  useEffect(() => {
-    checkScrollState();
-    const current = sliderRef.current;
-    if (current) {
-      current.addEventListener('scroll', checkScrollState, { passive: true });
-      window.addEventListener('resize', checkScrollState);
-    }
-    return () => {
-      if (current) current.removeEventListener('scroll', checkScrollState);
-      window.removeEventListener('resize', checkScrollState);
-    };
-  }, [filteredItems]);
-
-  // Reset scroll to 0 when filter changes
-  const handleFilterChange = (filter: CategoryFilter) => {
-    setActiveFilter(filter);
-    if (sliderRef.current) {
-      sliderRef.current.scrollTo({ left: 0, behavior: 'smooth' });
-    }
-  };
-
-  // Scroll controls
-  const scroll = (direction: 'left' | 'right') => {
-    if (!sliderRef.current) return;
-    const scrollAmount = sliderRef.current.clientWidth * 0.75;
-    sliderRef.current.scrollBy({
-      left: direction === 'left' ? -scrollAmount : scrollAmount,
-      behavior: 'smooth',
-    });
-  };
-
-  // Keyboard navigation for lightbox
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (lightboxIndex === null) return;
-      if (e.key === 'Escape') setLightboxIndex(null);
-      if (e.key === 'ArrowRight') {
-        setLightboxIndex((prev) => (prev !== null && prev < filteredItems.length - 1 ? prev + 1 : 0));
-      }
-      if (e.key === 'ArrowLeft') {
-        setLightboxIndex((prev) => (prev !== null && prev > 0 ? prev - 1 : filteredItems.length - 1));
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [lightboxIndex, filteredItems.length]);
-
-  // Lock body scroll when lightbox is open
-  useEffect(() => {
-    if (lightboxIndex !== null) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [lightboxIndex]);
-
-  const activeItem = lightboxIndex !== null ? filteredItems[lightboxIndex] : null;
+  const filteredItems = WORKFLOW_ITEMS.filter((item) => item.category === activeTab);
 
   return (
-    <section
-      id="preview-aplikasi"
-      className="section"
-      style={{
-        background: 'var(--clr-forest)',
-        position: 'relative',
-        overflow: 'hidden',
-        borderTop: '1px solid var(--clr-sage)',
-        borderBottom: '1px solid var(--clr-sage)',
-        paddingTop: 'clamp(48px, 6vw, 72px)',
-        paddingBottom: 'clamp(48px, 6vw, 72px)',
-      }}
-    >
-      {/* Background ambient lighting */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '25%',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '720px',
-          height: '350px',
-          background: 'radial-gradient(ellipse at center, rgba(34, 197, 94, 0.08) 0%, rgba(59, 130, 246, 0.04) 50%, transparent 70%)',
-          filter: 'blur(90px)',
-          pointerEvents: 'none',
-          zIndex: 0,
-        }}
-      />
-
-      <style>{`
-        .preview-filter-btn {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          padding: 7px 16px;
-          border-radius: 99px;
-          font-size: 13px;
-          font-weight: 700;
-          border: 1px solid var(--clr-sage);
-          background: rgba(20, 21, 31, 0.7);
-          color: var(--clr-sand);
-          cursor: pointer;
-          transition: all 0.2s ease;
-          backdrop-filter: blur(8px);
-          white-space: nowrap;
-        }
-
-        .preview-filter-btn:hover {
-          color: var(--clr-cream);
-          border-color: rgba(34, 197, 94, 0.4);
-          background: rgba(34, 197, 94, 0.08);
-        }
-
-        .preview-filter-btn.active {
-          color: #ffffff;
-          background: var(--clr-leaf);
-          border-color: var(--clr-leaf);
-          box-shadow: 0 4px 16px rgba(34, 197, 94, 0.35);
-        }
-
-        /* ─── Horizontal Slider Track ─── */
-        .preview-slider-track {
-          display: flex;
-          gap: 20px;
-          overflow-x: auto;
-          scroll-snap-type: x mandatory;
-          -webkit-overflow-scrolling: touch;
-          scroll-behavior: smooth;
-          padding: 8px 4px 18px 4px;
-          scrollbar-width: none; /* Firefox */
-        }
-
-        .preview-slider-track::-webkit-scrollbar {
-          display: none; /* Chrome, Safari */
-        }
-
-        .preview-slide-card {
-          flex: 0 0 clamp(285px, 28vw, 340px);
-          scroll-snap-align: start;
-          position: relative;
-          background: var(--clr-moss);
-          border: 1px solid var(--clr-sage);
-          border-radius: 16px;
-          overflow: hidden;
-          transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease, box-shadow 0.25s ease;
-          display: flex;
-          flex-direction: column;
-          cursor: pointer;
-          user-select: none;
-        }
-
-        .preview-slide-card:hover {
-          transform: translateY(-4px);
-          border-color: rgba(34, 197, 94, 0.5);
-          box-shadow: 0 16px 32px rgba(0, 0, 0, 0.45), 0 0 20px rgba(34, 197, 94, 0.12);
-        }
-
-        .preview-img-wrapper {
-          position: relative;
-          width: 100%;
-          height: 220px;
-          background: #06080d;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          overflow: hidden;
-        }
-
-        .preview-slide-card:hover .preview-img-wrapper img {
-          transform: scale(1.03);
-        }
-
-        .preview-img-wrapper img {
-          transition: transform 0.35s ease;
-        }
-
-        .preview-zoom-overlay {
-          position: absolute;
-          inset: 0;
-          background: rgba(8, 9, 14, 0.45);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          opacity: 0;
-          transition: opacity 0.2s ease;
-          backdrop-filter: blur(2px);
-        }
-
-        .preview-slide-card:hover .preview-zoom-overlay {
-          opacity: 1;
-        }
-
-        /* ─── Slider Navigation Controls ─── */
-        .slider-nav-btn {
-          width: 42px;
-          height: 42px;
-          border-radius: 50%;
-          background: rgba(20, 21, 31, 0.85);
-          border: 1px solid var(--clr-sage);
-          color: var(--clr-cream);
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          transition: all 0.2s ease;
-          box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
-        }
-
-        .slider-nav-btn:hover:not(:disabled) {
-          background: var(--clr-leaf);
-          border-color: var(--clr-leaf);
-          color: #ffffff;
-          transform: scale(1.05);
-        }
-
-        .slider-nav-btn:disabled {
-          opacity: 0.35;
-          cursor: not-allowed;
-        }
-
-        /* ─── Lightbox Modal ─── */
-        .preview-lightbox-backdrop {
-          position: fixed;
-          inset: 0;
-          background: rgba(4, 5, 8, 0.9);
-          backdrop-filter: blur(12px);
-          z-index: 9999;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 16px;
-          animation: fadeIn 0.2s ease;
-        }
-
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-
-        .lightbox-dialog {
-          position: relative;
-          max-width: 1040px;
-          width: 100%;
-          max-height: 94vh;
-          background: #0f121d;
-          border: 1px solid rgba(255, 255, 255, 0.14);
-          border-radius: 20px;
-          overflow: hidden;
-          box-shadow: 0 24px 60px rgba(0,0,0,0.8), 0 0 40px rgba(34, 197, 94, 0.15);
-          display: flex;
-          flex-direction: column;
-        }
-
-        .lightbox-nav-btn {
-          width: 44px;
-          height: 44px;
-          border-radius: 50%;
-          background: rgba(255, 255, 255, 0.1);
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          color: #fff;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          transition: all 0.2s ease;
-        }
-
-        .lightbox-nav-btn:hover {
-          background: var(--clr-leaf);
-          border-color: var(--clr-leaf);
-          transform: scale(1.08);
-        }
-      `}</style>
-
-      <div className="container" style={{ position: 'relative', zIndex: 1 }}>
-        {/* Section Header */}
-        <div style={{ textAlign: 'center', marginBottom: 'clamp(28px, 4vw, 40px)' }}>
-          <div className="section-label" style={{ justifyContent: 'center' }}>
-            <Sparkles size={14} /> Tampilan Nyata Aplikasi
-          </div>
-          <h2 className="heading-lg" style={{ maxWidth: '30ch', margin: '0 auto 14px' }}>
-            Lihat Langsung Antarmuka POS OFFLINE
+    <section id="alur-kerja" className="bg-[#141414] text-white rounded-[28px] p-6 sm:p-10 mb-12">
+      {/* Section Header */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-white/10">
+        <div>
+          <span className="text-xs font-mono uppercase tracking-widest text-[#C8F53B] block mb-2 font-semibold">
+            FITUR & TAMPILAN APLIKASI
+          </span>
+          <h2 className="font-display text-2xl sm:text-4xl font-bold leading-tight">
+            Antarmuka Cepat & Mudah Digunakan
           </h2>
-          <p
-            style={{
-              fontSize: 14.5,
-              color: 'var(--clr-sand)',
-              maxWidth: '54ch',
-              margin: '0 auto',
-              lineHeight: 1.6,
-            }}
-          >
-            Bukan sekadar mockup konsep. Geser untuk melihat tampilan asli aplikasi POS OFFLINE 
-            yang berjalan mulus di tablet dan smartphone Android.
-          </p>
-
-          {/* Filter Pills */}
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              flexWrap: 'wrap',
-              gap: 8,
-              marginTop: 22,
-            }}
-          >
-            <button
-              onClick={() => handleFilterChange('all')}
-              className={`preview-filter-btn ${activeFilter === 'all' ? 'active' : ''}`}
-            >
-              <Layers size={13} /> Semua ({PREVIEWS.length})
-            </button>
-            <button
-              onClick={() => handleFilterChange('tablet')}
-              className={`preview-filter-btn ${activeFilter === 'tablet' ? 'active' : ''}`}
-            >
-              <Tablet size={13} /> Mode Tablet & Kasir ({PREVIEWS.filter(p => p.category === 'tablet').length})
-            </button>
-            <button
-              onClick={() => handleFilterChange('mobile')}
-              className={`preview-filter-btn ${activeFilter === 'mobile' ? 'active' : ''}`}
-            >
-              <Smartphone size={13} /> HP & Laporan ({PREVIEWS.filter(p => p.category === 'mobile').length})
-            </button>
-            <button
-              onClick={() => handleFilterChange('admin')}
-              className={`preview-filter-btn ${activeFilter === 'admin' ? 'active' : ''}`}
-            >
-              <SlidersHorizontal size={13} /> Fitur & Stok ({PREVIEWS.filter(p => p.category === 'admin').length})
-            </button>
-          </div>
         </div>
-
-        {/* Slider Controls Header (Indicator & Prev/Next Arrows) */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: 12,
-            padding: '0 4px',
-          }}
-        >
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-              fontSize: 12.5,
-              color: 'var(--clr-sand)',
-              fontWeight: 600,
-            }}
-          >
-            <MoveHorizontal size={15} style={{ color: '#22c55e' }} />
-            <span>Geser ke samping ({filteredItems.length} Layar)</span>
-            <span style={{ color: 'var(--clr-fog)' }}>•</span>
-            <span style={{ color: '#4ade80' }}>Klik kartu untuk memperbesar</span>
-          </div>
-
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <button
-              onClick={() => scroll('left')}
-              disabled={!canScrollLeft}
-              className="slider-nav-btn"
-              aria-label="Geser ke kiri"
-            >
-              <ChevronLeft size={18} />
-            </button>
-            <button
-              onClick={() => scroll('right')}
-              disabled={!canScrollRight}
-              className="slider-nav-btn"
-              aria-label="Geser ke kanan"
-            >
-              <ChevronRight size={18} />
-            </button>
-          </div>
-        </div>
-
-        {/* Horizontal Slider Track */}
-        <div
-          ref={sliderRef}
-          className="preview-slider-track"
-          role="region"
-          aria-label="Galeri Layar Aplikasi POS OFFLINE"
-        >
-          {filteredItems.map((item, idx) => {
-            const isLandscape = item.width > item.height;
-
-            return (
-              <div
-                key={item.id}
-                className="preview-slide-card"
-                onClick={() => setLightboxIndex(idx)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    setLightboxIndex(idx);
-                  }
-                }}
-                aria-label={`Lihat detail ${item.title}`}
-              >
-                {/* Image Container with Safe Responsive Styles (No Aspect Ratio Warnings) */}
-                <div className="preview-img-wrapper">
-                  <Image
-                    src={item.src}
-                    alt={item.title}
-                    width={item.width}
-                    height={item.height}
-                    style={{
-                      width: 'auto',
-                      height: '100%',
-                      maxWidth: '100%',
-                      maxHeight: '100%',
-                      objectFit: 'contain',
-                      padding: isLandscape ? '8px 12px' : '6px 10px',
-                    }}
-                    sizes="340px"
-                    loading="lazy"
-                  />
-
-                  {/* Device Tag */}
-                  <span
-                    style={{
-                      position: 'absolute',
-                      top: 10,
-                      left: 10,
-                      background: 'rgba(8, 9, 14, 0.85)',
-                      border: '1px solid rgba(255, 255, 255, 0.12)',
-                      backdropFilter: 'blur(8px)',
-                      color: isLandscape ? '#38bdf8' : '#4ade80',
-                      fontSize: 10.5,
-                      fontWeight: 800,
-                      padding: '3px 8px',
-                      borderRadius: 99,
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: 4,
-                      zIndex: 2,
-                    }}
-                  >
-                    {isLandscape ? <Tablet size={11} /> : <Smartphone size={11} />}
-                    {item.deviceType}
-                  </span>
-
-                  {/* Zoom Overlay */}
-                  <div className="preview-zoom-overlay">
-                    <span
-                      style={{
-                        background: 'var(--clr-leaf)',
-                        color: '#fff',
-                        fontSize: 11.5,
-                        fontWeight: 700,
-                        padding: '6px 14px',
-                        borderRadius: 99,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: 6,
-                        boxShadow: '0 4px 14px rgba(0,0,0,0.4)',
-                      }}
-                    >
-                      <Maximize2 size={13} /> Perbesar
-                    </span>
-                  </div>
-                </div>
-
-                {/* Card Info */}
-                <div style={{ padding: '16px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                  <h3
-                    style={{
-                      fontSize: 15,
-                      fontWeight: 700,
-                      color: 'var(--clr-cream)',
-                      marginBottom: 4,
-                      lineHeight: 1.3,
-                    }}
-                  >
-                    {item.title}
-                  </h3>
-                  <p
-                    style={{
-                      fontSize: 12,
-                      color: '#4ade80',
-                      fontWeight: 600,
-                      lineHeight: 1.45,
-                      marginBottom: 8,
-                    }}
-                  >
-                    {item.highlight}
-                  </p>
-                  <p
-                    style={{
-                      fontSize: 12,
-                      color: 'var(--clr-sand)',
-                      lineHeight: 1.5,
-                      marginTop: 'auto',
-                    }}
-                  >
-                    {item.description}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Scroll Progress Bar */}
-        <div
-          style={{
-            width: '100%',
-            maxWidth: 240,
-            height: 4,
-            background: 'rgba(255, 255, 255, 0.08)',
-            borderRadius: 99,
-            margin: '10px auto 32px',
-            overflow: 'hidden',
-          }}
-        >
-          <div
-            style={{
-              height: '100%',
-              width: `${Math.max(15, scrollProgress)}%`,
-              background: 'var(--clr-leaf)',
-              borderRadius: 99,
-              transition: 'width 0.15s ease',
-            }}
-          />
-        </div>
-
-        {/* Bottom Compatibility Banner (Compact) */}
-        <div
-          style={{
-            padding: '16px 20px',
-            background: 'rgba(20, 21, 31, 0.7)',
-            border: '1px solid var(--clr-sage)',
-            borderRadius: 14,
-            display: 'flex',
-            flexWrap: 'wrap',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 14,
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: 10,
-                background: 'rgba(34, 197, 94, 0.15)',
-                border: '1px solid rgba(34, 197, 94, 0.35)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: '#22c55e',
-                flexShrink: 0,
-              }}
-            >
-              <CheckCircle size={18} />
-            </div>
-            <div>
-              <div style={{ fontWeight: 800, fontSize: 13.5, color: '#f0f1f8' }}>
-                Responsif di Semua Layar Android (HP, Tablet, & Mesin Kasir POS)
-              </div>
-              <div style={{ fontSize: 12, color: 'var(--clr-sand)' }}>
-                Tampilan otomatis menyesuaikan mode portrait (HP) atau landscape (Tablet).
-              </div>
-            </div>
-          </div>
-
-          <a
-            href="#checkout"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 6,
-              background: 'var(--clr-leaf)',
-              color: '#ffffff',
-              padding: '8px 18px',
-              borderRadius: 8,
-              fontWeight: 700,
-              fontSize: 13,
-              textDecoration: 'none',
-              boxShadow: '0 4px 12px rgba(34, 197, 94, 0.3)',
-              transition: 'transform 0.2s ease',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            <span>Dapatkan Lisensi</span>
-            <ArrowRight size={14} />
-          </a>
-        </div>
+        <p className="text-xs sm:text-sm text-zinc-400 max-w-md leading-relaxed">
+          Dirancang praktis dan ringan agar karyawan atau kasir baru langsung bisa mengoperasikan toko tanpa pelatihan rumit.
+        </p>
       </div>
 
-      {/* ── Lightbox Modal ─────────────────────────────────────────────────── */}
-      {activeItem && lightboxIndex !== null && (
+      {/* Concise Workflow Tabs */}
+      <div className="flex flex-wrap gap-2 sm:gap-2.5 my-6">
+        <button
+          type="button"
+          onClick={() => setActiveTab('kasir')}
+          className={`px-4 py-2 rounded-full text-xs sm:text-sm font-bold transition cursor-pointer ${activeTab === 'kasir'
+              ? 'bg-[#C8F53B] text-[#141414] shadow'
+              : 'bg-[#1F1F22] text-zinc-300 hover:text-white border border-white/10'
+            }`}
+        >
+          Transaksi Kasir (5)
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('stok')}
+          className={`px-4 py-2 rounded-full text-xs sm:text-sm font-bold transition cursor-pointer ${activeTab === 'stok'
+              ? 'bg-[#C8F53B] text-[#141414] shadow'
+              : 'bg-[#1F1F22] text-zinc-300 hover:text-white border border-white/10'
+            }`}
+        >
+          Stok & Produk (4)
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('laporan')}
+          className={`px-4 py-2 rounded-full text-xs sm:text-sm font-bold transition cursor-pointer ${activeTab === 'laporan'
+              ? 'bg-[#C8F53B] text-[#141414] shadow'
+              : 'bg-[#1F1F22] text-zinc-300 hover:text-white border border-white/10'
+            }`}
+        >
+          Laba & Laporan (3)
+        </button>
+      </div>
+
+      {/* Split Media Rows (Direct homage to Indoor Courts / Clay Courts / Grass Courts in reference) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+        {filteredItems.map((item) => (
+          <div
+            key={item.id}
+            onClick={() => setSelectedImage(item)}
+            className="group cursor-pointer bg-[#1F1F22] hover:bg-[#26262B] rounded-[20px] p-4 sm:p-5 flex items-start gap-4 border border-white/10 hover:border-[#C8F53B]/40 transition shadow-sm"
+          >
+            {/* Square Screenshot Thumbnail */}
+            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden bg-black/60 shrink-0 relative border border-white/15">
+              <Image
+                src={item.imgSrc}
+                alt={item.title}
+                fill
+                sizes="120px"
+                className="object-cover object-top group-hover:scale-105 transition-transform duration-300"
+              />
+              <div className="absolute top-1.5 left-1.5 bg-black/70 backdrop-blur-sm text-[9px] font-mono text-[#C8F53B] font-bold px-1.5 py-0.5 rounded">
+                {item.metric}
+              </div>
+            </div>
+
+            {/* Content Details */}
+            <div className="flex-1 min-w-0">
+              <div className="inline-block text-[10px] font-mono font-semibold text-zinc-300 bg-white/10 px-2 py-0.5 rounded-full mb-1.5">
+                {item.badge}
+              </div>
+              <h3 className="font-display font-bold text-sm sm:text-base text-white mb-1 leading-snug group-hover:text-[#C8F53B] transition-colors">
+                {item.title}
+              </h3>
+              <p className="text-xs sm:text-[13px] text-zinc-400 leading-relaxed line-clamp-2">
+                {item.desc}
+              </p>
+              <span className="inline-block mt-2 text-[11px] font-mono text-[#C8F53B] font-semibold">
+                Klik perbesar layar →
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Image Modal for Inspecting High-Res Screenshot */}
+      {selectedImage && (
         <div
-          className="preview-lightbox-backdrop"
-          onClick={() => setLightboxIndex(null)}
           role="dialog"
           aria-modal="true"
-          aria-label={activeItem.title}
+          onClick={() => setSelectedImage(null)}
+          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4"
         >
           <div
-            className="lightbox-dialog"
             onClick={(e) => e.stopPropagation()}
+            className="bg-[#141414] border border-white/20 rounded-[24px] max-w-3xl w-full p-5 sm:p-6 text-white relative shadow-2xl overflow-hidden"
           >
-            {/* Lightbox Header */}
-            <div
-              style={{
-                padding: '12px 18px',
-                borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                background: '#090c14',
-              }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <span
-                  style={{
-                    background: activeItem.width > activeItem.height ? 'rgba(56, 189, 248, 0.15)' : 'rgba(34, 197, 94, 0.15)',
-                    color: activeItem.width > activeItem.height ? '#38bdf8' : '#4ade80',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    fontSize: 11,
-                    fontWeight: 800,
-                    padding: '3px 8px',
-                    borderRadius: 6,
-                  }}
-                >
-                  {activeItem.deviceType}
-                </span>
-                <span style={{ fontWeight: 800, fontSize: 14.5, color: '#f8fafc' }}>
-                  {activeItem.title}
-                </span>
-                <span style={{ fontSize: 12, color: 'var(--clr-sand)' }}>
-                  ({lightboxIndex + 1} dari {filteredItems.length})
-                </span>
-              </div>
-
-              {/* Close Button */}
-              <button
-                onClick={() => setLightboxIndex(null)}
-                style={{
-                  background: 'rgba(255, 255, 255, 0.08)',
-                  border: 'none',
-                  color: '#f8fafc',
-                  width: 32,
-                  height: 32,
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer',
-                  transition: 'background 0.2s ease',
-                }}
-                aria-label="Tutup Pratinjau"
-              >
-                <X size={16} />
-              </button>
-            </div>
-
-            {/* Lightbox Image Stage */}
-            <div
-              style={{
-                flex: 1,
-                minHeight: '340px',
-                maxHeight: '66vh',
-                background: '#04060a',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                position: 'relative',
-                padding: '16px',
-                overflow: 'hidden',
-              }}
-            >
-              {/* Prev Button */}
-              <button
-                className="lightbox-nav-btn"
-                style={{ position: 'absolute', left: 16, zIndex: 10 }}
-                onClick={() =>
-                  setLightboxIndex((prev) =>
-                    prev !== null && prev > 0 ? prev - 1 : filteredItems.length - 1
-                  )
-                }
-                aria-label="Gambar Sebelumnya"
-              >
-                <ChevronLeft size={20} />
-              </button>
-
-              {/* Main Image */}
-              <div
-                style={{
-                  position: 'relative',
-                  width: '100%',
-                  height: '100%',
-                  maxHeight: '62vh',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <Image
-                  src={activeItem.src}
-                  alt={activeItem.title}
-                  width={activeItem.width}
-                  height={activeItem.height}
-                  priority
-                  style={{
-                    width: 'auto',
-                    height: 'auto',
-                    maxWidth: '100%',
-                    maxHeight: '62vh',
-                    objectFit: 'contain',
-                    borderRadius: 12,
-                    boxShadow: '0 12px 40px rgba(0,0,0,0.7)',
-                  }}
-                />
-              </div>
-
-              {/* Next Button */}
-              <button
-                className="lightbox-nav-btn"
-                style={{ position: 'absolute', right: 16, zIndex: 10 }}
-                onClick={() =>
-                  setLightboxIndex((prev) =>
-                    prev !== null && prev < filteredItems.length - 1 ? prev + 1 : 0
-                  )
-                }
-                aria-label="Gambar Selanjutnya"
-              >
-                <ChevronRight size={20} />
-              </button>
-            </div>
-
-            {/* Lightbox Footer Info */}
-            <div
-              style={{
-                padding: '14px 20px',
-                background: '#090c14',
-                borderTop: '1px solid rgba(255, 255, 255, 0.08)',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                gap: 12,
-              }}
-            >
+            <div className="flex items-center justify-between pb-3 mb-4 border-b border-white/15">
               <div>
-                <div style={{ color: '#4ade80', fontWeight: 700, fontSize: 13, marginBottom: 2 }}>
-                  {activeItem.highlight}
-                </div>
-                <div style={{ color: 'var(--clr-sand)', fontSize: 12.5, maxWidth: 640, lineHeight: 1.5 }}>
-                  {activeItem.description}
-                </div>
+                <span className="text-[11px] font-mono text-[#C8F53B] uppercase font-bold">
+                  {selectedImage.metric} • {selectedImage.badge}
+                </span>
+                <h4 className="font-display font-bold text-lg text-white mt-0.5">
+                  {selectedImage.title}
+                </h4>
               </div>
-
-              <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                <a
-                  href="#checkout"
-                  onClick={() => setLightboxIndex(null)}
-                  style={{
-                    background: 'var(--clr-leaf)',
-                    color: '#ffffff',
-                    fontWeight: 700,
-                    fontSize: 12.5,
-                    padding: '8px 16px',
-                    borderRadius: 8,
-                    textDecoration: 'none',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: 6,
-                  }}
-                >
-                  Beli Lisensi Sekarang
-                </a>
-              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedImage(null)}
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center font-bold text-white text-sm"
+              >
+                ✕
+              </button>
             </div>
+
+            <div className="relative w-full aspect-[16/10] bg-black rounded-xl overflow-hidden border border-white/10 mb-4">
+              <Image
+                src={selectedImage.imgSrc}
+                alt={selectedImage.title}
+                fill
+                sizes="(max-width: 768px) 100vw, 800px"
+                className="object-contain"
+              />
+            </div>
+
+            <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
+              {selectedImage.desc}
+            </p>
           </div>
         </div>
       )}

@@ -2,48 +2,18 @@
 
 export function StickyMobileCta() {
   return (
-    <>
-      <style>{`
-        @media (min-width: 640px) {
-          .sticky-mobile-cta { display: none !important; }
-        }
-      `}</style>
-      <div
-        className="sticky-mobile-cta"
-        style={{
-          position:             'fixed',
-          bottom:               0,
-          left:                 0,
-          right:                0,
-          zIndex:               40,
-          padding:              '10px 16px max(12px, env(safe-area-inset-bottom))',
-          background:           'rgba(8, 9, 14, 0.92)',
-          backdropFilter:       'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
-          borderTop:            '1px solid var(--clr-sage)',
-          boxShadow:            '0 -6px 24px rgba(0, 0, 0, 0.4)',
-          display:              'flex',
-          gap:                  10,
-        }}
-      >
-        <a
-          href="#checkout"
-          className="btn-primary btn-shimmer"
-          style={{
-            flex:           1,
-            fontSize:       15,
-            fontWeight:     800,
-            padding:        '13px 18px',
-            minHeight:      48,
-            boxSizing:      'border-box',
-            justifyContent: 'center',
-            borderRadius:   10,
-            boxShadow:      '0 4px 16px rgba(34, 197, 94, 0.35)',
-          }}
-        >
-          Dapatkan Lisensi Sekarang (Rp 149.000)
-        </a>
+    <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 p-3 bg-[#141414]/95 backdrop-blur-md border-t border-white/10 shadow-2xl flex items-center justify-between gap-3">
+      <div>
+        <span className="text-[10px] text-zinc-400 block font-mono">SEKALI BAYAR • LIFETIME</span>
+        <span className="font-mono font-bold text-base text-white">Rp 299.000</span>
       </div>
-    </>
+      <a
+        href="#checkout-manusiawi"
+        className="bg-[#C8F53B] hover:bg-[#BCEB28] text-[#141414] font-bold text-xs px-4 py-3 rounded-xl transition shadow flex items-center gap-1.5"
+      >
+        <span>Ambil Lisensi</span>
+        <span className="font-mono text-xs">→</span>
+      </a>
+    </div>
   );
 }

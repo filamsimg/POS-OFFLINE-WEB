@@ -24,14 +24,14 @@ export function FloatingWhatsApp() {
   }, [isOpen]);
 
   // Pre-configured message per admin role
-  const getPreFilledMessage = (id: 'ariyo' | 'filamsi', name: string) => {
+  const getPreFilledMessage = (id: 'ariyo' | 'filamsi') => {
     if (id === 'ariyo') {
       return encodeURIComponent(
-        `Halo Mas ${name}, saya tertarik dengan aplikasi kasir POS OFFLINE dan ingin konsultasi mengenai fitur & cara pembelian.`
+        'Halo Tim POS OFFLINE, saya tertarik dengan aplikasi kasir POS OFFLINE dan ingin konsultasi mengenai fitur & cara pembelian.'
       );
     }
     return encodeURIComponent(
-      `Halo Mas ${name}, saya butuh bantuan teknis terkait aplikasi kasir POS OFFLINE (kompatibilitas HP / printer / lisensi).`
+      'Halo Tim Teknis POS OFFLINE, saya butuh bantuan teknis terkait aplikasi kasir (kompatibilitas HP / printer / lisensi).'
     );
   };
 
@@ -161,7 +161,7 @@ export function FloatingWhatsApp() {
             <div style={{ padding: '14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
               {ADMIN_CONTACTS.map((admin) => {
                 const isSales = admin.id === 'ariyo';
-                const msg = getPreFilledMessage(admin.id, admin.name);
+                const msg = getPreFilledMessage(admin.id);
 
                 return (
                   <a
@@ -191,9 +191,9 @@ export function FloatingWhatsApp() {
 
                     {/* Content */}
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-                        <span style={{ fontSize: 14, fontWeight: 800, color: '#0f172a' }}>
-                          {admin.name}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6, marginBottom: 2 }}>
+                        <span style={{ fontSize: 13, fontWeight: 800, color: '#0f172a' }}>
+                          {isSales ? 'Tim Konsultasi & Order' : 'Tim Bantuan Teknis'}
                         </span>
                         <span
                           style={{
@@ -205,7 +205,7 @@ export function FloatingWhatsApp() {
                             color: isSales ? '#15803d' : '#1d4ed8',
                           }}
                         >
-                          {isSales ? 'Pembelian' : 'Teknis'}
+                          {isSales ? 'Order' : 'Teknis'}
                         </span>
                       </div>
                       <div

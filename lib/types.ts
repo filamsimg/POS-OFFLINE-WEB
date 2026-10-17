@@ -24,24 +24,43 @@ export interface AdminContact {
   waNumber: string;
 }
 
-const ariyoWa = process.env.NEXT_PUBLIC_ADMIN_ARIYO_WA || process.env.NEXT_PUBLIC_ADMIN_ARIYO_PHONE || '';
-const filamsiWa = process.env.NEXT_PUBLIC_ADMIN_FILAMSI_WA || process.env.NEXT_PUBLIC_ADMIN_FILAMSI_PHONE || process.env.NEXT_PUBLIC_WA_NUMBER || '';
+const sanitizePhone = (val: string | undefined, fallback: string) => {
+  if (!val || val.includes('nomor_') || val.includes('masukkan_') || val.includes('admin')) return fallback;
+  return val.trim();
+};
+
+const sanitizeWa = (val: string | undefined, fallback: string) => {
+  if (!val || val.includes('nomor_') || val.includes('masukkan_') || val.includes('admin')) return fallback;
+  return val.replace(/[^0-9]/g, '');
+};
+
+const ariyoWa = sanitizeWa(process.env.NEXT_PUBLIC_ADMIN_ARIYO_WA, '6285168828063');
+const ariyoPhone = sanitizePhone(process.env.NEXT_PUBLIC_ADMIN_ARIYO_PHONE, '+62851-6882-8063');
+const ariyoName = (process.env.NEXT_PUBLIC_ADMIN_ARIYO_NAME && !process.env.NEXT_PUBLIC_ADMIN_ARIYO_NAME.includes('admin2'))
+  ? process.env.NEXT_PUBLIC_ADMIN_ARIYO_NAME
+  : 'Ariyo';
+
+const filamsiWa = sanitizeWa(process.env.NEXT_PUBLIC_ADMIN_FILAMSI_WA || process.env.NEXT_PUBLIC_WA_NUMBER, '6285853685622');
+const filamsiPhone = sanitizePhone(process.env.NEXT_PUBLIC_ADMIN_FILAMSI_PHONE, '085853685622');
+const filamsiName = (process.env.NEXT_PUBLIC_ADMIN_FILAMSI_NAME && !process.env.NEXT_PUBLIC_ADMIN_FILAMSI_NAME.includes('admin1'))
+  ? process.env.NEXT_PUBLIC_ADMIN_FILAMSI_NAME
+  : 'Filamsi';
 
 export const ADMIN_CONTACTS: AdminContact[] = [
   {
     id:       'ariyo',
-    name:     process.env.NEXT_PUBLIC_ADMIN_ARIYO_NAME || 'Ariyo',
+    name:     ariyoName,
     role:     'Konsultasi & Pembelian',
     desc:     'Tanya fitur aplikasi, kecocokan toko, & cara order',
-    phone:    ariyoWa,
+    phone:    ariyoPhone,
     waNumber: ariyoWa,
   },
   {
     id:       'filamsi',
-    name:     process.env.NEXT_PUBLIC_ADMIN_FILAMSI_NAME || 'Filamsi',
+    name:     filamsiName,
     role:     'Bantuan Teknis & Aktivasi',
     desc:     'Setup printer thermal, kendala HP, & serial key',
-    phone:    filamsiWa,
+    phone:    filamsiPhone,
     waNumber: filamsiWa,
   },
 ];
@@ -78,14 +97,16 @@ export const PACKAGES: Record<PackageType, PackageDetail> = {
   software_only: {
     id:            'software_only',
     name:          'Lisensi Software POS OFFLINE',
-    badge:         'HEMAT 57% • SEKALI BAYAR SEUMUR HIDUP',
-    originalPrice: 350_000,
-    price:         149_000,
+    badge:         'HEMAT 54% • SEKALI BAYAR SEUMUR HIDUP',
+    originalPrice: 650_000,
+    price:         299_000,
     description:
       'Solusi kasir Android lengkap untuk toko Anda. Bayar sekali, aktif seumur hidup tanpa biaya bulanan.',
     features: [
       'File APK POS OFFLINE Full Version Resmi',
       '1x Serial Key Lisensi Permanen (tidak kedaluwarsa)',
+      'Multi-Currency, Expense & Manajemen Bahan Baku',
+      'Data Pelanggan & Fitur Membership Kasir',
       'Akses 11 Video Tutorial Lengkap',
       'Template Excel Import Produk Massal',
       'Fitur Diskon, Grosir, Timbangan & Sistem Meja',

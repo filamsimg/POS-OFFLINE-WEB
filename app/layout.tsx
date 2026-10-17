@@ -1,6 +1,13 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { MetaPixelTracker } from '@/components/MetaPixelTracker';
 import './globals.css';
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: '#141414',
+};
 
 // ─── Metadata ────────────────────────────────────────────────────────────────
 
@@ -34,12 +41,29 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title:       'POS OFFLINE – Kasir Android Sekali Bayar, Aktif Seumur Hidup',
-    description: '100% Offline. Tanpa Biaya Bulanan. Cetak struk Bluetooth, scan barcode, laporan laba otomatis. Lisensi permanen Rp 149.000.',
+    description: '100% Offline. Tanpa Biaya Bulanan. Cetak struk Bluetooth, scan barcode, laporan laba otomatis, multi-currency. Lisensi permanen Rp 299.000.',
     url:         siteUrl || '/',
     siteName:    'POS OFFLINE',
     images: [{ url: '/hero-mockup.jpg', width: 1280, height: 720, alt: 'Aplikasi Kasir POS OFFLINE di Android' }],
     locale:      'id_ID',
     type:        'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'POS OFFLINE – Kasir Android Sekali Bayar, Aktif Seumur Hidup',
+    description: '100% Offline. Tanpa Biaya Bulanan. Cetak struk Bluetooth, scan barcode, laporan laba otomatis. Lisensi permanen Rp 299.000.',
+    images: ['/hero-mockup.jpg'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
 };
 
@@ -64,7 +88,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           'Aplikasi kasir Android 100% offline tanpa biaya langganan bulanan. Cetak struk Bluetooth thermal, scan barcode kamera, manajemen stok, dan laporan laba otomatis.',
         offers: {
           '@type': 'Offer',
-          price: '149000',
+          price: '299000',
           priceCurrency: 'IDR',
           priceValidUntil: '2027-12-31',
           availability: 'https://schema.org/InStock',
@@ -91,6 +115,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="id">
       <head>
+        {/* Google Fonts */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&family=Syne:wght@700;800&display=swap"
+          rel="stylesheet"
+        />
+
+        {/* Favicon & App Icons */}
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
+        <link rel="apple-touch-icon" href="/icon.png" />
         {/* Schema Markup (JSON-LD) for Google Rich Snippets */}
         <script
           type="application/ld+json"

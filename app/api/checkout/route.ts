@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
 import { createOrder, getRecentPendingOrderByPhone } from '@/lib/db';
-import { createMidtransSnapTransaction } from '@/lib/midtrans';
+import { createMidtransSnapTransaction, isMidtransConfigured } from '@/lib/midtrans';
 import { PACKAGES, Order } from '@/lib/types';
 
 export const runtime = 'nodejs';
@@ -48,6 +48,7 @@ export async function POST(req: NextRequest) {
       customerEmail,
       storeName,
       businessType,
+      paymentMethod = 'qris',
       notes,
     } = body;
 
@@ -70,7 +71,7 @@ export async function POST(req: NextRequest) {
 
     // ── Anti-Spam & Resume Active Pending Order ─────────────────────────────
     const existingPendingOrder = await getRecentPendingOrderByPhone(customerPhone.trim(), 24);
-    if (existingPendingOrder && existingPendingOrder.midtransPaymentToken) {
+    if (existingPendingOrder) {
       console.log(`[Checkout] Resuming active pending order ${existingPendingOrder.id} for phone ${customerPhone.trim()}`);
       const clientKey =
         process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY?.trim() ||
@@ -78,29 +79,13 @@ export async function POST(req: NextRequest) {
         '';
 
       return NextResponse.json({
-        orderId:     existingPendingOrder.id,
-        snapToken:   existingPendingOrder.midtransPaymentToken,
-        redirectUrl: existingPendingOrder.midtransRedirectUrl,
-        clientKey,
-        resumed:     true,
+        orderId:        existingPendingOrder.id,
+        snapToken:      existingPendingOrder.midtransPaymentToken,
+        redirectUrl:    existingPendingOrder.midtransRedirectUrl,
+        clientKey:      existingPendingOrder.midtransPaymentToken ? clientKey : '',
+        manualTransfer: !existingPendingOrder.midtransPaymentToken,
+        resumed:        true,
       });
-    }
-
-    // ── Pre-flight Server Key Check (Anti-Bypass & Anti-Ghost Order) ────────
-    const serverKey = process.env.MIDTRANS_SERVER_KEY?.trim();
-    const isDev = process.env.NODE_ENV !== 'production';
-
-    if (!serverKey || serverKey.includes('xxxxxxxx') || serverKey.length < 8) {
-      console.error('[Checkout] MIDTRANS_SERVER_KEY is missing or unconfigured.');
-      return NextResponse.json(
-        {
-          error: isDev
-            ? 'DEV NOTICE: MIDTRANS_SERVER_KEY belum diisi di environment (.env). Silakan isi kredensial Midtrans Server Key Anda di .env.'
-            : 'Layanan pembayaran instan sedang dalam pemeliharaan berkala. Mohon maaf atas ketidaknyamanannya. Silakan hubungi admin kami via WhatsApp untuk transaksi langsung atau coba beberapa saat lagi.',
-          contactAdmin: !isDev,
-        },
-        { status: 503 }
-      );
     }
 
     // Server-Authoritative Price: User cannot tamper with amount
@@ -117,36 +102,44 @@ export async function POST(req: NextRequest) {
 
     const successUrl = `${siteUrl}/order/${orderId}`;
 
-    // ── Create Midtrans Snap Transaction ─────────────────────────────────────
-    let snapResult;
-    try {
-      snapResult = await createMidtransSnapTransaction({
-        orderId,
-        amount:        pkg.price,
-        customerName:  customerName.trim(),
-        customerEmail: customerEmail.trim(),
-        customerPhone: customerPhone.trim(),
-        productName:   `Lisensi POS OFFLINE – ${storeName?.trim() ?? customerName.trim()}`,
-        successUrl,
-      });
-    } catch (midtransErr) {
-      console.error('[Checkout] Midtrans Snap API Error:', midtransErr);
-      const devMsg =
-        midtransErr instanceof Error
-          ? midtransErr.message
-          : 'Gagal menghubungi server Midtrans. Periksa kembali kredensial Server Key Anda.';
-      return NextResponse.json(
-        {
-          error: isDev
-            ? `DEV NOTICE: Gagal membuat transaksi Midtrans: ${devMsg}`
-            : 'Layanan pembayaran instan sedang mengalami gangguan sementara. Silakan hubungi admin kami via WhatsApp untuk bantuan pemesanan atau coba beberapa saat lagi.',
-          contactAdmin: !isDev,
-        },
-        { status: 502 }
-      );
+    // ── Filter Midtrans Payment Methods Based on User Selection ─────────────
+    let enabledPayments: string[] | undefined = undefined;
+    if (paymentMethod === 'qris') {
+      enabledPayments = ['other_qris', 'gopay', 'shopeepay'];
+    } else if (paymentMethod === 'bca') {
+      enabledPayments = ['bca_va'];
+    } else if (paymentMethod === 'mandiri') {
+      enabledPayments = ['echannel'];
+    } else if (paymentMethod === 'bri') {
+      enabledPayments = ['bri_va'];
+    } else if (paymentMethod === 'bni') {
+      enabledPayments = ['bni_va'];
     }
 
-    // ── Persist Order Only When Snap Session Successfully Created ────────────
+    const hasValidMidtrans = isMidtransConfigured();
+    const isManual = paymentMethod === 'manual' || !hasValidMidtrans;
+
+    let snapResult = null;
+    if (!isManual) {
+      try {
+        snapResult = await createMidtransSnapTransaction({
+          orderId,
+          amount:        pkg.price,
+          customerName:  customerName.trim(),
+          customerEmail: customerEmail.trim(),
+          customerPhone: customerPhone.trim(),
+          productName:   `Lisensi POS OFFLINE – ${storeName?.trim() ?? customerName.trim()}`,
+          successUrl,
+          enabledPayments,
+        });
+      } catch (midtransErr) {
+        console.warn('[Checkout] Midtrans Snap API error, falling back to manual order:', midtransErr);
+      }
+    }
+
+    const finalPaymentMethod = snapResult ? 'midtrans' : 'manual_transfer';
+
+    // ── Persist Order to DB ──────────────────────────────────────────────────
     const order: Order = {
       id:                    orderId,
       customerName:          customerName.trim(),
@@ -156,10 +149,10 @@ export async function POST(req: NextRequest) {
       businessType:          businessType?.trim()   ?? undefined,
       packageType:           'software_only',
       amount:                pkg.price,
-      paymentMethod:         'midtrans',
+      paymentMethod:         finalPaymentMethod,
       paymentStatus:         'pending',
-      midtransPaymentToken:  snapResult.token,
-      midtransRedirectUrl:   snapResult.redirectUrl,
+      midtransPaymentToken:  snapResult?.token,
+      midtransRedirectUrl:   snapResult?.redirectUrl,
       notes:                 notes?.trim() ?? undefined,
       createdAt:             new Date().toISOString(),
     };
@@ -174,9 +167,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       orderId,
-      snapToken: snapResult.token,
-      redirectUrl: snapResult.redirectUrl,
-      clientKey,
+      snapToken: snapResult?.token,
+      redirectUrl: snapResult?.redirectUrl,
+      clientKey: snapResult ? clientKey : '',
+      manualTransfer: !snapResult,
+      selectedMethod: paymentMethod,
     });
   } catch (err: unknown) {
     const errorMsg = err instanceof Error ? err.message : 'Terjadi kesalahan pada server. Silakan coba lagi.';

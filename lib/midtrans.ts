@@ -47,6 +47,9 @@ function getMidtransConfig() {
     apiBaseUrl: isProduction
       ? 'https://api.midtrans.com/v2'
       : 'https://api.sandbox.midtrans.com/v2',
+    preferenceBaseUrl: isProduction
+      ? 'https://app.midtrans.com/snap/v3/merchant-preferences'
+      : 'https://app.sandbox.midtrans.com/snap/v3/merchant-preferences',
   };
 }
 
@@ -214,4 +217,232 @@ export async function getMidtransTransactionStatus(
     console.error(`[Midtrans] Error checking status for order ${orderId}:`, err);
     return null;
   }
+}
+
+export interface PaymentOptionItem {
+  id: string;
+  name: string;
+  desc: string;
+  tag: string;
+  isPopular?: boolean;
+  midtransChannels: string[];
+}
+
+interface MidtransPreferenceResponse {
+  merchant_id?: string;
+  payment_channels?: Array<{
+    name: string;
+    enabled: boolean;
+  }>;
+}
+
+// In-Memory cache (15 minutes TTL) to prevent rate-limiting Midtrans API
+let cachedPaymentChannels: {
+  channels: string[];
+  expiresAt: number;
+} | null = null;
+
+const CACHE_TTL_MS = 15 * 60 * 1000; // 15 mins
+
+/**
+ * Fetch raw active channel names from Midtrans Snap Preference API
+ */
+export async function getMidtransActiveChannels(): Promise<string[]> {
+  const now = Date.now();
+  if (cachedPaymentChannels && now < cachedPaymentChannels.expiresAt) {
+    return cachedPaymentChannels.channels;
+  }
+
+  const { serverKey, preferenceBaseUrl } = getMidtransConfig();
+  if (!serverKey || !isMidtransConfigured()) {
+    return [];
+  }
+
+  try {
+    const authHeader = `Basic ${Buffer.from(`${serverKey}:`).toString('base64')}`;
+    const res = await fetch(preferenceBaseUrl, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        Authorization: authHeader,
+      },
+      next: { revalidate: 900 },
+    });
+
+    if (!res.ok) {
+      console.warn(`[Midtrans] Preference API returned HTTP ${res.status}`);
+      return cachedPaymentChannels ? cachedPaymentChannels.channels : [];
+    }
+
+    const data = (await res.json()) as MidtransPreferenceResponse;
+    const channels = (data.payment_channels || [])
+      .filter((c) => c.enabled)
+      .map((c) => c.name.toLowerCase());
+
+    cachedPaymentChannels = {
+      channels,
+      expiresAt: now + CACHE_TTL_MS,
+    };
+
+    return channels;
+  } catch (err) {
+    console.error('[Midtrans] Error fetching merchant preferences:', err);
+    return cachedPaymentChannels ? cachedPaymentChannels.channels : [];
+  }
+}
+
+/**
+ * Build dynamic, customer-facing payment options based on what is genuinely active in Midtrans
+ */
+export async function getDynamicPaymentOptions(): Promise<PaymentOptionItem[]> {
+  const activeChannels = await getMidtransActiveChannels();
+  const channelSet = new Set(activeChannels);
+
+  const options: PaymentOptionItem[] = [];
+
+  const hasQris =
+    channelSet.has('qris') || channelSet.has('other_qris') || channelSet.has('gopay_qris');
+  const hasGoPay = channelSet.has('gopay');
+  const hasMandiri = channelSet.has('echannel') || channelSet.has('mandiri_va');
+  const hasBri = channelSet.has('bri_va');
+  const hasBni = channelSet.has('bni_va');
+  const hasBsi = channelSet.has('bsi_va') || channelSet.has('b_s_i_va');
+  const hasBca = channelSet.has('bca_va');
+  const hasPermata = channelSet.has('permata_va');
+
+  // 1. QRIS (If active in Midtrans)
+  if (hasQris) {
+    options.push({
+      id: 'qris',
+      name: 'QRIS Instan',
+      desc: 'GoPay, OVO, Dana, ShopeePay & Semua m-Banking',
+      tag: 'Terpopuler',
+      isPopular: true,
+      midtransChannels: ['other_qris', 'gopay', 'shopeepay'],
+    });
+  }
+
+  // 2. GoPay E-Wallet (Always highlight if active, especially when QRIS is not yet active!)
+  if (hasGoPay) {
+    options.push({
+      id: 'gopay',
+      name: 'GoPay / Gojek E-Wallet',
+      desc: 'Bayar otomatis via aplikasi Gojek / GoPay',
+      tag: hasQris ? 'Instan' : 'Terpopuler',
+      isPopular: !hasQris,
+      midtransChannels: ['gopay'],
+    });
+  }
+
+  // 3. Mandiri Bill / VA
+  if (hasMandiri) {
+    options.push({
+      id: 'mandiri',
+      name: 'Mandiri Bill / VA',
+      desc: 'Livin by Mandiri & ATM Mandiri',
+      tag: 'Otomatis 24 Jam',
+      midtransChannels: ['echannel', 'mandiri_va'],
+    });
+  }
+
+  // 4. BRI Virtual Account
+  if (hasBri) {
+    options.push({
+      id: 'bri',
+      name: 'BRI Virtual Account',
+      desc: 'BRImo & ATM Bank BRI',
+      tag: 'Otomatis 24 Jam',
+      midtransChannels: ['bri_va'],
+    });
+  }
+
+  // 5. BNI Virtual Account
+  if (hasBni) {
+    options.push({
+      id: 'bni',
+      name: 'BNI Virtual Account',
+      desc: 'BNI Mobile Banking & ATM BNI',
+      tag: 'Otomatis 24 Jam',
+      midtransChannels: ['bni_va'],
+    });
+  }
+
+  // 6. BSI Virtual Account
+  if (hasBsi) {
+    options.push({
+      id: 'bsi',
+      name: 'BSI Virtual Account',
+      desc: 'BSI Mobile & ATM Bank Syariah Indonesia',
+      tag: 'Otomatis 24 Jam',
+      midtransChannels: ['bsi_va'],
+    });
+  }
+
+  // 7. BCA Virtual Account (Only when approved by Midtrans)
+  if (hasBca) {
+    options.push({
+      id: 'bca',
+      name: 'BCA Virtual Account',
+      desc: 'BCA Mobile, myBCA, KlikBCA & ATM BCA',
+      tag: 'Otomatis 24 Jam',
+      midtransChannels: ['bca_va'],
+    });
+  }
+
+  // 8. Permata
+  if (hasPermata) {
+    options.push({
+      id: 'permata',
+      name: 'PermataBank Virtual Account',
+      desc: 'PermataME & ATM Permata',
+      tag: 'Otomatis 24 Jam',
+      midtransChannels: ['permata_va'],
+    });
+  }
+
+  // Emergency Fallback: If Midtrans is configured but preference API returned nothing
+  if (options.length === 0 && isMidtransConfigured()) {
+    options.push(
+      {
+        id: 'gopay',
+        name: 'GoPay / Gojek E-Wallet',
+        desc: 'Bayar instan via aplikasi Gojek / GoPay',
+        tag: 'Terpopuler',
+        isPopular: true,
+        midtransChannels: ['gopay'],
+      },
+      {
+        id: 'mandiri',
+        name: 'Mandiri Bill / VA',
+        desc: 'Livin by Mandiri & ATM Mandiri',
+        tag: 'Otomatis 24 Jam',
+        midtransChannels: ['echannel'],
+      },
+      {
+        id: 'bri',
+        name: 'BRI Virtual Account',
+        desc: 'BRImo & ATM Bank BRI',
+        tag: 'Otomatis 24 Jam',
+        midtransChannels: ['bri_va'],
+      },
+      {
+        id: 'bni',
+        name: 'BNI Virtual Account',
+        desc: 'BNI Mobile Banking & ATM BNI',
+        tag: 'Otomatis 24 Jam',
+        midtransChannels: ['bni_va'],
+      }
+    );
+  }
+
+  // Always append Manual Transfer (BCA / WA) as reliable alternative
+  options.push({
+    id: 'manual',
+    name: 'Transfer Bank Manual / Rekening BCA',
+    desc: 'Transfer Rekening & Konfirmasi WhatsApp',
+    tag: 'Alternatif',
+    midtransChannels: [],
+  });
+
+  return options;
 }

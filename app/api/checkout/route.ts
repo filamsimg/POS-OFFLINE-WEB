@@ -106,14 +106,20 @@ export async function POST(req: NextRequest) {
     let enabledPayments: string[] | undefined = undefined;
     if (paymentMethod === 'qris') {
       enabledPayments = ['other_qris', 'gopay', 'shopeepay'];
+    } else if (paymentMethod === 'gopay') {
+      enabledPayments = ['gopay'];
     } else if (paymentMethod === 'bca') {
       enabledPayments = ['bca_va'];
     } else if (paymentMethod === 'mandiri') {
-      enabledPayments = ['echannel'];
+      enabledPayments = ['echannel', 'mandiri_va'];
     } else if (paymentMethod === 'bri') {
       enabledPayments = ['bri_va'];
     } else if (paymentMethod === 'bni') {
       enabledPayments = ['bni_va'];
+    } else if (paymentMethod === 'bsi') {
+      enabledPayments = ['bsi_va'];
+    } else if (paymentMethod === 'permata') {
+      enabledPayments = ['permata_va'];
     }
 
     const hasValidMidtrans = isMidtransConfigured();

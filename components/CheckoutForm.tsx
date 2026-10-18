@@ -14,18 +14,21 @@ const BUSINESS_PRESETS = [
   { id: 'Usaha Lainnya', label: 'Usaha Lainnya' },
 ];
 
-const PAYMENT_OPTIONS = [
+interface PaymentOptionDef {
+  id: string;
+  name: string;
+  desc: string;
+  tag: string;
+  isPopular?: boolean;
+}
+
+const DEFAULT_PAYMENT_OPTIONS: PaymentOptionDef[] = [
   {
-    id: 'qris',
-    name: 'QRIS Instan',
-    desc: 'GoPay, OVO, Dana, ShopeePay & Semua m-Banking',
+    id: 'gopay',
+    name: 'GoPay / Gojek E-Wallet',
+    desc: 'Bayar instan via aplikasi Gojek / GoPay',
     tag: 'Terpopuler',
-  },
-  {
-    id: 'bca',
-    name: 'BCA Virtual Account',
-    desc: 'BCA Mobile, myBCA, KlikBCA & ATM BCA',
-    tag: 'Otomatis 24 Jam',
+    isPopular: true,
   },
   {
     id: 'mandiri',
@@ -46,8 +49,14 @@ const PAYMENT_OPTIONS = [
     tag: 'Otomatis 24 Jam',
   },
   {
+    id: 'bsi',
+    name: 'BSI Virtual Account',
+    desc: 'BSI Mobile & ATM Bank Syariah Indonesia',
+    tag: 'Otomatis 24 Jam',
+  },
+  {
     id: 'manual',
-    name: 'Transfer Bank Manual',
+    name: 'Transfer Bank Manual / Rekening BCA',
     desc: 'Transfer Rekening & Konfirmasi WhatsApp',
     tag: 'Alternatif',
   },
@@ -66,7 +75,8 @@ export function CheckoutForm() {
     notes: '',
   });
 
-  const [paymentMethod, setPaymentMethod] = useState<'qris' | 'bca' | 'mandiri' | 'bri' | 'bni' | 'manual'>('qris');
+  const [paymentOptions, setPaymentOptions] = useState<PaymentOptionDef[]>(DEFAULT_PAYMENT_OPTIONS);
+  const [paymentMethod, setPaymentMethod] = useState<string>('gopay');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [contactAdmin, setContactAdmin] = useState(false);
@@ -91,6 +101,32 @@ export function CheckoutForm() {
     } catch {
       // ignore
     }
+  }, []);
+
+  // Fetch live active channels from Midtrans API dynamically
+  useEffect(() => {
+    let isMounted = true;
+    fetch('/api/payment-methods')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!isMounted || !data?.success || !Array.isArray(data.options) || data.options.length === 0) {
+          return;
+        }
+        setPaymentOptions(data.options);
+        setPaymentMethod((curr) => {
+          const exists = data.options.some((opt: PaymentOptionDef) => opt.id === curr);
+          if (exists) return curr;
+          const popular = data.options.find((opt: PaymentOptionDef) => opt.isPopular);
+          return popular ? popular.id : data.options[0].id;
+        });
+      })
+      .catch((err) => {
+        console.warn('[Checkout] Using fallback payment options:', err);
+      });
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const filamsi = ADMIN_CONTACTS.find((c) => c.id === 'filamsi') || ADMIN_CONTACTS[1];
@@ -419,13 +455,13 @@ export function CheckoutForm() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              {PAYMENT_OPTIONS.map((opt) => {
+              {paymentOptions.map((opt) => {
                 const isSelected = paymentMethod === opt.id;
                 return (
                   <button
                     key={opt.id}
                     type="button"
-                    onClick={() => setPaymentMethod(opt.id as any)}
+                    onClick={() => setPaymentMethod(opt.id)}
                     className={`p-3.5 rounded-xl text-left border transition relative flex items-start gap-3 cursor-pointer ${
                       isSelected
                         ? 'border-[#141414] bg-[#141414] text-white shadow-sm ring-1 ring-[#C8F53B]'
@@ -476,6 +512,9 @@ export function CheckoutForm() {
               {paymentMethod === 'qris' && (
                 <span>Kode QRIS resmi akan langsung muncul setelah Anda klik tombol bayar. Bisa di-scan dari GoPay, OVO, Dana, ShopeePay, atau m-Banking apapun.</span>
               )}
+              {paymentMethod === 'gopay' && (
+                <span>Aplikasi Gojek / GoPay Anda akan otomatis terbuka atau menampilkan kode bayar resmi Midtrans dengan verifikasi instan.</span>
+              )}
               {paymentMethod === 'bca' && (
                 <span>Nomor Virtual Account BCA resmi akan langsung terbit untuk Anda salin ke m-BCA, myBCA, atau KlikBCA.</span>
               )}
@@ -488,8 +527,14 @@ export function CheckoutForm() {
               {paymentMethod === 'bni' && (
                 <span>Nomor BNI Virtual Account resmi langsung terbit untuk pembayaran via BNI Mobile Banking.</span>
               )}
+              {paymentMethod === 'bsi' && (
+                <span>Nomor BSI Virtual Account resmi langsung terbit untuk pembayaran via aplikasi BSI Mobile.</span>
+              )}
+              {paymentMethod === 'permata' && (
+                <span>Nomor PermataBank Virtual Account resmi langsung terbit untuk pembayaran via aplikasi PermataME.</span>
+              )}
               {paymentMethod === 'manual' && (
-                <span>Anda akan diarahkan ke petunjuk rekening resmi dan dapat langsung konfirmasi bukti transfer via WhatsApp ke Tim Pembelian.</span>
+                <span>Anda akan diarahkan ke petunjuk rekening resmi (BCA / Mandiri) dan dapat langsung konfirmasi bukti transfer via WhatsApp ke Tim Pembelian.</span>
               )}
             </div>
           </div>

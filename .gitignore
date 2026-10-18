@@ -47,6 +47,7 @@ next-env.d.ts
 # local documents and internal scripts
 /ktp/
 /scripts/
+*.eml
 
 # Screen recorder simulators & generated video assets
 /public/recorder*.html

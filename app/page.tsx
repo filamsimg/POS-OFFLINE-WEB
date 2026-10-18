@@ -15,7 +15,7 @@ import { OfferingHeader } from '@/components/OfferingHeader';
 
 export default function Home() {
   return (
-    <main className="min-h-screen pb-20 selection:bg-[#C8F53B] selection:text-[#141414] bg-[#F8FAFC] overflow-x-hidden w-full max-w-full">
+    <main className="min-h-screen pb-32 sm:pb-24 selection:bg-[#C8F53B] selection:text-[#141414] bg-[#F8FAFC] overflow-x-hidden w-full max-w-full">
       {/* Meta Pixel ViewContent Trigger */}
       <PixelViewContent />
 

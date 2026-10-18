@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ADMIN_CONTACTS } from '@/lib/types';
+import { ADMIN_CONTACTS, PACKAGES } from '@/lib/types';
 
 const STORIES = [
   {
@@ -9,7 +9,7 @@ const STORIES = [
     store: 'Toko Sembako Berkah',
     city: 'Bekasi',
     gradient: 'from-emerald-950/90 to-black/80',
-    text: '“Aplikasinya enteng banget di HP Android jadul. Yang paling ngebantu laporan laba hariannya dan pencatatan expense listrik/sewa, tiap tutup toko ga perlu rekap buku manual lagi.”',
+    text: '“Aplikasinya enteng banget di HP Android jadul. Yang paling ngebantu laporan laba hariannya dan pencatatan pengeluaran operasional listrik/sewa, tiap tutup toko ga perlu rekap buku manual lagi.”',
   },
   {
     name: 'Pak Dimas',
@@ -23,7 +23,7 @@ const STORIES = [
     store: 'Butik Rina',
     city: 'Bandung',
     gradient: 'from-sky-950/90 to-black/80',
-    text: '“Awalnya ragu karena sekali bayar Rp 299rb murah banget, ternyata fiturnya komplit. Ada fitur membership pelanggan dan barcode kamera HP lancar tanpa alat scanner tambahan.”',
+    text: `“Awalnya ragu karena sekali bayar Rp ${Math.round(PACKAGES.software_only.price / 1000)}rb murah banget, ternyata fiturnya komplit. Ada fitur membership pelanggan dan barcode kamera HP lancar tanpa alat scanner tambahan.”`,
   },
   {
     name: 'Mas Andri',

@@ -19,9 +19,11 @@ import {
   Zap,
   RefreshCw,
   CreditCard,
+  FileText,
 } from 'lucide-react';
 
 import { Order, PACKAGES, ADMIN_CONTACTS } from '@/lib/types';
+import { DigitalReceiptModal } from '@/components/DigitalReceiptModal';
 import { trackPurchase } from '@/lib/fpixel';
 
 function fmtCurrency(n: number) {
@@ -90,6 +92,7 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
   const [syncLoading, setSyncLoading]   = useState(false);
   const [syncMessage, setSyncMessage]   = useState<{ text: string; type: 'info' | 'success' | 'warn' } | null>(null);
   const [clientKey, setClientKey]       = useState('');
+  const [showReceipt, setShowReceipt]   = useState(false);
 
   const ariyo = ADMIN_CONTACTS.find((c) => c.id === 'ariyo') || ADMIN_CONTACTS[0];
   const filamsi = ADMIN_CONTACTS.find((c) => c.id === 'filamsi') || ADMIN_CONTACTS[1];
@@ -424,6 +427,31 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
                 {fmtCurrency(pkg.price)}
               </span>
             </div>
+
+            {isPaid && (
+              <div style={{ marginTop: 12, paddingTop: 10, borderTop: `1px dashed ${C.border}`, display: 'flex', justifyContent: 'flex-end' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowReceipt(true)}
+                  style={{
+                    background: '#ffffff',
+                    border: '1px solid #cbd5e1',
+                    borderRadius: 8,
+                    padding: '8px 14px',
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: '#0f172a',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    fontFamily: 'inherit',
+                  }}
+                >
+                  <FileText size={13} style={{ color: '#2563eb' }} /> Lihat / Cetak Nota Pembelian
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -489,16 +517,16 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
                     Petunjuk Pembayaran Transfer Bank &amp; QRIS
                   </div>
                   <div style={{ fontSize: 12, color: C.muted, lineHeight: 1.5 }}>
-                    Silakan transfer tepat senilai <strong style={{ color: '#16a34a' }}>Rp 299.000</strong> ke rekening admin atau minta QRIS toko resmi via WhatsApp tim kami:
+                    Silakan transfer tepat senilai <strong style={{ color: '#16a34a' }}>{fmtCurrency(order?.amount || PACKAGES.software_only.price)}</strong> ke rekening admin atau minta QRIS toko resmi via WhatsApp tim kami:
                   </div>
 
                   <a
-                    href={`https://wa.me/${ariyo?.waNumber || '6285168828063'}?text=${encodeURIComponent(
+                    href={`https://wa.me/${ariyo?.waNumber || ADMIN_CONTACTS[0].waNumber}?text=${encodeURIComponent(
                       `Halo Mas Ariyo, saya ingin konfirmasi pembayaran pesanan POS OFFLINE.\n` +
                       `No. Pesanan: #${orderId.slice(0, 8).toUpperCase()}\n` +
                       `Nama: ${order?.customerName ?? '-'}\n` +
                       `Toko: ${order?.storeName ?? '-'}\n` +
-                      `Total: Rp 299.000\n` +
+                      `Total: ${fmtCurrency(order?.amount || PACKAGES.software_only.price)}\n` +
                       `Mohon info rekening atau QRIS resmi untuk transfer.`
                     )}`}
                     target="_blank"
@@ -988,6 +1016,14 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
             ← Kembali ke Halaman Utama
           </Link>
         </div>
+
+        {/* ── Digital Sales Receipt Modal ─────────────────────────────────────── */}
+        {showReceipt && order && (
+          <DigitalReceiptModal
+            order={order}
+            onClose={() => setShowReceipt(false)}
+          />
+        )}
       </div>
     </div>
   );

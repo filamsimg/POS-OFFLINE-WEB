@@ -3,6 +3,8 @@
  * Official Documentation: https://developers.facebook.com/docs/meta-pixel/reference
  */
 
+import { PACKAGES } from '@/lib/types';
+
 declare global {
   interface Window {
     fbq?: (...args: unknown[]) => void;
@@ -33,7 +35,7 @@ export const trackViewContent = (params?: {
       content_category: params?.content_category ?? 'Software Kasir Android',
       content_ids: params?.content_ids ?? ['POS_OFFLINE_LIFETIME'],
       content_type: params?.content_type ?? 'product',
-      value: params?.value ?? 299000,
+      value: params?.value ?? PACKAGES.software_only.price,
       currency: params?.currency ?? 'IDR',
     });
   }
@@ -52,7 +54,7 @@ export const trackInitiateCheckout = (params?: {
       content_name: params?.content_name ?? 'Lisensi Software POS OFFLINE Permanen',
       content_ids: params?.content_ids ?? ['POS_OFFLINE_LIFETIME'],
       content_type: 'product',
-      value: params?.value ?? 299000,
+      value: params?.value ?? PACKAGES.software_only.price,
       currency: params?.currency ?? 'IDR',
       num_items: params?.num_items ?? 1,
     });

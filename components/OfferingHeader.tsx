@@ -21,7 +21,7 @@ export function OfferingHeader() {
             <span className="font-display font-bold text-sm sm:text-base text-white tracking-tight leading-none">
               POS OFFLINE
             </span>
-            <span className="text-[10px] text-zinc-400 font-mono hidden xs:inline leading-tight mt-0.5">
+            <span className="text-[10px] text-zinc-400 font-mono hidden sm:inline leading-tight mt-0.5">
               100% Offline • Sekali Bayar
             </span>
           </div>
@@ -38,7 +38,7 @@ export function OfferingHeader() {
 
         {/* Primary CTA */}
         <a
-          href="#checkout-manusiawi"
+          href="#checkout"
           className="inline-flex items-center gap-1.5 bg-[#C8F53B] hover:bg-[#BCEB28] text-[#141414] text-xs sm:text-sm font-bold px-4 py-2 sm:py-2.5 rounded-full transition shadow-sm shrink-0"
         >
           <span>Ambil Lisensi</span>

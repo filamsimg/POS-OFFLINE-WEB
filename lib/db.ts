@@ -63,7 +63,9 @@ export async function createOrder(order: Order): Promise<Order> {
           id, customer_name, customer_phone, customer_email,
           store_name, business_type, package_type, amount,
           payment_method, payment_status,
-          midtrans_token, midtrans_redirect_url, notes, created_at
+          midtrans_token, midtrans_redirect_url,
+          device_id, serial_key, activated_at,
+          notes, created_at
         ) VALUES (
           ${order.id},
           ${order.customerName},
@@ -77,6 +79,9 @@ export async function createOrder(order: Order): Promise<Order> {
           ${order.paymentStatus},
           ${order.midtransPaymentToken ?? null},
           ${order.midtransRedirectUrl ?? null},
+          ${order.deviceId ?? null},
+          ${order.serialKey ?? null},
+          ${order.activatedAt ? new Date(order.activatedAt) : null},
           ${order.notes ?? null},
           NOW()
         );

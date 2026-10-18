@@ -8,7 +8,7 @@ import { ADMIN_CONTACTS } from '@/lib/types';
 const FAQS = [
   {
     q: 'Apakah benar-benar tidak butuh kuota internet sama sekali saat dipakai kasir?',
-    a: 'Ya, 100% offline. Internet hanya dibutuhkan satu kali saat Anda mengunduh file APK dan mengaktifkan Serial Key di awal. Setelah itu, transaksi kasir, cetak struk Bluetooth, hitung expense, dan laporan laba berjalan sepenuhnya di HP/Tablet Anda tanpa kuota sepeser pun.',
+    a: 'Ya, 100% offline. Internet hanya dibutuhkan satu kali saat Anda mengunduh file APK dan mengaktifkan Serial Key di awal. Setelah itu, transaksi kasir, cetak struk Bluetooth, hitung pengeluaran operasional, dan laporan laba berjalan sepenuhnya di HP/Tablet Anda tanpa kuota sepeser pun.',
   },
   {
     q: 'Bagaimana jika suatu saat HP saya rusak, hilang, atau saya ganti HP baru?',
@@ -17,6 +17,10 @@ const FAQS = [
   {
     q: 'Apakah printer Bluetooth saya pasti cocok?',
     a: 'Kompatibel dengan lebih dari 50+ merk printer thermal Bluetooth 58mm maupun 80mm di pasaran Indonesia (Panda, Iware, Eppos, VSC, Kassen, Codeshop, Blueprint, dll). Jika belum memiliki printer thermal, transaksi tetap tercatat rapi dan struk transaksi bisa dipratinjau langsung di layar aplikasi.',
+  },
+  {
+    q: 'Apakah bisa pakai barcode scanner fisik (gun scanner USB/OTG/Bluetooth)?',
+    a: 'Sangat bisa! POS OFFLINE mendukung pemindai barcode fisik eksternal (USB/OTG/Bluetooth HID) dengan kecepatan scan instan 0ms tanpa lag dan akurasi 100%. Anda juga bisa menggunakan kamera HP langsung tanpa alat tambahan.',
   },
   {
     q: 'Apakah ada fitur multi-currency dan bagaimana cara kerjanya?',

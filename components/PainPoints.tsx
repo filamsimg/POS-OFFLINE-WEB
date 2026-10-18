@@ -1,6 +1,10 @@
 'use client';
 
+import { PACKAGES } from '@/lib/types';
+
 export function PainPoints() {
+  const priceFormatted = 'Rp ' + PACKAGES.software_only.price.toLocaleString('id-ID');
+
   return (
     <section id="masalah-solusi" className="mb-12">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
@@ -43,7 +47,7 @@ export function PainPoints() {
                 <span>✗ Cara Lama: Bayar bulanan walau toko sepi</span>
               </div>
               <h3 className="font-display font-bold text-lg text-[#141414] mb-2 leading-snug">
-                Sekali Bayar Rp 299.000, Bebas Tagihan Selamanya
+                Sekali Bayar {priceFormatted}, Bebas Tagihan Selamanya
               </h3>
               <p className="text-zinc-600 text-sm leading-relaxed">
                 Tidak ada biaya perpanjangan tahunan, tidak ada potong komisi transaksi, dan kasir Anda tidak akan pernah dikunci paksa karena telat bayar langganan.
@@ -94,7 +98,7 @@ export function PainPoints() {
           <div className="bg-[#F3F4F6] rounded-[28px] p-6 flex flex-col justify-between border border-zinc-200/60">
             <div>
               <div className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 bg-emerald-100 px-2.5 py-1 rounded-full mb-3">
-                <span>★ Fitur Baru: Expense, Bahan Baku & Multi-Currency</span>
+                <span>★ Fitur Baru: Pengeluaran Toko, Bahan Baku &amp; Multi-Currency</span>
               </div>
               <h3 className="font-display font-bold text-lg text-[#141414] mb-2 leading-snug">
                 Laba Bersih Riil, Biaya Toko & Expired Date

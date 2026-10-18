@@ -41,8 +41,8 @@ export function FloatingWhatsApp() {
         .floating-wa-wrapper {
           position: fixed;
           z-index: 50;
-          bottom: calc(max(12px, env(safe-area-inset-bottom)) + 74px);
-          right: 16px;
+          bottom: calc(max(10px, env(safe-area-inset-bottom)) + 62px);
+          right: 14px;
         }
         @media (min-width: 640px) {
           .floating-wa-wrapper {
@@ -53,9 +53,9 @@ export function FloatingWhatsApp() {
 
         .floating-wa-popup {
           position: absolute;
-          bottom: 64px;
+          bottom: 58px;
           right: 0;
-          width: clamp(300px, 86vw, 360px);
+          width: clamp(290px, 86vw, 360px);
           background: #ffffff;
           border: 1px solid #e2e8f0;
           border-radius: 18px;
@@ -73,6 +73,17 @@ export function FloatingWhatsApp() {
           100% {
             opacity: 1;
             transform: scale(1) translateY(0);
+          }
+        }
+
+        .floating-wa-btn {
+          width: 48px;
+          height: 48px;
+        }
+        @media (min-width: 640px) {
+          .floating-wa-btn {
+            width: 56px;
+            height: 56px;
           }
         }
 
@@ -255,9 +266,8 @@ export function FloatingWhatsApp() {
           type="button"
           onClick={() => setIsOpen((prev) => !prev)}
           aria-label={isOpen ? 'Tutup Pilihan WhatsApp' : 'Chat WhatsApp Admin POS OFFLINE'}
+          className="floating-wa-btn"
           style={{
-            width: 54,
-            height: 54,
             borderRadius: '50%',
             background: isOpen ? '#0f172a' : '#25d366',
             border: 'none',
@@ -267,7 +277,7 @@ export function FloatingWhatsApp() {
             color: '#ffffff',
             boxShadow: isOpen
               ? '0 6px 20px rgba(15, 23, 42, 0.4)'
-              : '0 6px 24px rgba(37, 211, 102, 0.5)',
+              : '0 4px 18px rgba(37, 211, 102, 0.45)',
             cursor: 'pointer',
             transition: 'transform 0.15s ease, background-color 0.15s ease',
             position: 'relative',

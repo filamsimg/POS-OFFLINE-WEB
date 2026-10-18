@@ -166,7 +166,7 @@ export function CheckoutForm() {
   };
 
   return (
-    <section id="checkout-manusiawi" className="bg-[#F3F4F6] rounded-[28px] p-4 sm:p-8 md:p-10 mb-12 border border-zinc-200/60 shadow-sm">
+    <section id="checkout" className="bg-[#F3F4F6] rounded-[28px] p-4 sm:p-8 md:p-10 mb-12 border border-zinc-200/60 shadow-sm">
       
       {/* 1. Step Expectation Banner (Eliminates Post-Payment Anxiety) */}
       <div className="mb-8 pb-7 border-b border-zinc-200">
@@ -249,10 +249,10 @@ export function CheckoutForm() {
 
           <div className="flex items-baseline gap-3 pb-5 mb-5 border-b border-white/10">
             <span className="font-mono font-bold text-3xl sm:text-4xl text-[#C8F53B]">
-              Rp 299.000
+              Rp {pkg.price.toLocaleString('id-ID')}
             </span>
             <span className="font-mono text-sm text-zinc-500 line-through">
-              Rp 650.000
+              Rp {pkg.originalPrice.toLocaleString('id-ID')}
             </span>
             <span className="text-xs text-zinc-300">/ Sekali Bayar</span>
           </div>
@@ -265,7 +265,7 @@ export function CheckoutForm() {
               <span className="text-[#C8F53B] font-bold">✓</span> 1x Serial Key Lisensi Permanen (Tidak Kedaluwarsa)
             </li>
             <li className="flex items-center gap-2.5">
-              <span className="text-[#C8F53B] font-bold">✓</span> Fitur Multi-Currency, Catat Expense & Bahan Baku
+              <span className="text-[#C8F53B] font-bold">✓</span> Fitur Multi-Currency, Catat Pengeluaran &amp; Bahan Baku
             </li>
             <li className="flex items-center gap-2.5">
               <span className="text-[#C8F53B] font-bold">✓</span> Peringatan Expired Date & Database Membership
@@ -503,7 +503,7 @@ export function CheckoutForm() {
               <span>Memproses Pesanan...</span>
             ) : (
               <>
-                <span>Lanjut ke Pembayaran Resmi (Rp 299.000)</span>
+                <span>Lanjut ke Pembayaran Resmi (Rp {pkg.price.toLocaleString('id-ID')})</span>
                 <span className="w-7 h-7 rounded-full bg-[#141414] text-[#C8F53B] inline-flex items-center justify-center text-sm font-mono">
                   →
                 </span>

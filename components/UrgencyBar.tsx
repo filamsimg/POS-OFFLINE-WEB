@@ -1,6 +1,7 @@
 'use client';
 
 import { ArrowRight, Sparkles } from 'lucide-react';
+import { PACKAGES } from '@/lib/types';
 
 export function UrgencyBar() {
   return (
@@ -171,7 +172,7 @@ export function UrgencyBar() {
               {/* Teks Penawaran */}
               <span>
                 Lisensi Permanen{' '}
-                <strong style={{ color: '#4ade80', fontWeight: 800 }}>Rp 299.000</strong>
+                <strong style={{ color: '#4ade80', fontWeight: 800 }}>Rp {PACKAGES.software_only.price.toLocaleString('id-ID')}</strong>
                 <span className="text-desktop-only"> (Sekali Bayar)</span>
               </span>
 

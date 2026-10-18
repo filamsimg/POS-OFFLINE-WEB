@@ -7,22 +7,28 @@ POS OFFLINE adalah perangkat lunak kasir (*Point of Sale*) khusus perangkat Andr
 ## Informasi Produk & Lisensi
 - **Nama Produk**: POS OFFLINE
 - **Platform**: Android (Smartphone & Tablet, OS 5.0 Lollipop ke atas)
-- **Harga Lisensi**: Rp 149.000 (Harga Promo Sekali Bayar, Permanen Seumur Hidup)
+- **Harga Lisensi**: Rp 299.000 (Harga Promo Sekali Bayar, Permanen Seumur Hidup)
 - **Model Lisensi**: Lisensi 1-to-1 Device ID Lock (Aman, Resmi, & Bebas Biaya Berkala)
 - **Koneksi Internet**: 100% Tidak Butuh Internet untuk operasional harian kasir
 
 ## Fitur Unggulan
-1. **100% Offline Tanpa Internet**: Data transaksi dan stok tersimpan di memori HP (SQLite lokal). Kasir tetap beroperasi meski sinyal mati atau mati lampu.
-2. **Cetak Struk Bluetooth Thermal**: Kompatibel dengan semua printer thermal Bluetooth ukuran 58mm dan 80mm standar pasaran.
-3. **Scan Barcode Cepat**: Menggunakan kamera bawaan HP Android atau barcode scanner eksternal untuk kasir cepat.
-4. **Manajemen Produk & Kategori**: Mendukung ribuan item produk, varian harga modal, harga jual, dan kontrol stok minimum.
-5. **Laporan Keuangan & Laba Bersih Otomatis**: Menghitung omzet harian/bulanan, laba kotor, laba bersih, dan produk terlaris secara instan tanpa perlu pembukuan manual.
-6. **Backup & Restore Database**: Cadangkan database transaksi ke penyimpanan internal atau Google Drive kapan saja dengan 1 klik.
+1. **100% Offline Tanpa Internet**: Data transaksi dan stok tersimpan di memori HP (SQLite lokal). Kasir tetap beroperasi lancar meski mati lampu atau tanpa kuota.
+2. **Cetak Struk Bluetooth Thermal**: Kompatibel dengan semua printer thermal Bluetooth ukuran 58mm dan 80mm standar pasaran (logo toko, diskon, PPN, footer).
+3. **Scan Barcode Kamera & Scanner OTG Fisik**: Menggunakan kamera bawaan HP Android atau gun barcode scanner eksternal (USB/OTG/Bluetooth HID) dengan 0ms cooldown.
+4. **Manajemen Produk, Grosir & Timbangan**: Mendukung ribuan SKU, harga grosir otomatis (≥12 pcs), varian anak, dan input desimal barang timbangan curah (kg).
+5. **Sistem Open Bill (Meja Kafe & Bayar Nanti)**: Simpan pesanan per nomor meja atau nama pelanggan, tambah pesanan bertahap, dan pelunasan fleksibel.
+6. **Riwayat Transaksi & Retur Barang Otomatis**: Nomor retur resmi RET-XXX, retur parsial/penuh, dan stok fisik barang otomatis kembali ke database.
+7. **Bahan Baku & Resep HPP Otomatis**: Penjualan porsi makanan/minuman otomatis memotong stok bahan baku dapur + notifikasi expired date.
+8. **Pencatatan Pengeluaran & Laba Bersih Riil**: Catat pengeluaran toko (listrik, sewa, gaji karyawan) untuk menghasilkan laporan laba bersih yang sesungguhnya.
+9. **Proteksi PIN Supervisor / Owner**: Kunci menu omset keuntungan, hapus nota transaksi, retur barang, dan edit harga modal agar kasir tidak bisa curang.
+10. **Buku Piutang & Kasbon Pelanggan**: Melacak hutang belanja pelanggan setia, riwayat cicilan, dan kirim pengingat pembayaran via WhatsApp.
+11. **Import & Ekspor Ribuan Produk via Excel**: Upload ribuan katalog barang sekaligus dalam 10 detik menggunakan template Excel/CSV siap pakai.
+12. **Backup & Restore Database SQLite**: Cadangkan berkas fisik SQLite atau JSON ke penyimpanan lokal atau share intent dengan 1 klik.
 
 ## Alur Pembelian & Aktivasi
 1. Kunjungi website resmi: https://www.posoffline.xyz/#checkout
 2. Isi formulir data usaha (Nama, Toko, WhatsApp, Email).
-3. Bayar Rp 149.000 via QRIS (GoPay, OVO, Dana, ShopeePay) atau Virtual Account melalui Midtrans Payment Gateway.
+3. Bayar Rp 299.000 via QRIS (GoPay, OVO, Dana, ShopeePay) atau Virtual Account melalui Midtrans Payment Gateway.
 4. Download file APK POS OFFLINE resmi dan klaim Serial Key instan di portal invoice pesanan.
 
 ## Tautan Resmi

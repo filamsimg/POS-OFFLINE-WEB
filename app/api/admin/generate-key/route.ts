@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
+import { v4 as uuidv4 } from 'uuid';
 import { generateSerialKey, normalizeDeviceId, isValidDeviceIdFormat } from '@/lib/license';
 import { extractAuthHeader } from '@/lib/auth';
-import { getOrderById, attachLicenseToOrder } from '@/lib/db';
+import { getOrderById, attachLicenseToOrder, createOrder } from '@/lib/db';
+import { PACKAGES, Order } from '@/lib/types';
 
 export async function POST(request: Request) {
   const isAuthorized = extractAuthHeader(request);
@@ -13,7 +15,17 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { deviceId, orderId, customerName, storeName } = await request.json();
+    const {
+      deviceId,
+      orderId,
+      customerName,
+      customerPhone,
+      customerEmail,
+      storeName,
+      businessType,
+      amount,
+      notes,
+    } = await request.json();
 
     if (!deviceId) {
       return NextResponse.json({ error: 'Device ID wajib diisi.' }, { status: 400 });
@@ -29,15 +41,16 @@ export async function POST(request: Request) {
 
     const serialKey = generateSerialKey(cleanDeviceId);
 
-    // If an orderId is provided, persist the key to the order in DB
-    let resolvedName  = customerName || 'Pelanggan';
-    let resolvedStore = storeName    || 'Toko Anda';
+    let resolvedOrderId = orderId;
+    let resolvedName = customerName?.trim() || 'Pelanggan Langsung (Admin)';
+    let resolvedStore = storeName?.trim() || 'Toko Anda';
+    let savedOrder: Order | null = null;
 
     if (orderId) {
       const order = await getOrderById(orderId);
       if (order) {
-        resolvedName  = order.customerName ?? resolvedName;
-        resolvedStore = order.storeName    ?? resolvedStore;
+        resolvedName = order.customerName ?? resolvedName;
+        resolvedStore = order.storeName ?? resolvedStore;
 
         // If order is already locked to a different device, protect from accidental overwrite
         if (order.deviceId && normalizeDeviceId(order.deviceId) !== cleanDeviceId) {
@@ -50,9 +63,43 @@ export async function POST(request: Request) {
         }
 
         await attachLicenseToOrder(orderId, cleanDeviceId, serialKey);
+        savedOrder = {
+          ...order,
+          deviceId: cleanDeviceId,
+          serialKey,
+          activatedAt: new Date().toISOString(),
+          paymentStatus: 'paid',
+        };
       }
-    }
+    } else {
+      // Standalone Order: Catat ke database agar masuk ke daftar pesanan, tracking device & pendapatan
+      const newOrderId = uuidv4();
+      resolvedOrderId = newOrderId;
+      const orderAmount =
+        typeof amount === 'number' && amount > 0
+          ? amount
+          : PACKAGES.software_only.price;
 
+      savedOrder = {
+        id: newOrderId,
+        customerName: resolvedName,
+        customerPhone: customerPhone?.trim() || '-',
+        customerEmail: customerEmail?.trim() || undefined,
+        storeName: resolvedStore !== 'Toko Anda' ? resolvedStore : undefined,
+        businessType: businessType?.trim() || 'Retail & Toko',
+        packageType: 'software_only',
+        amount: orderAmount,
+        paymentMethod: 'manual_transfer',
+        paymentStatus: 'paid', // Standalone generation by admin is officially paid
+        deviceId: cleanDeviceId,
+        serialKey: serialKey,
+        activatedAt: new Date().toISOString(),
+        createdAt: new Date().toISOString(),
+        notes: notes?.trim() || 'Order Standalone dibuat via Dashboard Admin',
+      };
+
+      await createOrder(savedOrder);
+    }
 
     // WhatsApp message template
     const waText =
@@ -69,10 +116,12 @@ export async function POST(request: Request) {
       `Jika ada pertanyaan, jangan ragu hubungi kami kembali ya Kak. 🙏`;
 
     return NextResponse.json({
-      success:           true,
-      deviceId:          cleanDeviceId,
+      success: true,
+      orderId: resolvedOrderId,
+      order: savedOrder,
+      deviceId: cleanDeviceId,
       serialKey,
-      whatsappTemplate:  waText,
+      whatsappTemplate: waText,
     });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Gagal membuat serial key.';

@@ -101,6 +101,12 @@ body {
   z-index: 10;
 }
 
+@media (max-width: 767px) {
+  .notch-cutout-mobile-hide {
+    display: none !important;
+  }
+}
+
 /* Concave fillet top-right */
 .notch-cutout::before {
   content: "";
@@ -246,3 +252,50 @@ body {
     animation: none !important;
   }
 }
+
+/* ─── Admin Mobile Optimization ───────────────────────────────────────────── */
+.admin-drawer-actions {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 8px !important;
+  width: 100% !important;
+}
+
+.admin-drawer-actions .admin-btn-full {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 42px !important;
+  padding: 10px 14px !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+}
+
+.admin-drawer-actions .admin-btn-half {
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 40px !important;
+  padding: 9px 8px !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+  font-size: 11.5px !important;
+}
+
+@media (min-width: 901px) {
+  .admin-drawer-actions {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+  }
+  .admin-drawer-actions .admin-btn-full,
+  .admin-drawer-actions .admin-btn-half {
+    width: auto !important;
+    flex: 0 0 auto !important;
+    grid-column: auto !important;
+  }
+}
+

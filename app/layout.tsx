@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { MetaPixelTracker } from '@/components/MetaPixelTracker';
+import { PACKAGES } from '@/lib/types';
 import './globals.css';
 
 export const viewport: Viewport = {
@@ -41,7 +42,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title:       'POS OFFLINE – Kasir Android Sekali Bayar, Aktif Seumur Hidup',
-    description: '100% Offline. Tanpa Biaya Bulanan. Cetak struk Bluetooth, scan barcode, laporan laba otomatis, multi-currency. Lisensi permanen Rp 299.000.',
+    description: `100% Offline. Tanpa Biaya Bulanan. Cetak struk Bluetooth, scan barcode, laporan laba otomatis, multi-currency. Lisensi permanen Rp ${PACKAGES.software_only.price.toLocaleString('id-ID')}.`,
     url:         siteUrl || '/',
     siteName:    'POS OFFLINE',
     images: [{ url: '/hero-mockup.jpg', width: 1280, height: 720, alt: 'Aplikasi Kasir POS OFFLINE di Android' }],
@@ -51,7 +52,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'POS OFFLINE – Kasir Android Sekali Bayar, Aktif Seumur Hidup',
-    description: '100% Offline. Tanpa Biaya Bulanan. Cetak struk Bluetooth, scan barcode, laporan laba otomatis. Lisensi permanen Rp 299.000.',
+    description: `100% Offline. Tanpa Biaya Bulanan. Cetak struk Bluetooth, scan barcode, laporan laba otomatis. Lisensi permanen Rp ${PACKAGES.software_only.price.toLocaleString('id-ID')}.`,
     images: ['/hero-mockup.jpg'],
   },
   robots: {
@@ -83,12 +84,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         name: 'POS OFFLINE',
         operatingSystem: 'Android 5.0 and up',
         applicationCategory: 'BusinessApplication',
-        softwareVersion: '2.4.0',
+        softwareVersion: '1.5.0',
         description:
           'Aplikasi kasir Android 100% offline tanpa biaya langganan bulanan. Cetak struk Bluetooth thermal, scan barcode kamera, manajemen stok, dan laporan laba otomatis.',
         offers: {
           '@type': 'Offer',
-          price: '299000',
+          price: String(PACKAGES.software_only.price),
           priceCurrency: 'IDR',
           priceValidUntil: '2027-12-31',
           availability: 'https://schema.org/InStock',

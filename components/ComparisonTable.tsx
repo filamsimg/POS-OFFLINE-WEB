@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { PACKAGES } from '@/lib/types';
 
 export function ComparisonTable() {
   const [years, setYears] = useState<number>(1);
@@ -8,7 +9,7 @@ export function ComparisonTable() {
   const months = years * 12;
   const saasMonthly = 149000;
   const saasCost = months * saasMonthly;
-  const posOfflineCost = 299000;
+  const posOfflineCost = PACKAGES.software_only.price;
   const totalSaved = saasCost - posOfflineCost;
 
   return (
@@ -61,7 +62,7 @@ export function ComparisonTable() {
               </div>
               <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#141414] text-white">
                 <span>POS OFFLINE (Sekali Bayar):</span>
-                <span className="font-mono font-bold text-[#C8F53B]">Rp 299.000</span>
+                <span className="font-mono font-bold text-[#C8F53B]">Rp {posOfflineCost.toLocaleString('id-ID')}</span>
               </div>
             </div>
           </div>
@@ -133,7 +134,7 @@ export function ComparisonTable() {
                     <td className="py-3.5 pl-3 text-zinc-400">Add-on berbayar tambahan</td>
                   </tr>
                   <tr>
-                    <td className="py-3.5 pr-3 font-medium">Catat Pengeluaran Toko (Expense)</td>
+                    <td className="py-3.5 pr-3 font-medium">Catat Pengeluaran Operasional Toko</td>
                     <td className="py-3.5 px-3 font-semibold text-white">✓ Hitung Laba Bersih Riil Otomatis</td>
                     <td className="py-3.5 pl-3 text-zinc-400">Modul akuntansi terpisah</td>
                   </tr>

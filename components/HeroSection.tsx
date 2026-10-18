@@ -2,9 +2,11 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import { PACKAGES } from '@/lib/types';
 
 export function HeroSection() {
   const [activeView, setActiveView] = useState<'tablet' | 'struk'>('tablet');
+  const pkg = PACKAGES.software_only;
 
   return (
     <section className="mb-10 sm:mb-14">
@@ -30,7 +32,7 @@ export function HeroSection() {
                   className="rounded-lg shadow-xs"
                 />
                 <span className="text-xs font-mono font-bold text-white tracking-wide">
-                  POS OFFLINE v2.4
+                  POS OFFLINE v1.5.0
                 </span>
               </div>
 
@@ -145,21 +147,21 @@ export function HeroSection() {
           </div>
 
           {/* Transparent Honest Price Pill */}
-          <div className="bg-[#F3F4F6] rounded-[28px] p-5 flex items-center justify-between gap-4 border border-zinc-200/80 shadow-xs">
-            <div>
+          <div className="bg-[#F3F4F6] rounded-[24px] p-4 sm:p-5 flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 sm:gap-4 border border-zinc-200/80 shadow-xs">
+            <div className="min-w-[170px] flex-1">
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-full font-mono">
                   DISKON 54%
                 </span>
                 <span className="text-xs text-zinc-600 font-semibold">Harga Promo Toko</span>
               </div>
-              <p className="text-xs sm:text-sm text-zinc-700 font-medium">
+              <p className="text-xs sm:text-sm text-zinc-700 font-medium leading-relaxed">
                 Cukup 1x bayar, tidak ada iuran bulanan selamanya.
               </p>
             </div>
-            <div className="text-right shrink-0">
-              <span className="text-xs text-zinc-400 line-through font-mono block">Rp 650.000</span>
-              <span className="font-mono font-bold text-2xl text-[#141414]">Rp 299.000</span>
+            <div className="text-left sm:text-right shrink-0">
+              <span className="text-xs text-zinc-400 line-through font-mono block">Rp {pkg.originalPrice.toLocaleString('id-ID')}</span>
+              <span className="font-mono font-bold text-2xl text-[#141414]">Rp {pkg.price.toLocaleString('id-ID')}</span>
             </div>
           </div>
 
@@ -188,7 +190,7 @@ export function HeroSection() {
             </p>
 
             <p className="text-[#141414]/85 text-xs sm:text-sm leading-relaxed mb-7 max-w-xl">
-              Cukup bayar satu kali <strong className="font-mono underline decoration-[#141414]/40 font-bold">Rp 299.000</strong>, aplikasi kasir langsung aktif di HP atau Tablet Android Anda. Transaksi beres dalam hitungan detik, cetak struk Bluetooth secepat kilat, dan setiap tutup toko Anda langsung tahu persis berapa rupiah laba bersih riil yang masuk hari ini.
+              Cukup bayar satu kali <strong className="font-mono underline decoration-[#141414]/40 font-bold">Rp {pkg.price.toLocaleString('id-ID')}</strong>, aplikasi kasir langsung aktif di HP atau Tablet Android Anda. Transaksi beres dalam hitungan detik, cetak struk Bluetooth secepat kilat, dan setiap tutup toko Anda langsung tahu persis berapa rupiah laba bersih riil yang masuk hari ini.
             </p>
           </div>
 
@@ -196,10 +198,10 @@ export function HeroSection() {
             {/* Primary Action Buttons */}
             <div className="flex flex-wrap items-center gap-3 mb-6">
               <a
-                href="#checkout-manusiawi"
+                href="#checkout"
                 className="bg-[#141414] text-white hover:bg-zinc-800 font-bold px-6 py-4 rounded-xl text-sm sm:text-base inline-flex items-center gap-3 transition shadow-lg group"
               >
-                <span>Beli Lisensi Sekarang (Rp 299.000)</span>
+                <span>Beli Lisensi Sekarang (Rp {pkg.price.toLocaleString('id-ID')})</span>
                 <span className="text-[#C8F53B] font-mono transition-transform group-hover:translate-x-1">→</span>
               </a>
               <a

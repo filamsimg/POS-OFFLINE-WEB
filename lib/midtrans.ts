@@ -314,88 +314,88 @@ export async function getDynamicPaymentOptions(): Promise<PaymentOptionItem[]> {
   if (hasQris) {
     options.push({
       id: 'qris',
-      name: 'QRIS Instan',
-      desc: 'GoPay, OVO, Dana, ShopeePay & Semua m-Banking',
-      tag: 'Terpopuler',
+      name: 'QRIS',
+      desc: 'Scan Semua E-Wallet & Bank',
+      tag: 'Instan',
       isPopular: true,
       midtransChannels: ['other_qris', 'gopay', 'shopeepay'],
     });
   }
 
-  // 2. GoPay E-Wallet (Always highlight if active, especially when QRIS is not yet active!)
+  // 2. GoPay E-Wallet
   if (hasGoPay) {
     options.push({
       id: 'gopay',
-      name: 'GoPay / Gojek E-Wallet',
-      desc: 'Bayar otomatis via aplikasi Gojek / GoPay',
-      tag: hasQris ? 'Instan' : 'Terpopuler',
+      name: 'GoPay',
+      desc: 'E-Wallet',
+      tag: 'Otomatis',
       isPopular: !hasQris,
       midtransChannels: ['gopay'],
     });
   }
 
-  // 3. Mandiri Bill / VA
+  // 3. Bank Mandiri
   if (hasMandiri) {
     options.push({
       id: 'mandiri',
-      name: 'Mandiri Bill / VA',
-      desc: 'Livin by Mandiri & ATM Mandiri',
-      tag: 'Otomatis 24 Jam',
+      name: 'Bank Mandiri',
+      desc: 'Virtual Account',
+      tag: 'Otomatis',
       midtransChannels: ['echannel', 'mandiri_va'],
     });
   }
 
-  // 4. BRI Virtual Account
+  // 4. Bank BRI
   if (hasBri) {
     options.push({
       id: 'bri',
-      name: 'BRI Virtual Account',
-      desc: 'BRImo & ATM Bank BRI',
-      tag: 'Otomatis 24 Jam',
+      name: 'Bank BRI',
+      desc: 'Virtual Account',
+      tag: 'Otomatis',
       midtransChannels: ['bri_va'],
     });
   }
 
-  // 5. BNI Virtual Account
+  // 5. Bank BNI
   if (hasBni) {
     options.push({
       id: 'bni',
-      name: 'BNI Virtual Account',
-      desc: 'BNI Mobile Banking & ATM BNI',
-      tag: 'Otomatis 24 Jam',
+      name: 'Bank BNI',
+      desc: 'Virtual Account',
+      tag: 'Otomatis',
       midtransChannels: ['bni_va'],
     });
   }
 
-  // 6. BSI Virtual Account
+  // 6. Bank BSI
   if (hasBsi) {
     options.push({
       id: 'bsi',
-      name: 'BSI Virtual Account',
-      desc: 'BSI Mobile & ATM Bank Syariah Indonesia',
-      tag: 'Otomatis 24 Jam',
+      name: 'Bank BSI',
+      desc: 'Virtual Account',
+      tag: 'Otomatis',
       midtransChannels: ['bsi_va'],
     });
   }
 
-  // 7. BCA Virtual Account (Only when approved by Midtrans)
+  // 7. Bank BCA (Only when approved by Midtrans)
   if (hasBca) {
     options.push({
       id: 'bca',
-      name: 'BCA Virtual Account',
-      desc: 'BCA Mobile, myBCA, KlikBCA & ATM BCA',
-      tag: 'Otomatis 24 Jam',
+      name: 'Bank BCA',
+      desc: 'Virtual Account',
+      tag: 'Otomatis',
       midtransChannels: ['bca_va'],
     });
   }
 
-  // 8. Permata
+  // 8. Bank Permata
   if (hasPermata) {
     options.push({
       id: 'permata',
-      name: 'PermataBank Virtual Account',
-      desc: 'PermataME & ATM Permata',
-      tag: 'Otomatis 24 Jam',
+      name: 'Bank Permata',
+      desc: 'Virtual Account',
+      tag: 'Otomatis',
       midtransChannels: ['permata_va'],
     });
   }
@@ -405,44 +405,35 @@ export async function getDynamicPaymentOptions(): Promise<PaymentOptionItem[]> {
     options.push(
       {
         id: 'gopay',
-        name: 'GoPay / Gojek E-Wallet',
-        desc: 'Bayar instan via aplikasi Gojek / GoPay',
-        tag: 'Terpopuler',
+        name: 'GoPay',
+        desc: 'E-Wallet',
+        tag: 'Otomatis',
         isPopular: true,
         midtransChannels: ['gopay'],
       },
       {
         id: 'mandiri',
-        name: 'Mandiri Bill / VA',
-        desc: 'Livin by Mandiri & ATM Mandiri',
-        tag: 'Otomatis 24 Jam',
+        name: 'Bank Mandiri',
+        desc: 'Virtual Account',
+        tag: 'Otomatis',
         midtransChannels: ['echannel'],
       },
       {
         id: 'bri',
-        name: 'BRI Virtual Account',
-        desc: 'BRImo & ATM Bank BRI',
-        tag: 'Otomatis 24 Jam',
+        name: 'Bank BRI',
+        desc: 'Virtual Account',
+        tag: 'Otomatis',
         midtransChannels: ['bri_va'],
       },
       {
         id: 'bni',
-        name: 'BNI Virtual Account',
-        desc: 'BNI Mobile Banking & ATM BNI',
-        tag: 'Otomatis 24 Jam',
+        name: 'Bank BNI',
+        desc: 'Virtual Account',
+        tag: 'Otomatis',
         midtransChannels: ['bni_va'],
       }
     );
   }
-
-  // Always append Manual Transfer (BCA / WA) as reliable alternative
-  options.push({
-    id: 'manual',
-    name: 'Transfer Bank Manual / Rekening BCA',
-    desc: 'Transfer Rekening & Konfirmasi WhatsApp',
-    tag: 'Alternatif',
-    midtransChannels: [],
-  });
 
   return options;
 }

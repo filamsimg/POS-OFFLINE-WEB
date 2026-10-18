@@ -48,8 +48,9 @@ export async function POST(req: NextRequest) {
       customerEmail,
       storeName,
       businessType,
-      paymentMethod = 'qris',
+      paymentMethod = 'gopay',
       notes,
+      forceNew,
     } = body;
 
     // ── Validation ──────────────────────────────────────────────────────────
@@ -70,8 +71,22 @@ export async function POST(req: NextRequest) {
     }
 
     // ── Anti-Spam & Resume Active Pending Order ─────────────────────────────
-    const existingPendingOrder = await getRecentPendingOrderByPhone(customerPhone.trim(), 24);
-    if (existingPendingOrder) {
+    // Jangan kunci pesanan jika:
+    // 1. User eksplisit meminta pesanan baru (forceNew === true)
+    // 2. Nama customer berbeda (misal: "filamsi" vs "filamsi mabda")
+    // 3. Nama toko berbeda
+    const existingPendingOrder = !forceNew
+      ? await getRecentPendingOrderByPhone(customerPhone.trim(), 2)
+      : null;
+
+    const isSameCustomer =
+      existingPendingOrder &&
+      existingPendingOrder.customerName.trim().toLowerCase() === customerName.trim().toLowerCase() &&
+      (!storeName?.trim() ||
+        !existingPendingOrder.storeName ||
+        existingPendingOrder.storeName.trim().toLowerCase() === storeName.trim().toLowerCase());
+
+    if (existingPendingOrder && isSameCustomer) {
       console.log(`[Checkout] Resuming active pending order ${existingPendingOrder.id} for phone ${customerPhone.trim()}`);
       const clientKey =
         process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY?.trim() ||

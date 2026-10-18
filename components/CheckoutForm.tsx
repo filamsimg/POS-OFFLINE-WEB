@@ -25,40 +25,34 @@ interface PaymentOptionDef {
 const DEFAULT_PAYMENT_OPTIONS: PaymentOptionDef[] = [
   {
     id: 'gopay',
-    name: 'GoPay / Gojek E-Wallet',
-    desc: 'Bayar instan via aplikasi Gojek / GoPay',
-    tag: 'Terpopuler',
+    name: 'GoPay',
+    desc: 'E-Wallet',
+    tag: 'Otomatis',
     isPopular: true,
   },
   {
     id: 'mandiri',
-    name: 'Mandiri Bill / VA',
-    desc: 'Livin by Mandiri & ATM Mandiri',
-    tag: 'Otomatis 24 Jam',
+    name: 'Bank Mandiri',
+    desc: 'Virtual Account',
+    tag: 'Otomatis',
   },
   {
     id: 'bri',
-    name: 'BRI Virtual Account',
-    desc: 'BRImo & ATM Bank BRI',
-    tag: 'Otomatis 24 Jam',
+    name: 'Bank BRI',
+    desc: 'Virtual Account',
+    tag: 'Otomatis',
   },
   {
     id: 'bni',
-    name: 'BNI Virtual Account',
-    desc: 'BNI Mobile Banking & ATM BNI',
-    tag: 'Otomatis 24 Jam',
+    name: 'Bank BNI',
+    desc: 'Virtual Account',
+    tag: 'Otomatis',
   },
   {
     id: 'bsi',
-    name: 'BSI Virtual Account',
-    desc: 'BSI Mobile & ATM Bank Syariah Indonesia',
-    tag: 'Otomatis 24 Jam',
-  },
-  {
-    id: 'manual',
-    name: 'Transfer Bank Manual / Rekening BCA',
-    desc: 'Transfer Rekening & Konfirmasi WhatsApp',
-    tag: 'Alternatif',
+    name: 'Bank BSI',
+    desc: 'Virtual Account',
+    tag: 'Otomatis',
   },
 ];
 
@@ -80,6 +74,7 @@ export function CheckoutForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [contactAdmin, setContactAdmin] = useState(false);
+  const [forceNewOrder, setForceNewOrder] = useState(false);
   const [pendingResumeOrder, setPendingResumeOrder] = useState<{
     id: string;
     name?: string;
@@ -162,7 +157,7 @@ export function CheckoutForm() {
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, paymentMethod }),
+        body: JSON.stringify({ ...form, paymentMethod, forceNew: forceNewOrder }),
       });
 
       const data = await res.json();
@@ -253,18 +248,37 @@ export function CheckoutForm() {
 
       {/* Resume Pending Order Notification if exists */}
       {pendingResumeOrder && (
-        <div className="mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-200 flex flex-wrap items-center justify-between gap-3 text-xs sm:text-sm text-amber-900">
-          <div>
-            <strong>Lanjutkan Pesanan Sebelumnya:</strong> Ada pesanan aktif atas nama{' '}
-            <strong>{pendingResumeOrder.name || 'Anda'}</strong>.
+        <div className="mb-6 p-4 sm:p-5 rounded-2xl bg-amber-50 border border-amber-200/90 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 text-xs sm:text-sm text-amber-950">
+          <div className="leading-snug">
+            <strong className="block font-bold text-amber-950 text-xs sm:text-sm">
+              Lanjutkan Pesanan Sebelumnya?
+            </strong>
+            <span className="text-amber-800 text-xs mt-0.5 block">
+              Ada pesanan aktif atas nama <strong>{pendingResumeOrder.name || 'Anda'}</strong> yang belum diselesaikan.
+            </span>
           </div>
-          <button
-            type="button"
-            onClick={() => router.push(`/order/${pendingResumeOrder.id}?pay=true`)}
-            className="px-4 py-2 bg-[#141414] text-[#C8F53B] rounded-xl font-bold text-xs hover:bg-zinc-800 transition"
-          >
-            Lanjut Bayar Pesanan Ini →
-          </button>
+
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-1 sm:pt-0 shrink-0">
+            <button
+              type="button"
+              onClick={() => router.push(`/order/${pendingResumeOrder.id}?pay=true`)}
+              className="w-full sm:w-auto min-h-[44px] px-5 py-2.5 bg-[#141414] text-[#C8F53B] rounded-xl font-bold text-xs flex items-center justify-center gap-2 hover:bg-zinc-800 active:scale-[0.98] transition shadow-xs"
+            >
+              <span>Lanjut Bayar Pesanan Ini</span>
+              <span>→</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                localStorage.removeItem('pos_last_pending_order');
+                setPendingResumeOrder(null);
+                setForceNewOrder(true);
+              }}
+              className="w-full sm:w-auto min-h-[44px] px-3.5 py-2 text-xs font-semibold text-amber-800 hover:text-amber-950 bg-amber-100/70 hover:bg-amber-100 border border-amber-200 rounded-xl transition text-center"
+            >
+              Buat Pesanan Baru
+            </button>
+          </div>
         </div>
       )}
 
@@ -318,7 +332,7 @@ export function CheckoutForm() {
           </ul>
 
           <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 text-xs text-zinc-300 leading-relaxed">
-            🔒 <strong>Garansi Lisensi Resmi:</strong> Jika ganti HP baru di kemudian hari, tim kami siap membantu pemindahan lisensi permanen Anda secara gratis.
+            <strong>Garansi Lisensi Resmi:</strong> Jika ganti HP baru di kemudian hari, tim kami siap membantu pemindahan lisensi permanen Anda secara gratis.
           </div>
         </div>
 
@@ -508,34 +522,11 @@ export function CheckoutForm() {
             </div>
 
             {/* Dynamic guidance note below selection */}
-            <div className="mt-2.5 p-2.5 rounded-lg bg-zinc-50 border border-zinc-200 text-[11px] text-zinc-600 leading-relaxed">
-              {paymentMethod === 'qris' && (
-                <span>Kode QRIS resmi akan langsung muncul setelah Anda klik tombol bayar. Bisa di-scan dari GoPay, OVO, Dana, ShopeePay, atau m-Banking apapun.</span>
-              )}
-              {paymentMethod === 'gopay' && (
-                <span>Aplikasi Gojek / GoPay Anda akan otomatis terbuka atau menampilkan kode bayar resmi Midtrans dengan verifikasi instan.</span>
-              )}
-              {paymentMethod === 'bca' && (
-                <span>Nomor Virtual Account BCA resmi akan langsung terbit untuk Anda salin ke m-BCA, myBCA, atau KlikBCA.</span>
-              )}
-              {paymentMethod === 'mandiri' && (
-                <span>Nomor Mandiri Bill / Virtual Account resmi langsung terbit untuk pembayaran via aplikasi Livin by Mandiri.</span>
-              )}
-              {paymentMethod === 'bri' && (
-                <span>Nomor BRI Virtual Account (BRIVA) resmi langsung terbit untuk pembayaran via aplikasi BRImo.</span>
-              )}
-              {paymentMethod === 'bni' && (
-                <span>Nomor BNI Virtual Account resmi langsung terbit untuk pembayaran via BNI Mobile Banking.</span>
-              )}
-              {paymentMethod === 'bsi' && (
-                <span>Nomor BSI Virtual Account resmi langsung terbit untuk pembayaran via aplikasi BSI Mobile.</span>
-              )}
-              {paymentMethod === 'permata' && (
-                <span>Nomor PermataBank Virtual Account resmi langsung terbit untuk pembayaran via aplikasi PermataME.</span>
-              )}
-              {paymentMethod === 'manual' && (
-                <span>Anda akan diarahkan ke petunjuk rekening resmi (BCA / Mandiri) dan dapat langsung konfirmasi bukti transfer via WhatsApp ke Tim Pembelian.</span>
-              )}
+            <div className="mt-2.5 p-2.5 rounded-lg bg-zinc-50 border border-zinc-200 text-[11px] text-zinc-600 flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+              <span>
+                Pembayaran diverifikasi otomatis 24 jam oleh sistem Midtrans.
+              </span>
             </div>
           </div>
 

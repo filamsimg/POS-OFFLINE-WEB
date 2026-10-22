@@ -264,6 +264,25 @@ export async function resetOrderDevice(id: string): Promise<boolean> {
   return false;
 }
 
+export async function deleteOrder(id: string): Promise<boolean> {
+  const sql = getNeonSql();
+  if (sql) {
+    try {
+      await sql`
+        DELETE FROM orders
+        WHERE id = ${id};
+      `;
+      return true;
+    } catch (err) {
+      console.warn('[DB] deleteOrder error:', err);
+      throw err;
+    }
+  }
+  const existed = inMemoryOrders.has(id);
+  inMemoryOrders.delete(id);
+  return existed;
+}
+
 export async function getAllOrders(): Promise<Order[]> {
   const sql = getNeonSql();
   if (sql) {

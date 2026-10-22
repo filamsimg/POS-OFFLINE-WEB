@@ -214,11 +214,35 @@ export function fmtDate(s?: string): string {
   }
 }
 
-/** Copy text to clipboard helper. */
-export function copyText(text: string): Promise<void> {
+/** Copy text to clipboard helper with legacy textarea fallback. */
+export async function copyText(text: string): Promise<void> {
   if (navigator?.clipboard?.writeText) {
-    return navigator.clipboard.writeText(text);
+    try {
+      await navigator.clipboard.writeText(text);
+      return;
+    } catch {
+      // Lanjut ke fallback di bawah jika clipboard API diblokir browser
+    }
   }
+
+  if (typeof document !== 'undefined') {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+      const successful = document.execCommand('copy');
+      document.body.removeChild(textArea);
+      if (successful) return;
+    } catch {
+      document.body.removeChild(textArea);
+    }
+  }
+
   return Promise.reject(new Error('Clipboard API unavailable'));
 }
 

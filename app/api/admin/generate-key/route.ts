@@ -76,9 +76,13 @@ export async function POST(request: Request) {
       const newOrderId = uuidv4();
       resolvedOrderId = newOrderId;
       const orderAmount =
-        typeof amount === 'number' && amount > 0
+        typeof amount === 'number' && amount >= 0
           ? amount
           : PACKAGES.software_only.price;
+
+      const defaultNotes = orderAmount === 0
+        ? 'Lisensi Gratis (Properti Konten / Demo) via Dashboard Admin'
+        : 'Order Standalone dibuat via Dashboard Admin';
 
       savedOrder = {
         id: newOrderId,
@@ -95,22 +99,28 @@ export async function POST(request: Request) {
         serialKey: serialKey,
         activatedAt: new Date().toISOString(),
         createdAt: new Date().toISOString(),
-        notes: notes?.trim() || 'Order Standalone dibuat via Dashboard Admin',
+        notes: notes?.trim() || defaultNotes,
       };
 
       await createOrder(savedOrder);
     }
 
-    // WhatsApp message template
+    const isFreeLicense = savedOrder?.amount === 0;
+    const greeting = isFreeLicense
+      ? `Halo Kak ${resolvedName}! Berikut adalah lisensi POS OFFLINE (Properti / Konten / Demo) Anda 😊\n\n`
+      : `Halo Kak ${resolvedName}! Terima kasih atas pesanannya di POS OFFLINE 😊\n\n`;
+
+    // WhatsApp message template dengan backtick agar pengguna di WhatsApp cukup 1-tap untuk salin serial key
     const waText =
-      `Halo Kak ${resolvedName}! Terima kasih atas pesanannya di POS OFFLINE 😊\n\n` +
+      greeting +
       `Berikut rincian aktivasi lisensi resmi Anda:\n` +
       `🏪 Nama Toko: ${resolvedStore}\n` +
       `📱 Device ID: ${cleanDeviceId}\n` +
-      `🔑 SERIAL KEY: ${serialKey}\n\n` +
+      `🔑 SERIAL KEY (Ketuk kode untuk menyalin):\n` +
+      `\`${serialKey}\`\n\n` +
       `Cara Aktivasi:\n` +
       `1. Buka aplikasi POS OFFLINE di HP Anda.\n` +
-      `2. Salin dan tempelkan Serial Key di atas ke kolom yang tersedia.\n` +
+      `2. Ketuk kode Serial Key di atas untuk menyalin, lalu tempelkan ke kolom yang tersedia di aplikasi.\n` +
       `3. Klik tombol "Aktivasi Aplikasi".\n\n` +
       `Aplikasi Anda langsung aktif permanen seumur hidup! ` +
       `Jika ada pertanyaan, jangan ragu hubungi kami kembali ya Kak. 🙏`;

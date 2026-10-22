@@ -34,12 +34,12 @@ const WORKFLOW_ITEMS: WorkflowItem[] = [
     imgSrc: '/preview-apps/preview-numpad-bayar.webp',
   },
   {
-    id: 'multi-metode',
+    id: 'metode-kasir-meja',
     category: 'kasir',
-    title: '3. Multi-Metode Bayar & Multi-Currency',
-    badge: 'IDR, USD, SGD, MYR',
-    metric: 'MULTI-MATA UANG',
-    desc: 'Dukung Tunai, QRIS, Transfer Bank, serta transaksi multi-currency untuk turis atau pelanggan luar negeri. Bisa Open Bill (Simpan Meja).',
+    title: '3. Metode Kasir: Tunai, QRIS Toko & Simpan Meja',
+    badge: 'Tunai, QRIS & Meja',
+    metric: '100% OFFLINE',
+    desc: 'Hitung kembalian tunai otomatis, catat pembayaran QRIS fisik toko, Simpan Tagihan Meja (Open Bill), serta kustomisasi simbol mata uang.',
     imgSrc: '/preview-apps/preview-tablet-kasir.webp',
   },
   {

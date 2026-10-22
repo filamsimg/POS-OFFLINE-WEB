@@ -23,8 +23,8 @@ const FAQS = [
     a: 'Sangat bisa! POS OFFLINE mendukung pemindai barcode fisik eksternal (USB/OTG/Bluetooth HID) dengan kecepatan scan instan 0ms tanpa lag dan akurasi 100%. Anda juga bisa menggunakan kamera HP langsung tanpa alat tambahan.',
   },
   {
-    q: 'Apakah ada fitur multi-currency dan bagaimana cara kerjanya?',
-    a: 'Ya, POS OFFLINE mendukung multi-currency (IDR, USD, SGD, MYR, dll). Anda bisa mengatur mata uang dasar serta kurs konversi sehingga cocok untuk toko di kawasan wisata atau melayani pembeli luar negeri.',
+    q: 'Apakah bisa menggunakan mata uang selain Rupiah (Custom Currency)?',
+    a: 'Sangat bisa. POS OFFLINE mendukung kustomisasi mata uang secara bebas (IDR, USD, SGD, MYR, dll). Anda dapat mengganti simbol mata uang (Rp, $, RM), jumlah desimal, dan pemisah ribuan di pengaturan toko sehingga cocok digunakan untuk usaha di Indonesia maupun mancanegara.',
   },
   {
     q: 'Bagaimana jika saya butuh fitur custom atau modifikasi alur khusus?',

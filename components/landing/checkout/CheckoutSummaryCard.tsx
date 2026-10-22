@@ -35,7 +35,7 @@ export function CheckoutSummaryCard() {
           <span className="text-[#C8F53B] font-bold">✓</span> 1x Serial Key Lisensi Permanen (Tidak Kedaluwarsa)
         </li>
         <li className="flex items-center gap-2.5">
-          <span className="text-[#C8F53B] font-bold">✓</span> Fitur Multi-Currency, Catat Pengeluaran &amp; Bahan Baku
+          <span className="text-[#C8F53B] font-bold">✓</span> Kustom Simbol Mata Uang, Catat Pengeluaran &amp; Bahan Baku
         </li>
         <li className="flex items-center gap-2.5">
           <span className="text-[#C8F53B] font-bold">✓</span> Peringatan Expired Date &amp; Database Membership

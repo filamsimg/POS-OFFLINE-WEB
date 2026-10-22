@@ -124,9 +124,9 @@ export function ComparisonTable() {
                     <td className="py-3.5 pl-3 text-zinc-400">Kasir macet / terhambat</td>
                   </tr>
                   <tr>
-                    <td className="py-3.5 pr-3 font-medium">Multi-Currency (Mata Uang Asing)</td>
-                    <td className="py-3.5 px-3 font-semibold text-white">✓ Sudah Termasuk (IDR, USD, dll)</td>
-                    <td className="py-3.5 pl-3 text-zinc-400">Khusus paket enterprise mahal</td>
+                    <td className="py-3.5 pr-3 font-medium">Format Mata Uang Fleksibel</td>
+                    <td className="py-3.5 px-3 font-semibold text-white">✓ Bebas Atur Simbol (Rp, $, RM, dll)</td>
+                    <td className="py-3.5 pl-3 text-zinc-400">Terkunci atau paket enterprise</td>
                   </tr>
                   <tr>
                     <td className="py-3.5 pr-3 font-medium">Bahan Baku &amp; Peringatan Expired</td>

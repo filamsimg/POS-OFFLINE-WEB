@@ -98,13 +98,13 @@ export function PainPoints() {
           <div className="bg-[#F3F4F6] rounded-[28px] p-6 flex flex-col justify-between border border-zinc-200/60">
             <div>
               <div className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 bg-emerald-100 px-2.5 py-1 rounded-full mb-3">
-                <span>★ Fitur Baru: Pengeluaran Toko, Bahan Baku &amp; Multi-Currency</span>
+                <span>★ Fitur Baru: Pengeluaran Toko, Bahan Baku &amp; Kustom Mata Uang</span>
               </div>
               <h3 className="font-display font-bold text-lg text-[#141414] mb-2 leading-snug">
                 Laba Bersih Riil, Biaya Toko &amp; Expired Date
               </h3>
               <p className="text-zinc-600 text-sm leading-relaxed">
-                Catat pengeluaran listrik/sewa, monitor bahan baku yang hampir kedaluwarsa, dan nikmati fleksibilitas multi-currency untuk transaksi lebih luas.
+                Catat pengeluaran operasional listrik/sewa, monitor bahan baku yang hampir kedaluwarsa, dan nikmati fleksibilitas kustomisasi format mata uang toko.
               </p>
             </div>
             <div className="mt-4 pt-3 border-t border-zinc-200 flex items-center justify-between text-xs font-mono text-zinc-500 font-semibold">

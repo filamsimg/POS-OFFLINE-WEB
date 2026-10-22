@@ -108,7 +108,7 @@ export function PackagesSection() {
               </li>
               <li className="flex items-start gap-2.5">
                 <span className="font-bold text-[#141414] mt-0.5">✓</span>
-                <span><strong>Multi-Metode &amp; PPN Resto:</strong> Tunai, QRIS toko, simpan bill, serta toggle pajak resto &amp; logo kafe di struk.</span>
+                <span><strong>Metode Kasir &amp; PPN Resto:</strong> Tunai (kembalian otomatis), QRIS fisik toko, simpan meja (open bill), serta toggle pajak &amp; logo di struk.</span>
               </li>
             </ul>
           </div>

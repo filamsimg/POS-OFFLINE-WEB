@@ -45,7 +45,7 @@ export async function getApkBinaryStream(): Promise<ApkStreamResult | null> {
 
   if (!rawDriveUrl) {
     throw new Error(
-      '[APK Download] Variabel lingkungan APK_DRIVE_URL atau NEXT_PUBLIC_APK_DRIVE_URL belum dikonfigurasi di file .env.'
+      '[APK Download] Variabel lingkungan APK_DRIVE_URL belum dikonfigurasi di file .env.'
     );
   }
 

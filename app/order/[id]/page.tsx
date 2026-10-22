@@ -267,9 +267,7 @@ export default function OrderPage({ params }: { params: Promise<{ id: string }> 
 
   const pkg    = order ? PACKAGES[order.packageType] : PACKAGES.software_only;
   const isPaid = order?.paymentStatus === 'paid';
-  const directApkUrl = isPaid
-    ? `/api/download/apk?orderId=${orderId}`
-    : (process.env.NEXT_PUBLIC_APK_DRIVE_URL || '');
+  const directApkUrl = `/api/download/apk?orderId=${orderId}`;
 
   const cleanDeviceInput = deviceIdInput.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
   const isCompleteFormat = cleanDeviceInput.length >= 10;

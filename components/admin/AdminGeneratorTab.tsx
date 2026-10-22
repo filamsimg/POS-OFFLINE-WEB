@@ -489,7 +489,7 @@ export function AdminGeneratorTab({
                 <textarea
                   readOnly
                   rows={9}
-                  value={genResult.waTemplate}
+                  value={genResult.waTemplate || ''}
                   style={{
                     width: '100%',
                     background: '#ffffff',
@@ -510,7 +510,7 @@ export function AdminGeneratorTab({
                 <button
                   type="button"
                   onClick={() => {
-                    copyText(genResult.waTemplate).then(() => {
+                    copyText(genResult.waTemplate || '').then(() => {
                       setWaMsgCopied(true);
                       setTimeout(() => setWaMsgCopied(false), 2500);
                     });
@@ -549,9 +549,9 @@ export function AdminGeneratorTab({
                 {(() => {
                   const targetOrder = genResult.order || selectedOrder;
                   const phoneTarget = targetOrder?.customerPhone || genCustomerPhone;
-                  if (phoneTarget) {
-                    const cleanPhone = phoneTarget.replace(/\D/g, '').replace(/^0/, '62');
-                    const waDirectUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(genResult.waTemplate)}`;
+                  const cleanPhone = (phoneTarget || '').replace(/\D/g, '').replace(/^0/, '62');
+                  if (cleanPhone.length >= 9) {
+                    const waDirectUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(genResult.waTemplate || '')}`;
                     return (
                       <a
                         href={waDirectUrl}

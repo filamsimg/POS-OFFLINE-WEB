@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { MetaPixelTracker } from '@/components/MetaPixelTracker';
-import { PACKAGES } from '@/lib/types';
+import { PACKAGES, CURRENT_APP_VERSION } from '@/lib/types';
 import './globals.css';
 
 export const viewport: Viewport = {
@@ -84,7 +84,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         name: 'POS OFFLINE',
         operatingSystem: 'Android 5.0 and up',
         applicationCategory: 'BusinessApplication',
-        softwareVersion: '1.5.0',
+        softwareVersion: CURRENT_APP_VERSION,
         description:
           'Aplikasi kasir Android 100% offline tanpa biaya langganan bulanan. Cetak struk Bluetooth thermal, scan barcode kamera, manajemen stok, dan laporan laba otomatis.',
         offers: {

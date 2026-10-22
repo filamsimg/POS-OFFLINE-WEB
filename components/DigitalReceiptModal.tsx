@@ -30,6 +30,12 @@ export function DigitalReceiptModal({ order, onClose }: DigitalReceiptModalProps
   const invoiceNumber = `INV-${order.id.slice(0, 8).toUpperCase()}`;
   const isPaid = order.paymentStatus === 'paid';
 
+  const siteBaseUrl =
+    typeof window !== 'undefined'
+      ? window.location.origin
+      : (process.env.NEXT_PUBLIC_SITE_URL?.trim() || 'https://www.posoffline.xyz').replace(/\/+$/, '');
+  const portalUrl = `${siteBaseUrl}/order/${order.id}`;
+
   const receiptSummaryText =
     `*━━━━━━━━━━━━━━━━━━━━━━━━━━━━━*\n` +
     `*NOTA PENJUALAN RESMI POS OFFLINE*\n` +
@@ -39,7 +45,7 @@ export function DigitalReceiptModal({ order, onClose }: DigitalReceiptModalProps
     `Status: ${isPaid ? 'LUNAS (TERVERIFIKASI)' : 'MENUNGGU PEMBAYARAN'}\n\n` +
     `*DATA PEMBELI:*\n` +
     `• Nama: ${order.customerName}\n` +
-    `• WhatsApp: ${order.customerPhone}\n` +
+    `• WhatsApp: ${order.customerPhone || '-'}\n` +
     `• Toko/Usaha: ${order.storeName || '-'}\n\n` +
     `*RINCIAN LISENSI:*\n` +
     `• Item: Lisensi Software POS OFFLINE Pro\n` +
@@ -50,7 +56,7 @@ export function DigitalReceiptModal({ order, onClose }: DigitalReceiptModalProps
     `• Serial Key: ${order.serialKey || '(Belum diterbitkan)'}\n` +
     `• Status Lisensi: ${order.serialKey ? 'Aktif Permanen Seumur Hidup' : 'Menunggu Aktivasi'}\n\n` +
     `*Portal Akses & Download APK:*\n` +
-    `https://www.posoffline.xyz/order/${order.id}\n\n` +
+    `${portalUrl}\n\n` +
     `_Terima kasih atas kepercayaan Anda bermitra dengan POS OFFLINE!_`;
 
   const handleCopyReceipt = () => {
@@ -64,12 +70,10 @@ export function DigitalReceiptModal({ order, onClose }: DigitalReceiptModalProps
     window.print();
   };
 
-  const phone = order.customerPhone.replace(/\D/g, '').replace(/^0/, '62');
-  const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(receiptSummaryText)}`;
-  const verificationUrl =
-    typeof window !== 'undefined'
-      ? `${window.location.origin}/order/${order.id}`
-      : `https://pos-offline.id/order/${order.id}`;
+  const phone = (order.customerPhone || '').replace(/\D/g, '').replace(/^0/, '62');
+  const hasValidPhone = phone.length >= 9;
+  const waUrl = hasValidPhone ? `https://wa.me/${phone}?text=${encodeURIComponent(receiptSummaryText)}` : '';
+  const verificationUrl = portalUrl;
 
   return (
     <div
@@ -517,28 +521,30 @@ export function DigitalReceiptModal({ order, onClose }: DigitalReceiptModalProps
               <Printer size={14} /> Cetak / PDF
             </button>
 
-            <a
-              href={waUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="receipt-action-btn"
-              style={{
-                background: '#f0fdf4',
-                color: '#16a34a',
-                border: '1px solid #86efac',
-                borderRadius: 8,
-                padding: '9px 14px',
-                fontSize: 12,
-                fontWeight: 700,
-                textDecoration: 'none',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6,
-                fontFamily: 'inherit',
-              }}
-            >
-              <MessageCircle size={14} /> Kirim ke WA
-            </a>
+            {hasValidPhone && (
+              <a
+                href={waUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="receipt-action-btn"
+                style={{
+                  background: '#f0fdf4',
+                  color: '#16a34a',
+                  border: '1px solid #86efac',
+                  borderRadius: 8,
+                  padding: '9px 14px',
+                  fontSize: 12,
+                  fontWeight: 700,
+                  textDecoration: 'none',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  fontFamily: 'inherit',
+                }}
+              >
+                <MessageCircle size={14} /> Kirim ke WA
+              </a>
+            )}
           </div>
 
           <div className="receipt-actions-secondary-group" style={{ display: 'flex', gap: 8 }}>

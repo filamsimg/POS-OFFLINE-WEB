@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   MessageCircle,
   FileText,
@@ -9,10 +9,12 @@ import {
   Key,
   ShieldCheck,
   CheckCircle,
+  Copy,
+  Check,
 } from 'lucide-react';
 import { Order } from '@/lib/types';
 import { InfoRow, CopyBtn, StatusBadge } from './AdminSharedUi';
-import { fmtCurrency, fmtDate } from '@/lib/ui-tokens';
+import { fmtCurrency, fmtDate, copyText } from '@/lib/ui-tokens';
 
 interface AdminOrderDrawerProps {
   order: Order;
@@ -21,6 +23,7 @@ interface AdminOrderDrawerProps {
   onOpenDelete: (order: Order) => void;
   onOpenGenerator: (order: Order) => void;
   getOrderWhatsAppUrl: (order: Order) => string;
+  getOrderActivationText?: (order: Order) => string;
 }
 
 export function AdminOrderDrawer({
@@ -30,7 +33,12 @@ export function AdminOrderDrawer({
   onOpenDelete,
   onOpenGenerator,
   getOrderWhatsAppUrl,
+  getOrderActivationText,
 }: AdminOrderDrawerProps) {
+  const [copiedDraft, setCopiedDraft] = useState(false);
+  const cleanPhone = (order.customerPhone || '').replace(/\D/g, '').replace(/^0/, '62');
+  const hasValidPhone = cleanPhone.length >= 9;
+
   return (
     <div
       style={{
@@ -76,8 +84,8 @@ export function AdminOrderDrawer({
             <InfoRow label="Kategori Usaha" value={order.businessType || '-'} />
             <InfoRow
               label="WhatsApp"
-              value={order.customerPhone}
-              href={`https://wa.me/${order.customerPhone.replace(/\D/g, '').replace(/^0/, '62')}`}
+              value={order.customerPhone || '-'}
+              href={hasValidPhone ? `https://wa.me/${cleanPhone}` : undefined}
             />
             {order.customerEmail && (
               <InfoRow
@@ -175,28 +183,66 @@ export function AdminOrderDrawer({
                 </div>
 
                 <div className="admin-drawer-actions">
-                  <a
-                    href={getOrderWhatsAppUrl(order)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="admin-btn-full"
-                    style={{
-                      background: '#16a34a',
-                      color: '#ffffff',
-                      borderRadius: 8,
-                      padding: '11px 16px',
-                      fontSize: 12,
-                      fontWeight: 700,
-                      textDecoration: 'none',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: 6,
-                      boxShadow: '0 2px 6px rgba(22, 163, 74, 0.25)',
-                    }}
-                  >
-                    <MessageCircle size={14} /> Kirim WhatsApp Lisensi
-                  </a>
+                  {hasValidPhone && (
+                    <a
+                      href={getOrderWhatsAppUrl(order)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="admin-btn-full"
+                      style={{
+                        background: '#16a34a',
+                        color: '#ffffff',
+                        borderRadius: 8,
+                        padding: '11px 16px',
+                        fontSize: 12,
+                        fontWeight: 700,
+                        textDecoration: 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 6,
+                        boxShadow: '0 2px 6px rgba(22, 163, 74, 0.25)',
+                      }}
+                    >
+                      <MessageCircle size={14} /> Kirim WhatsApp Lisensi
+                    </a>
+                  )}
+
+                  {getOrderActivationText && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const txt = getOrderActivationText(order);
+                        if (txt) {
+                          copyText(txt).then(() => {
+                            setCopiedDraft(true);
+                            setTimeout(() => setCopiedDraft(false), 2500);
+                          });
+                        }
+                      }}
+                      className="admin-btn-full"
+                      style={{
+                        background: copiedDraft ? '#16a34a' : '#0f172a',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: 8,
+                        padding: '11px 16px',
+                        fontSize: 12,
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        fontFamily: 'inherit',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 6,
+                        boxShadow: '0 2px 6px rgba(15, 23, 42, 0.15)',
+                        transition: 'all 0.15s ease',
+                      }}
+                    >
+                      {copiedDraft ? <Check size={14} /> : <Copy size={14} />}
+                      {copiedDraft ? 'Pesan Lisensi Berhasil Disalin!' : 'Salin Pesan Lisensi'}
+                    </button>
+                  )}
 
                   <button
                     type="button"

@@ -16,6 +16,7 @@ interface AdminOrderCardsProps {
   onOpenDelete: (order: Order) => void;
   onOpenGenerator: (order: Order) => void;
   getOrderWhatsAppUrl: (order: Order) => string;
+  getOrderActivationText?: (order: Order) => string;
 }
 
 export function AdminOrderCards({
@@ -27,6 +28,7 @@ export function AdminOrderCards({
   onOpenDelete,
   onOpenGenerator,
   getOrderWhatsAppUrl,
+  getOrderActivationText,
 }: AdminOrderCardsProps) {
   return (
     <div className="mobile-only-cards">
@@ -164,6 +166,7 @@ export function AdminOrderCards({
                 onOpenDelete={onOpenDelete}
                 onOpenGenerator={onOpenGenerator}
                 getOrderWhatsAppUrl={getOrderWhatsAppUrl}
+                getOrderActivationText={getOrderActivationText}
               />
             )}
           </div>

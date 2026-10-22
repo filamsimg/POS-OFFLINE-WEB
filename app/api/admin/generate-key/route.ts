@@ -131,6 +131,7 @@ export async function POST(request: Request) {
       order: savedOrder,
       deviceId: cleanDeviceId,
       serialKey,
+      waTemplate: waText,
       whatsappTemplate: waText,
     });
   } catch (err: unknown) {

@@ -3,6 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { RefreshCw, LogOut } from 'lucide-react';
+import { CURRENT_APP_VERSION } from '@/lib/types';
 
 interface AdminHeaderProps {
   dataLoading: boolean;
@@ -89,7 +90,7 @@ export function AdminHeader({
                 fontFamily: 'monospace',
               }}
             >
-              v1.5.0
+              v{CURRENT_APP_VERSION}
             </span>
           </div>
         </div>

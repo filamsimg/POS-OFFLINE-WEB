@@ -150,9 +150,8 @@ export default function AdminPage() {
     }
   };
 
-  // WhatsApp draft helper
-  const getOrderWhatsAppUrl = (order: Order) => {
-    const phone = order.customerPhone.replace(/\D/g, '').replace(/^0/, '62');
+  // WhatsApp text helper (raw formatted message for clipboard copy or direct messaging)
+  const getOrderActivationText = (order: Order): string => {
     let text = '';
     if (order.serialKey) {
       const isFree = order.amount === 0;
@@ -183,7 +182,16 @@ export default function AdminPage() {
         `No. Pesanan: #${order.id.slice(0, 8).toUpperCase()}\n\n` +
         `Apakah ada pertanyaan atau kendala dalam menyelesaikan pembayaran yang bisa kami bantu?`;
     }
-    return `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
+    return text;
+  };
+
+  // WhatsApp draft URL helper
+  const getOrderWhatsAppUrl = (order: Order): string => {
+    const text = getOrderActivationText(order);
+    const cleanPhone = (order.customerPhone || '').replace(/\D/g, '').replace(/^0/, '62');
+    return cleanPhone.length >= 9
+      ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`
+      : `https://wa.me/?text=${encodeURIComponent(text)}`;
   };
 
   // Switch to Generator for specific order
@@ -303,10 +311,15 @@ export default function AdminPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
+      const activeOrder = data.order || order;
+      const fallbackWaText = activeOrder
+        ? getOrderActivationText(activeOrder)
+        : (data.serialKey ? `Berikut Serial Key Anda:\n${data.serialKey}` : '');
+
       setGenResult({
         serialKey: data.serialKey,
-        waTemplate: data.waTemplate,
-        order: data.order || order,
+        waTemplate: data.waTemplate || data.whatsappTemplate || fallbackWaText,
+        order: activeOrder,
       });
 
       if (authToken) fetchOrders(authToken);
@@ -784,6 +797,7 @@ export default function AdminPage() {
                   }}
                   onOpenGenerator={handleOpenGeneratorForOrder}
                   getOrderWhatsAppUrl={getOrderWhatsAppUrl}
+                  getOrderActivationText={getOrderActivationText}
                 />
 
                 {/* Mobile Cards View */}
@@ -804,6 +818,7 @@ export default function AdminPage() {
                   }}
                   onOpenGenerator={handleOpenGeneratorForOrder}
                   getOrderWhatsAppUrl={getOrderWhatsAppUrl}
+                  getOrderActivationText={getOrderActivationText}
                 />
               </div>
             )}

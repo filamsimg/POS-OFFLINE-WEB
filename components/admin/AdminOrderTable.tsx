@@ -16,6 +16,7 @@ interface AdminOrderTableProps {
   onOpenDelete: (order: Order) => void;
   onOpenGenerator: (order: Order) => void;
   getOrderWhatsAppUrl: (order: Order) => string;
+  getOrderActivationText?: (order: Order) => string;
 }
 
 export function AdminOrderTable({
@@ -27,6 +28,7 @@ export function AdminOrderTable({
   onOpenDelete,
   onOpenGenerator,
   getOrderWhatsAppUrl,
+  getOrderActivationText,
 }: AdminOrderTableProps) {
   return (
     <div
@@ -202,6 +204,7 @@ export function AdminOrderTable({
                 onOpenDelete={onOpenDelete}
                 onOpenGenerator={onOpenGenerator}
                 getOrderWhatsAppUrl={getOrderWhatsAppUrl}
+                getOrderActivationText={getOrderActivationText}
               />
             )}
           </div>

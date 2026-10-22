@@ -37,11 +37,7 @@ export interface ApkStreamResult {
  * Bypasses the 117MB Google virus warning page using session cookies + UUID.
  */
 export async function getApkBinaryStream(): Promise<ApkStreamResult | null> {
-  const rawDriveUrl = (
-    process.env.APK_DRIVE_URL ||
-    process.env.NEXT_PUBLIC_APK_DRIVE_URL ||
-    ''
-  ).trim();
+  const rawDriveUrl = (process.env.APK_DRIVE_URL || '').trim();
 
   if (!rawDriveUrl) {
     throw new Error(

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ADMIN_CONTACTS, PACKAGES } from '@/lib/types';
+import { PACKAGES } from '@/lib/types';
 
 const STORIES = [
   {
@@ -37,9 +37,6 @@ const STORIES = [
 export function SocialProof() {
   const [device, setDevice] = useState<string>('android');
   const [printer, setPrinter] = useState<string>('bluetooth');
-
-  const filamsi = ADMIN_CONTACTS.find((c) => c.id === 'filamsi') || ADMIN_CONTACTS[1];
-  const ariyo = ADMIN_CONTACTS.find((c) => c.id === 'ariyo') || ADMIN_CONTACTS[0];
 
   return (
     <section className="mb-12">
@@ -97,7 +94,7 @@ export function SocialProof() {
                 CEK KECOCOKAN PERANGKAT (10 DETIK)
               </span>
               <h3 className="font-display font-bold text-xl text-[#141414] mb-2 leading-snug">
-                Apakah HP & Printer Anda Cocok?
+                Apakah HP &amp; Printer Anda Cocok?
               </h3>
               <p className="text-xs sm:text-sm text-zinc-600 mb-5 leading-relaxed">
                 Pilih jenis perangkat Anda untuk memastikan aplikasi berjalan mulus:
@@ -151,7 +148,7 @@ export function SocialProof() {
             ) : (
               <div className="p-4 rounded-2xl bg-emerald-950 text-white border border-emerald-500/30">
                 <div className="flex items-center gap-2 text-[#C8F53B] font-bold text-xs sm:text-sm mb-1">
-                  <span>✓ 100% Kompatibel & Siap Dipasang!</span>
+                  <span>✓ 100% Kompatibel &amp; Siap Dipasang!</span>
                 </div>
                 <p className="text-xs text-zinc-300 leading-relaxed">
                   Perangkat Anda mendukung penuh kamera scan barcode, penyimpanan database offline, dan koneksi printer thermal seketika.
@@ -166,7 +163,7 @@ export function SocialProof() {
               Didampingi Tim Teknis Sampai Bisa Pakai
             </h4>
             <p className="text-xs sm:text-sm text-[#141414]/85 leading-relaxed mb-4">
-              Baru pertama kali memakai aplikasi kasir? Jangan khawatir. Anda mendapat <strong>11 Video Panduan praktis</strong> serta pendampingan langsung via WhatsApp bersama <strong>Tim Support & Teknis kami</strong> setiap hari.
+              Baru pertama kali memakai aplikasi kasir? Jangan khawatir. Anda mendapat <strong>11 Video Panduan praktis</strong> serta pendampingan langsung via WhatsApp bersama <strong>Tim Support &amp; Teknis kami</strong> setiap hari.
             </p>
             <div className="flex flex-wrap items-center gap-2 text-xs font-mono font-bold">
               <span className="px-3 py-1.5 rounded-full bg-[#141414] text-[#C8F53B]">

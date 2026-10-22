@@ -1,17 +1,19 @@
 'use client';
 
-import { HeroSection } from '@/components/HeroSection';
-import { PainPoints } from '@/components/PainPoints';
-import { AppPreviewSection } from '@/components/AppPreviewSection';
-import { PackagesSection } from '@/components/PackagesSection';
-import { ComparisonTable } from '@/components/ComparisonTable';
-import { SocialProof } from '@/components/SocialProof';
-import { CheckoutForm } from '@/components/CheckoutForm';
-import { FaqSection } from '@/components/FaqSection';
-import { StickyMobileCta } from '@/components/StickyMobileCta';
-import { FloatingWhatsApp } from '@/components/FloatingWhatsApp';
-import { PixelViewContent } from '@/components/PixelViewContent';
-import { OfferingHeader } from '@/components/OfferingHeader';
+import {
+  OfferingHeader,
+  HeroSection,
+  PainPoints,
+  AppPreviewSection,
+  PackagesSection,
+  ComparisonTable,
+  SocialProof,
+  CheckoutForm,
+  FaqSection,
+  StickyMobileCta,
+  FloatingWhatsApp,
+  PixelViewContent,
+} from '@/components/landing';
 
 export default function Home() {
   return (

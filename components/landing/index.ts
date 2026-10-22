@@ -1,0 +1,12 @@
+export { OfferingHeader } from './OfferingHeader';
+export { HeroSection } from './HeroSection';
+export { PainPoints } from './PainPoints';
+export { AppPreviewSection } from './AppPreviewSection';
+export { PackagesSection } from './PackagesSection';
+export { ComparisonTable } from './ComparisonTable';
+export { SocialProof } from './SocialProof';
+export { CheckoutForm } from './checkout/CheckoutForm';
+export { FaqSection } from './FaqSection';
+export { StickyMobileCta } from './StickyMobileCta';
+export { FloatingWhatsApp } from './FloatingWhatsApp';
+export { PixelViewContent } from './PixelViewContent';

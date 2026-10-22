@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { PACKAGES } from '@/lib/types';
+import { PACKAGES, CURRENT_APP_VERSION } from '@/lib/types';
 
 export function HeroSection() {
   const [activeView, setActiveView] = useState<'tablet' | 'struk'>('tablet');
@@ -32,7 +32,7 @@ export function HeroSection() {
                   className="rounded-lg shadow-xs"
                 />
                 <span className="text-xs font-mono font-bold text-white tracking-wide">
-                  POS OFFLINE v1.5.0
+                  POS OFFLINE v{CURRENT_APP_VERSION}
                 </span>
               </div>
 
@@ -218,7 +218,7 @@ export function HeroSection() {
                 <span className="w-5 h-5 rounded-full bg-[#141414] text-[#C8F53B] inline-flex items-center justify-center text-[11px] font-bold shrink-0 mt-0.5">✓</span>
                 <div>
                   <span className="block font-bold">Antrean Beres 2 Detik</span>
-                  <span className="text-[11px] font-medium text-[#141414]/75">Uang pas & struk kilat</span>
+                  <span className="text-[11px] font-medium text-[#141414]/75">Uang pas &amp; struk kilat</span>
                 </div>
               </div>
               <div className="flex items-start gap-2">

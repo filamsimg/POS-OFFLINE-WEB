@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { MessageCircle, X, ShoppingBag, Wrench, ChevronRight, Sparkles } from 'lucide-react';
+import { MessageCircle, X, ShoppingBag, Wrench, ChevronRight } from 'lucide-react';
 import { ADMIN_CONTACTS } from '@/lib/types';
 
 export function FloatingWhatsApp() {

@@ -1,3 +1,6 @@
+// ─── App Version ─────────────────────────────────────────────────────────────
+export const CURRENT_APP_VERSION = '1.5.2';
+
 // ─── Package Types ──────────────────────────────────────────────────────────
 
 export type PackageType = 'software_only';

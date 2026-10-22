@@ -203,7 +203,7 @@ export function PackagesSection() {
             <div className="text-left md:text-right mb-4">
               <span className="text-xs text-zinc-400 block font-mono">KONSULTASI LANGSUNG</span>
               <span className="font-display font-bold text-xl text-[#C8F53B]">Chat Tim Developer</span>
-              <span className="text-xs text-zinc-400 block font-mono mt-0.5">Tim Teknis & Kustomisasi</span>
+              <span className="text-xs text-zinc-400 block font-mono mt-0.5">Tim Teknis &amp; Kustomisasi</span>
             </div>
             <a
               href={waCustomUrl}

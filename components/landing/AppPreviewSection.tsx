@@ -141,10 +141,10 @@ export function AppPreviewSection() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 sm:gap-4 pb-5 sm:pb-6 border-b border-white/10">
         <div>
           <span className="text-[11px] sm:text-xs font-mono uppercase tracking-widest text-[#C8F53B] block mb-1.5 sm:mb-2 font-semibold">
-            FITUR & TAMPILAN APLIKASI
+            FITUR &amp; TAMPILAN APLIKASI
           </span>
           <h2 className="font-display text-xl sm:text-3xl md:text-4xl font-bold leading-tight">
-            Antarmuka Cepat & Mudah Digunakan
+            Antarmuka Cepat &amp; Mudah Digunakan
           </h2>
         </div>
         <p className="text-xs sm:text-sm text-zinc-400 max-w-md leading-relaxed">
@@ -157,32 +157,35 @@ export function AppPreviewSection() {
         <button
           type="button"
           onClick={() => setActiveTab('kasir')}
-          className={`px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition whitespace-nowrap cursor-pointer shrink-0 ${activeTab === 'kasir'
+          className={`px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition whitespace-nowrap cursor-pointer shrink-0 ${
+            activeTab === 'kasir'
               ? 'bg-[#C8F53B] text-[#141414] shadow'
               : 'bg-[#1F1F22] text-zinc-300 hover:text-white border border-white/10'
-            }`}
+          }`}
         >
           Transaksi Kasir (5)
         </button>
         <button
           type="button"
           onClick={() => setActiveTab('stok')}
-          className={`px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition whitespace-nowrap cursor-pointer shrink-0 ${activeTab === 'stok'
+          className={`px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition whitespace-nowrap cursor-pointer shrink-0 ${
+            activeTab === 'stok'
               ? 'bg-[#C8F53B] text-[#141414] shadow'
               : 'bg-[#1F1F22] text-zinc-300 hover:text-white border border-white/10'
-            }`}
+          }`}
         >
-          Stok & Produk (4)
+          Stok &amp; Produk (4)
         </button>
         <button
           type="button"
           onClick={() => setActiveTab('laporan')}
-          className={`px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition whitespace-nowrap cursor-pointer shrink-0 ${activeTab === 'laporan'
+          className={`px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-bold transition whitespace-nowrap cursor-pointer shrink-0 ${
+            activeTab === 'laporan'
               ? 'bg-[#C8F53B] text-[#141414] shadow'
               : 'bg-[#1F1F22] text-zinc-300 hover:text-white border border-white/10'
-            }`}
+          }`}
         >
-          Laba & Laporan (3)
+          Laba &amp; Laporan (3)
         </button>
       </div>
 
@@ -251,7 +254,7 @@ export function AppPreviewSection() {
               <button
                 type="button"
                 onClick={() => setSelectedImage(null)}
-                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center font-bold text-white text-sm"
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center font-bold text-white text-sm cursor-pointer"
               >
                 ✕
               </button>

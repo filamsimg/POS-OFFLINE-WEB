@@ -13,7 +13,7 @@ export function PainPoints() {
         <div className="lg:col-span-4 bg-[#141414] text-white rounded-[28px] p-5 sm:p-7 flex flex-col justify-between">
           <div>
             <span className="text-xs font-mono uppercase tracking-widest text-[#C8F53B] block mb-3 font-semibold">
-              MASALAH & SOLUSI NYATA
+              MASALAH &amp; SOLUSI NYATA
             </span>
             <h2 className="font-display text-2xl sm:text-4xl font-bold leading-tight mb-4">
               Kenapa UMKM Pindah ke POS OFFLINE?
@@ -65,7 +65,7 @@ export function PainPoints() {
                 <span>✗ Cara Lama: Internet mati, kasir ikut macet</span>
               </div>
               <h3 className="font-display font-bold text-lg text-[#141414] mb-2 leading-snug">
-                100% Bekerja Offline Tanpa Kuota & Sinyal
+                100% Bekerja Offline Tanpa Kuota &amp; Sinyal
               </h3>
               <p className="text-zinc-600 text-sm leading-relaxed">
                 Lokasi toko di dalam pasar atau sinyal sering hilang? Seluruh transaksi, scan barcode kamera, dan cetak struk tetap berjalan kencang tanpa hambatan.
@@ -80,7 +80,7 @@ export function PainPoints() {
           <div className="bg-[#F3F4F6] rounded-[28px] p-6 flex flex-col justify-between border border-zinc-200/60">
             <div>
               <div className="inline-flex items-center gap-1.5 text-xs font-bold text-red-700 bg-red-100/80 px-2.5 py-1 rounded-full mb-3">
-                <span>✗ Cara Lama: Tulis nota manual & salah hitung</span>
+                <span>✗ Cara Lama: Tulis nota manual &amp; salah hitung</span>
               </div>
               <h3 className="font-display font-bold text-lg text-[#141414] mb-2 leading-snug">
                 Cetak Struk Bluetooth 58/80mm dalam 2 Detik
@@ -101,7 +101,7 @@ export function PainPoints() {
                 <span>★ Fitur Baru: Pengeluaran Toko, Bahan Baku &amp; Multi-Currency</span>
               </div>
               <h3 className="font-display font-bold text-lg text-[#141414] mb-2 leading-snug">
-                Laba Bersih Riil, Biaya Toko & Expired Date
+                Laba Bersih Riil, Biaya Toko &amp; Expired Date
               </h3>
               <p className="text-zinc-600 text-sm leading-relaxed">
                 Catat pengeluaran listrik/sewa, monitor bahan baku yang hampir kedaluwarsa, dan nikmati fleksibilitas multi-currency untuk transaksi lebih luas.
@@ -109,7 +109,7 @@ export function PainPoints() {
             </div>
             <div className="mt-4 pt-3 border-t border-zinc-200 flex items-center justify-between text-xs font-mono text-zinc-500 font-semibold">
               <span>KONTROL BISNIS</span>
-              <span className="text-[#141414] font-bold">✓ LABA RIIL & MEMBERSHIP</span>
+              <span className="text-[#141414] font-bold">✓ LABA RIIL &amp; MEMBERSHIP</span>
             </div>
           </div>
 

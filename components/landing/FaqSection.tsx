@@ -53,7 +53,7 @@ export function FaqSection() {
         <div className="lg:col-span-7 space-y-3">
           <div className="mb-4">
             <span className="text-xs font-mono uppercase tracking-wider text-zinc-500 font-semibold block mb-1">
-              BANTUAN & JAWABAN
+              BANTUAN &amp; JAWABAN
             </span>
             <h3 className="font-display font-bold text-xl sm:text-2xl text-[#141414]">
               Pertanyaan yang Sering Ditanyakan
@@ -120,14 +120,14 @@ export function FaqSection() {
                 href={waAriyoUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-between p-3.5 rounded-xl bg-white border border-zinc-200 hover:border-emerald-500 transition group shadow-xs"
+                className="flex items-center justify-between p-3.5 rounded-xl bg-white border border-zinc-200 hover:border-emerald-500 transition group shadow-xs cursor-pointer"
               >
                 <div>
                   <div className="text-xs font-bold text-[#141414] flex items-center gap-1.5">
-                    <span>Tim Konsultasi & Pembelian</span>
+                    <span>Tim Konsultasi &amp; Pembelian</span>
                   </div>
                   <div className="text-[11px] text-zinc-500 mt-0.5">
-                    Tanya fitur aplikasi & panduan order
+                    Tanya fitur aplikasi &amp; panduan order
                   </div>
                 </div>
                 <span className="text-xs font-mono font-bold text-emerald-600 group-hover:translate-x-0.5 transition-transform shrink-0 ml-2">
@@ -140,14 +140,14 @@ export function FaqSection() {
                 href={waFilamsiUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-between p-3.5 rounded-xl bg-white border border-zinc-200 hover:border-emerald-500 transition group shadow-xs"
+                className="flex items-center justify-between p-3.5 rounded-xl bg-white border border-zinc-200 hover:border-emerald-500 transition group shadow-xs cursor-pointer"
               >
                 <div>
                   <div className="text-xs font-bold text-[#141414] flex items-center gap-1.5">
-                    <span>Tim Teknis & Aktivasi</span>
+                    <span>Tim Teknis &amp; Aktivasi</span>
                   </div>
                   <div className="text-[11px] text-zinc-500 mt-0.5">
-                    Setup printer thermal & bantuan lisensi
+                    Setup printer thermal &amp; bantuan lisensi
                   </div>
                 </div>
                 <span className="text-xs font-mono font-bold text-emerald-600 group-hover:translate-x-0.5 transition-transform shrink-0 ml-2">
@@ -159,7 +159,7 @@ export function FaqSection() {
             {/* Operational Info */}
             <div className="text-xs text-zinc-500 space-y-1 mb-4">
               <div>Jam Layanan: <strong>08.00 – 22.00 WIB</strong></div>
-              <div>Garansi: <strong>Aktivasi Lisensi Resmi & Bantuan Setup</strong></div>
+              <div>Garansi: <strong>Aktivasi Lisensi Resmi &amp; Bantuan Setup</strong></div>
             </div>
           </div>
 
@@ -172,7 +172,7 @@ export function FaqSection() {
                 Kebijakan Privasi
               </Link>
               <Link href="/terms" className="hover:text-[#141414] transition underline">
-                Syarat & Ketentuan
+                Syarat &amp; Ketentuan
               </Link>
             </div>
           </div>

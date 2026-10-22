@@ -107,7 +107,7 @@ export function ComparisonTable() {
               <table className="min-w-[480px] w-full text-left border-collapse text-xs sm:text-sm">
                 <thead>
                   <tr className="border-b border-white/15 text-zinc-400 font-mono text-xs">
-                    <th className="py-3 pr-3 font-semibold">Fitur & Kebutuhan</th>
+                    <th className="py-3 pr-3 font-semibold">Fitur &amp; Kebutuhan</th>
                     <th className="py-3 px-3 text-[#C8F53B] font-bold">POS OFFLINE</th>
                     <th className="py-3 pl-3 text-zinc-400 font-semibold">Kasir Langganan (SaaS)</th>
                   </tr>
@@ -129,8 +129,8 @@ export function ComparisonTable() {
                     <td className="py-3.5 pl-3 text-zinc-400">Khusus paket enterprise mahal</td>
                   </tr>
                   <tr>
-                    <td className="py-3.5 pr-3 font-medium">Bahan Baku & Peringatan Expired</td>
-                    <td className="py-3.5 px-3 font-semibold text-white">✓ Pantau Stok & Peringatan Dini</td>
+                    <td className="py-3.5 pr-3 font-medium">Bahan Baku &amp; Peringatan Expired</td>
+                    <td className="py-3.5 px-3 font-semibold text-white">✓ Pantau Stok &amp; Peringatan Dini</td>
                     <td className="py-3.5 pl-3 text-zinc-400">Add-on berbayar tambahan</td>
                   </tr>
                   <tr>
@@ -144,7 +144,7 @@ export function ComparisonTable() {
                     <td className="py-3.5 pl-3 text-zinc-400">Harus paket mahal</td>
                   </tr>
                   <tr>
-                    <td className="py-3.5 pr-3 font-medium">Dukungan & Setup Awal</td>
+                    <td className="py-3.5 pr-3 font-medium">Dukungan &amp; Setup Awal</td>
                     <td className="py-3.5 px-3 font-semibold text-white">✓ Chat WA Langsung Tim Resmi</td>
                     <td className="py-3.5 pl-3 text-zinc-400">Antre tiket bot email</td>
                   </tr>
